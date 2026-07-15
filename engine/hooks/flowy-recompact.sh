@@ -43,10 +43,13 @@ SC="$(cat "$STATE" 2>/dev/null || true)"
 NAME="$(printf '%s' "$SC" | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
 REF="$(printf '%s' "$SC" | grep -o '"flowRef"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
 LOC="$(printf '%s' "$SC" | grep -o '"location"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
+# overlay: single-value pluginRoot (mirror of flowy-inject.sh's PLUGINROOTS, but this
+# hook resolves only the FIRST active flow, so head -n 1 is enough — no positional pairing).
+FPR="$(printf '%s' "$SC" | grep -o '"pluginRoot"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
 case "$NAME" in '' | *[!A-Za-z0-9_.-]* | *..* ) exit 0 ;; esac
 
 # Resolve via the shared helper (single source of truth with flowy-inject.sh).
-RESOLVED="$(flowy_resolve_flowmd "$NAME" "$REF" "$LOC" "$PROJECT_DIR/.flowy/flows" "$PLUGIN_ROOT")"
+RESOLVED="$(flowy_resolve_flowmd "$NAME" "$REF" "$LOC" "$PROJECT_DIR/.flowy/flows" "$PLUGIN_ROOT" "$FPR")"
 [ -n "$RESOLVED" ] || exit 0
 
 printf '%s\n' "⚑ Flowy: context was just compacted. RE-READ the FLOW.md at $RESOLVED IN FULL now, before your next routing decision."

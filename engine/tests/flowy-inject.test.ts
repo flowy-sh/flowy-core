@@ -1716,4 +1716,32 @@ d("flowy-inject.sh", () => {
     expect(existsSync(join(dirs.stateDirWin, "state-A.json"))).toBe(false);
     expect(r.stdout.trim()).toBe("");
   });
+
+  // =========================================================================
+  // OVERLAY LOCATION RESOLUTION (Task 4) — location:"overlay" resolves the
+  // FLOW.md from a DIFFERENT sibling plugin (per-entry "pluginRoot", written by
+  // the activator), not from the engine's own CLAUDE_PLUGIN_ROOT.
+  // =========================================================================
+  test("location=overlay resolves the overlay plugin's FLOW.md via pluginRoot → banner names it", () => {
+    const dirs = makeDirs();
+    // A sibling overlay plugin under the SAME .claude/plugins/cache tree as the engine root.
+    // dirs.pluginRootWin = <base>/.claude/plugins/cache/flowy-flows/flowy/0.4.2 ; go up 3 to /cache.
+    const cache = join(dirs.pluginRootWin, "..", "..", "..");            // .../plugins/cache
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# superpowers overlay routes\n");
+    writeState(dirs, "A", {
+      schema: "flowy-state-v2",
+      sessionId: "A",
+      createdAtEpoch: Math.floor(Date.now() / 1000),
+      activeFlows: [
+        { name: "superpowers", flowRef: "flows/superpowers/FLOW.md", location: "overlay", pluginRoot: toPosix(overlayWin) },
+      ],
+    });
+    const r = run(dirs, stdinFor("A"));                                   // engine root in CLAUDE_PLUGIN_ROOT, NOT the overlay
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain("Flowy routing ACTIVE");
+    expect(r.stdout).toContain(`${toPosix(overlayWin)}/flows/superpowers/FLOW.md`);  // resolved from the DIFFERENT plugin
+    expect(r.stdout).not.toContain("unreadable");
+  });
 });

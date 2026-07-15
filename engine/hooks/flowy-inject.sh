@@ -357,6 +357,19 @@ LOCATIONS="$(
     | sed 's/.*:[[:space:]]*"//; s/"$//' \
     | tr -d '\r'
 )"
+# overlay: optional per-entry "pluginRoot" — the overlay plugin's absolute root,
+# written by the activator for location:overlay entries. Parsed line-oriented and
+# paired POSITIONALLY with NAMES, exactly like LOCATIONS. The activator writes
+# pluginRoot on EVERY entry (empty for plugin/project) to keep the pairing lockstep.
+# SAFE for the pilot: activations write SINGLE-element activeFlows arrays (each
+# activation overwrites the claimed state — last-writer-wins), so a mixed multi-entry
+# array cannot arise here. Per-object parsing is a Phase-3 prerequisite (multi-overlay).
+PLUGINROOTS="$(
+  printf '%s' "$STATE_CONTENT" \
+    | grep -o '"pluginRoot"[[:space:]]*:[[:space:]]*"[^"]*"' \
+    | sed 's/.*:[[:space:]]*"//; s/"$//' \
+    | tr -d '\r'
+)"
 
 [ -n "$NAMES" ] || exit 0
 
@@ -386,11 +399,14 @@ for NAME in $NAMES; do
   REF="$(printf '%s\n' "$REFS" | sed -n "${i}p")"
   # Nth location (may be empty/absent → defaults to plugin resolution).
   LOC="$(printf '%s\n' "$LOCATIONS" | sed -n "${i}p")"
+  # Nth pluginRoot (empty unless this is an overlay entry).
+  FPR="$(printf '%s\n' "$PLUGINROOTS" | sed -n "${i}p")"
 
   # Per-flow FLOW.md resolution via the shared helper (flowy-resolve.sh) so inject and
   # recompact cannot drift: project -> PROJECT_FLOWS_DIR only; plugin/absent -> ref, then
-  # name-based auto-repair; symlink-rejected; ref/name charset-guarded.
-  RESOLVED="$(flowy_resolve_flowmd "$NAME" "$REF" "$LOC" "$PROJECT_FLOWS_DIR" "$PLUGIN_ROOT")"
+  # name-based auto-repair; symlink-rejected; ref/name charset-guarded; overlay -> FPR's
+  # sibling plugin root (S1 containment enforced inside flowy_resolve_flowmd).
+  RESOLVED="$(flowy_resolve_flowmd "$NAME" "$REF" "$LOC" "$PROJECT_FLOWS_DIR" "$PLUGIN_ROOT" "$FPR")"
 
   # SANITIZE FOR OUTPUT. The banner/warning is injected verbatim into the
   # agent's CONTEXT, so a hand-edited/garbage state-file name could otherwise
