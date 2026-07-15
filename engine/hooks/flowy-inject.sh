@@ -371,6 +371,36 @@ PLUGINROOTS="$(
     | tr -d '\r'
 )"
 
+# ---------------------------------------------------------------------------
+# FIX C (P2) — positional-parity wrong-fire guard. NAMES/REFS/LOCATIONS/
+# PLUGINROOTS above are zipped by RAW LINE INDEX (see section 6 below). If SOME
+# entries carry a "pluginRoot" KEY and some don't (a stacked state that dropped
+# the field, or a foreign/older entry sharing the file), the MISSING key
+# shrinks PLUGINROOTS by one line and shifts every following entry's root out
+# of alignment — the Nth name can then pair with the WRONG non-empty root, an
+# unintended FLOW.md substitution, not a safe no-op. (An empty VALUE, e.g.
+# "pluginRoot": "", still emits a positional line via grep -o above — only a
+# missing KEY shifts the zip.)
+#
+# Count occurrences from the RAW state content — the "name"/"pluginRoot" KEY
+# only, NOT the post-strip PLUGINROOTS value — so an empty-but-present value
+# still counts correctly. Counting the stripped variable instead (e.g. via
+# wc -l on PLUGINROOTS) undercounts exactly the case this guard exists for.
+#
+# Require: pcount is EITHER 0 (legacy/no-overlay state — every entry resolves
+# plugin/project with an empty FPR, today's safe behavior) OR == ncount (every
+# entry carries the field — the positional zip is aligned). A PARTIAL count
+# (0 < pcount < ncount) means misaligned pairing: treat the WHOLE state as
+# corrupt and skip the resolve loop entirely — never guess which pairing (if
+# any) is trustworthy.
+# ---------------------------------------------------------------------------
+_ncount="$(printf '%s' "$STATE_CONTENT" | grep -o '"name"[[:space:]]*:' | grep -c .)"
+_pcount="$(printf '%s' "$STATE_CONTENT" | grep -o '"pluginRoot"[[:space:]]*:' | grep -c .)"
+if [ "$_pcount" -gt 0 ] && [ "$_pcount" -ne "$_ncount" ]; then
+  printf '%s\n' "⚠ Flowy: routing state malformed (pluginRoot/name count mismatch); re-activate with /flowy:<slug>, or run /flowy deactivate."
+  exit 0
+fi
+
 [ -n "$NAMES" ] || exit 0
 
 # Resolve each flow. Build accumulators:

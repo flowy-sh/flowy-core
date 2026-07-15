@@ -28,6 +28,13 @@
 flowy_resolve_flowmd() {
   _name="$1"; _ref="$2"; _loc="$3"; _pfd="$4"; _pr="$5"; _flowpr="${6:-}"
   _resolved=""
+  # FIX D — normalize the ENGINE root ($5) too, same reasoning as _flowpr below: a
+  # Windows-backslash-form CLAUDE_PLUGIN_ROOT has no literal "/" for
+  # `${_pr%/plugins/*}` to split on, so S1's _plugbase (derived from $_pr just
+  # below) would come out as garbage and EVERY overlay would silently resolve
+  # empty. Production hands hooks POSIX paths already (see file header), so this
+  # is defense-in-depth for any future/defensive caller, not an observed prod path.
+  _pr="$(printf '%s' "$_pr" | tr '\\' '/')"
   # OVERLAY plugin-root guard: it comes from the per-session state's pluginRoot
   # (activator-written, not repo-committed). Normalize Windows separators FIRST, the
   # same way flowy-paths.sh does (a wrapper-reported "Base directory" can arrive in
@@ -82,6 +89,24 @@ flowy_resolve_flowmd() {
           if [ -n "$_flowpr" ] && [ -f "$_ocanon" ] && [ ! -L "$_ocanon" ]; then _resolved="$_ocanon"; fi
           ;;
       esac
+    fi
+    # FIX B (P0) — canonicalize + re-verify containment. S1 above is a STRING
+    # prefix check on the uncanonicalized path; a directory junction/symlink in
+    # an INTERMEDIATE component of $_flowpr (e.g. a "flows" junction) can
+    # physically escape the /plugins/ tree while the string still starts with
+    # $_plugbase, and the leaf `[ ! -L ]` checks above only reject a symlinked
+    # FLOW.md itself, not an escaping ancestor directory. realpath resolves
+    # through any such reparse point; re-checking the CANONICAL resolved path
+    # against the CANONICAL plugbase closes that gap. Both sides are
+    # canonicalized so a plugbase that itself sits behind a mount/symlink still
+    # compares apples-to-apples. Fails OPEN (keeps the S1-only result) if
+    # realpath is unavailable or resolution errors — never a hard block.
+    if [ -n "$_resolved" ]; then
+      _rp="$(realpath "$_resolved" 2>/dev/null || true)"
+      _pb="$(realpath "${_plugbase:-}" 2>/dev/null || printf '%s' "${_plugbase:-}")"
+      if [ -n "$_rp" ] && [ -n "$_pb" ]; then
+        case "$_rp" in "$_pb"/* | "$_pb" ) : ;; * ) _resolved="" ;; esac
+      fi
     fi
   elif [ -n "$_ref" ] && [ -f "$_pr/$_ref" ] && [ ! -L "$_pr/$_ref" ]; then
     _resolved="$_pr/$_ref"

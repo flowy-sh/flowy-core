@@ -81,7 +81,10 @@ The wrapper passes the flow name — or, for an overlay Flow, `overlay <flow-nam
 
 ### Step 1: Locate the Flow
 
-**Overlay activation (skip the search below).** If you were invoked as `overlay <flow-name> <overlay-plugin-root>` (see "Parse the argument"), the wrapper already told you where its Flow content lives — there is nothing to search for. Record now: `flowRef = flows/<flow-name>/FLOW.md`, `location = "overlay"`, and `<overlay-plugin-root>` = the second value exactly as passed (a DIFFERENT plugin root than your own — the overlay flow's own, not the engine's). Then skip directly to Step 2. The 4-path search below applies only to the bare `<flow-name>` argument form (plugin/project).
+**Overlay activation (skip the search below).** If you were invoked as `overlay <flow-name> <overlay-plugin-root>` (see "Parse the argument"), the wrapper already told you where its Flow content lives — there is nothing to search for. Record now: `flowRef = flows/<flow-name>/FLOW.md`, `location = "overlay"`, and `<overlay-plugin-root>` = the second value exactly as passed (a DIFFERENT plugin root than your own — the overlay flow's own, not the engine's). Print:
+> ⚠ Loading FLOW.md from a separate overlay plugin (`<overlay-plugin-root>`). Its content is not bundled with this engine.
+
+Then skip directly to Step 2. The 4-path search below applies only to the bare `<flow-name>` argument form (plugin/project).
 
 Resolve the FLOW.md (plugin FIRST for security — project-local paths are dev/UGC overrides that earn a warning):
 

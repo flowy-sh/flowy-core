@@ -110,4 +110,83 @@ describe("flowy_resolve_flowmd (location: overlay)", () => {
     writeFileSync(join(engineWin, "flows", "x", "FLOW.md"), "x");
     expect(resolve("x", "flows/x/FLOW.md", "plugin", PFD, ENGINE, OVERLAY)).toBe(`${ENGINE}/flows/x/FLOW.md`);
   });
+
+  // ---------------------------------------------------------------------------
+  // FIX D — _flowpr was normalized (tr '\\' '/') but _pr (the engine root, $5)
+  // was not, so a Windows-backslash-form CLAUDE_PLUGIN_ROOT made
+  // ${_pr%/plugins/*} fail to match (no literal "/" in an all-backslash path)
+  // -> S1's _plugbase came out as garbage (the unstripped _pr + a bogus
+  // "/plugins/" suffix) -> the containment prefix check on _flowpr NEVER
+  // matched -> every overlay silently resolved empty. Production hands hooks
+  // POSIX paths (per the file header), but a defensive/future caller passing
+  // the Windows form must not silently disable every overlay.
+  // ---------------------------------------------------------------------------
+  test("FIX D: engine root ($5) in Windows BACKSLASH form still resolves the overlay (overlay root, $6, stays POSIX)", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "ovd "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const OVERLAY = toPosix(overlayWin);
+    const PFD = toPosix(join(base, "pfd"));
+    // Take the POSIX engine path and convert /->\ for the 5th arg ONLY.
+    const ENGINE_BACKSLASH = toPosix(engineWin).replace(/\//g, "\\");
+
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE_BACKSLASH, OVERLAY))
+      .toBe(`${OVERLAY}/flows/superpowers/FLOW.md`);
+  });
+
+  // ---------------------------------------------------------------------------
+  // FIX B — S1 containment is a STRING-PREFIX check on the uncanonicalized
+  // path. A directory JUNCTION in an INTERMEDIATE component of the overlay root
+  // (e.g. its "flows" dir) can physically escape the /plugins/ tree while the
+  // string still starts with the plugins-base prefix, and the leaf `[ ! -L ]`
+  // check only rejects a symlinked FLOW.md itself — not an escaping ancestor
+  // directory. Requires creating an NTFS junction (works unprivileged on this
+  // machine per prior verification); loud-skip if junction creation fails.
+  // ---------------------------------------------------------------------------
+  test("FIX B: a `flows` JUNCTION escaping the /plugins/ tree is refused after canonicalization", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "junc "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-legit", "0.1.0"); // legit-prefixed, under the SAME /plugins/ tree
+    const outsideWin = join(base, "outside-evil", "flows-escaped");
+    mkdirSync(join(outsideWin, "superpowers"), { recursive: true });
+    writeFileSync(join(outsideWin, "superpowers", "FLOW.md"), "# attacker routing\n");
+    mkdirSync(overlayWin, { recursive: true }); // overlay root itself; "flows" created as a junction below
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+
+    const junctionPath = join(overlayWin, "flows");
+    const mk = spawnSync("powershell", [
+      "-NoProfile",
+      "-Command",
+      `New-Item -ItemType Junction -Path '${junctionPath}' -Target '${outsideWin}'`,
+    ]);
+    if (mk.status !== 0) {
+      console.warn(`[SKIP] cannot create junction: ${mk.stderr}`);
+      return;
+    }
+
+    try {
+      const PFD = toPosix(join(base, "pfd"));
+      const got = resolve(
+        "superpowers",
+        "flows/superpowers/FLOW.md",
+        "overlay",
+        PFD,
+        toPosix(engineWin),
+        toPosix(overlayWin),
+      );
+      expect(got).toBe(""); // post-fix: canonicalization catches the escape -> empty
+    } finally {
+      // cmd /c rmdir removes the JUNCTION ENTRY only, never recursing into the
+      // target (matches the documented Windows-junction cleanup pattern; a plain
+      // recursive rm here risks deleting through the reparse point instead of it).
+      spawnSync("cmd", ["/c", "rmdir", junctionPath]);
+    }
+  });
 });

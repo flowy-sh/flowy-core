@@ -1744,4 +1744,90 @@ d("flowy-inject.sh", () => {
     expect(r.stdout).toContain(`${toPosix(overlayWin)}/flows/superpowers/FLOW.md`);  // resolved from the DIFFERENT plugin
     expect(r.stdout).not.toContain("unreadable");
   });
+
+  // =========================================================================
+  // POSITIONAL-PARITY WRONG-FIRE GUARD (FIX C) — NAMES/REFS/LOCATIONS/
+  // PLUGINROOTS are zipped by RAW LINE INDEX (see section 6 above). If SOME
+  // entries carry a "pluginRoot" KEY and some don't (a stacked state that
+  // dropped the field, or a foreign/older entry sharing the file), the MISSING
+  // key shrinks PLUGINROOTS by one line (an empty VALUE still emits a
+  // positional line — only a missing KEY shifts the zip), so the Nth name can
+  // pair with the WRONG non-empty root: an unintended FLOW.md substitution,
+  // not a safe no-op.
+  // =========================================================================
+  test("FIX C wrong-fire guard: partial pluginRoot coverage (1 of 2 entries) → whole state corrupt, no mis-rooted resolve", () => {
+    const dirs = makeDirs();
+    // The attacker's OWN overlay root (real, under the same /plugins/ tree) also
+    // happens to contain a flows/preexisting/FLOW.md — exactly the file a
+    // wrong-fire would resolve "preexisting" to, via auto-repair or direct ref.
+    const cache = join(dirs.pluginRootWin, "..", "..", "..");
+    const attackerOverlayWin = join(cache, "flowy-attacker", "0.1.0");
+    mkdirSync(join(attackerOverlayWin, "flows", "preexisting"), { recursive: true });
+    writeFileSync(join(attackerOverlayWin, "flows", "preexisting", "FLOW.md"), "# attacker-supplied preexisting\n");
+    mkdirSync(join(attackerOverlayWin, "flows", "attacker"), { recursive: true });
+    writeFileSync(join(attackerOverlayWin, "flows", "attacker", "FLOW.md"), "# attacker routes\n");
+
+    // Hand-crafted flowy-state-v2: entry 1 ("preexisting") has NO pluginRoot key
+    // at all; entry 2 ("attacker") DOES. Both say location:overlay. Written as a
+    // raw string (not JSON.stringify) so entry 1 can OMIT the key entirely,
+    // which JSON.stringify of a JS object literal cannot express.
+    const stateJson = [
+      "{",
+      '  "schema": "flowy-state-v2",',
+      '  "sessionId": "A",',
+      '  "activeFlows": [',
+      "    {",
+      '      "name": "preexisting",',
+      '      "flowRef": "flows/preexisting/FLOW.md",',
+      '      "location": "overlay"',
+      "    },",
+      "    {",
+      '      "name": "attacker",',
+      '      "flowRef": "flows/attacker/FLOW.md",',
+      '      "location": "overlay",',
+      `      "pluginRoot": "${toPosix(attackerOverlayWin)}"`,
+      "    }",
+      "  ]",
+      "}",
+    ].join("\n");
+    writeState(dirs, "A", stateJson);
+
+    const r = run(dirs, stdinFor("A"));
+
+    expect(r.code).toBe(0);
+    // POST-FIX: must NOT resolve "preexisting" under the attacker's root (or at
+    // all) — no live banner for a mis-rooted entry.
+    expect(r.stdout).not.toContain("Flowy routing ACTIVE");
+    // A single loud "state is malformed" warning, distinct from the per-flow
+    // "unreadable" corrupt line, so this failure mode is never confused with a
+    // normal unresolvable single flow.
+    expect(r.stdout).toContain("malformed");
+  });
+
+  test("FIX C parity-holds: every entry carries pluginRoot (one overlay root, one empty for a plugin entry) → both still resolve", () => {
+    const dirs = makeDirs();
+    writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md"); // plugin entry resolves under the engine's own PLUGIN_ROOT
+    const cache = join(dirs.pluginRootWin, "..", "..", "..");
+    const overlayWin = join(cache, "flowy-parity-ok", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "parity-overlay"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "parity-overlay", "FLOW.md"), "# legit overlay routes\n");
+
+    writeState(dirs, "A", {
+      schema: "flowy-state-v2",
+      sessionId: "A",
+      createdAtEpoch: Math.floor(Date.now() / 1000),
+      activeFlows: [
+        { name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md", location: "plugin", pluginRoot: "" },
+        { name: "parity-overlay", flowRef: "flows/parity-overlay/FLOW.md", location: "overlay", pluginRoot: toPosix(overlayWin) },
+      ],
+    });
+
+    const r = run(dirs, stdinFor("A"));
+
+    expect(r.code).toBe(0);
+    expect(r.stdout).toContain("Flowy routing ACTIVE");
+    expect(r.stdout).toContain("superpowers-flow");
+    expect(r.stdout).toContain("parity-overlay");
+    expect(r.stdout).not.toContain("malformed");
+  });
 });
