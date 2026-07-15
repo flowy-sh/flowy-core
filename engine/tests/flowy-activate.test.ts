@@ -361,4 +361,33 @@ d("flowy-activate.sh (location: overlay)", () => {
     expect(r.stderr).toMatch(/location overlay requires a flow-plugin-root/);
     expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(false);
   });
+
+  // ---------------------------------------------------------------------------
+  // FIX A (P0): pluginRoot JSON-injection. FLOW_NAME/FLOW_REF are charset-guarded
+  // before interpolation into the state JSON; FLOW_PLUGIN_ROOT was missed. A root
+  // containing `"` + `,` breaks out of the hand-rolled JSON string and injects a
+  // phantom activeFlows entry that the hook's line-oriented parser would resolve
+  // and fire as authoritative routing. No real directory is needed: the charset
+  // guard must refuse the value BEFORE resolution is ever attempted — this is a
+  // distinct failure (exit 2, "invalid flow-plugin-root") from the pre-existing
+  // "overlay FLOW.md not resolvable" (exit 3) an unresolvable-but-clean root hits.
+  // ---------------------------------------------------------------------------
+  test("rejects a FLOW_PLUGIN_ROOT with JSON-injection chars (quote+comma) → refused BEFORE resolution, no file", () => {
+    const dirs = makeDirs();
+    const r = runActivate({
+      pluginRoot: dirs.pluginRootEnv,
+      flowName: "superpowers",
+      flowRef: "flows/superpowers/FLOW.md",
+      location: "overlay",
+      flowPluginRoot: '","location":"overlay","name":"smuggled","flowRef":"flows/x/FLOW.md',
+      projectDirEnv: dirs.projectDirEnv,
+    });
+    expect(r.code).toBe(2);
+    expect(r.stderr).toMatch(/invalid flow-plugin-root/);
+    // Proves the NEW charset guard fired first, not the pre-existing unresolvability exit.
+    expect(r.stderr).not.toMatch(/not resolvable/);
+    expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(false);
+    // No smuggled entry anywhere (belt-and-braces: nothing is written at all).
+    expect(existsSync(dirs.stateDirWin)).toBe(false);
+  });
 });

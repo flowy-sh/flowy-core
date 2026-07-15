@@ -48,9 +48,20 @@ case "$LOCATION" in plugin | project | overlay) : ;; *) LOCATION="plugin" ;; esa
 if [ "$LOCATION" = "overlay" ] && [ -z "$FLOW_PLUGIN_ROOT" ]; then
   printf 'flowy-activate: location overlay requires a flow-plugin-root arg\n' >&2; exit 2
 fi
-# Traversal-guard the flow-plugin-root before it reaches the resolver or the state file
-# (empty for plugin/project, so this is a no-op there).
-case "$FLOW_PLUGIN_ROOT" in *..*) printf 'flowy-activate: invalid flow-plugin-root\n' >&2; exit 2 ;; esac
+# Normalize Windows separators FIRST (mirrors flowy-resolve.sh's _flowpr handling) so a
+# legit backslash-form root still passes below, then traversal + charset-guard the
+# flow-plugin-root before it reaches the resolver or the state file (empty for
+# plugin/project, so this is a no-op there). FIX A (P0): a root containing `"` + `,`
+# (both legal Windows filename chars) would otherwise break out of the hand-rolled JSON
+# string in the heredoc below and inject a phantom activeFlows entry that the hook's
+# line-oriented parser would resolve and fire as authoritative routing. Positive
+# allowlist: a real OS path needs only alnum, /, ., -, _, : (drive), space, and (); any
+# other char (in particular `"` `,` `{` `}` `` ` `` `$`) refuses the value outright.
+FLOW_PLUGIN_ROOT="$(printf '%s' "$FLOW_PLUGIN_ROOT" | tr '\\' '/')"
+case "$FLOW_PLUGIN_ROOT" in
+  *..* | *[!A-Za-z0-9_./:\ \(\)-]* )
+    printf 'flowy-activate: invalid flow-plugin-root\n' >&2; exit 2 ;;
+esac
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 [ -n "$PROJECT_DIR" ] || { printf 'flowy-activate: no project dir\n' >&2; exit 3; }

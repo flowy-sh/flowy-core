@@ -35,6 +35,13 @@ flowy_resolve_flowmd() {
   # traversal so a hand-edited state can't escape; absolute-path chars (:, /) are fine.
   _flowpr="$(printf '%s' "$_flowpr" | tr '\\' '/')"
   case "$_flowpr" in *..* ) _flowpr="" ;; esac
+  # FIX A (P0) — positive allowlist charset guard, defense-in-depth alongside
+  # flowy-activate.sh's identical check on the raw FLOW_PLUGIN_ROOT before it is ever
+  # written to the state file. A real OS path needs only alnum, /, ., -, _, : (drive),
+  # space, and (); anything else (in particular a crafted root's `"` `,` `{` `}` `` ` ``
+  # `$`, which could break out of a hand-rolled JSON string) empties the value here too,
+  # so a hand-edited/future-caller state file can't smuggle a phantom entry either.
+  case "$_flowpr" in *[!A-Za-z0-9_./:\ \(\)-]* ) _flowpr="" ;; esac
   # S1: containment — the overlay root MUST live under the SAME /plugins/ tree as the
   # engine ($_pr = $CLAUDE_PLUGIN_ROOT). Derive the shared prefix up to and including
   # "/plugins/"; refuse any root that doesn't start with it (an absolute /tmp/evil or a
