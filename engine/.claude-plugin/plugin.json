@@ -1,0 +1,1 @@
+{ "name": "flowy-core", "version": "0.1.0", "description": "The Flowy enforcement engine (hook + activator). Overlays depend on this." }

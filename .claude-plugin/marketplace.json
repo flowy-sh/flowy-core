@@ -1,0 +1,8 @@
+{
+  "name": "flowy-core",
+  "owner": { "name": "Flowy", "email": "maximo@flowy.sh" },
+  "plugins": [
+    { "name": "flowy-core", "source": "./engine", "description": "The Flowy enforcement engine: the routing hook + activator that overlays depend on." },
+    { "name": "flowy-superpowers", "source": "./overlays/superpowers", "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate." }
+  ]
+}
