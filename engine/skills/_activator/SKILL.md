@@ -166,7 +166,12 @@ Do not print the skills list, the state path, scope, or any explanation on the h
 
 ### Step 5: Bootstrap (if defined)
 
-Check the FLOW.md for a session-bootstrap step. For superpowers-flow, this is `using-superpowers`. Within a single activation, fire the bootstrap once: read the bootstrap skill's SKILL.md from `<plugin-root>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md` (for an overlay activation, from `<overlay-plugin-root>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md` instead) and follow its instructions. If you are stacking onto a Flow that was already active this session and its bootstrap clearly already fired, skip re-firing.
+Check the FLOW.md for a session-bootstrap step (the bundled superpowers-flow names `using-superpowers`; a thin overlay's FLOW.md names a namespaced upstream skill like `superpowers:using-superpowers`). Within a single activation, fire the bootstrap once, choosing HOW to invoke it by whether its name is namespaced:
+
+- **Namespaced bootstrap (the name contains a `:`, e.g. `superpowers:using-superpowers`)** — invoke it DIRECTLY via the Skill tool by that exact namespaced name. Do NOT read a bundled SKILL.md path: a thin overlay bundles no skills of its own, so its bootstrap lives in a separately-installed upstream plugin (no `<...>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md` file exists). An `overlay` activation's bootstrap is ALWAYS namespaced, so it always takes this branch.
+- **Bare bootstrap (no `:`, e.g. `using-superpowers`)** — read the bootstrap skill's SKILL.md from `<plugin-root>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md` and follow its instructions (the bundled plugin/project case).
+
+If you are stacking onto a Flow that was already active this session and its bootstrap clearly already fired, skip re-firing.
 
 ### Stacking (rare: a Flow is ALREADY active this session)
 
