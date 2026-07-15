@@ -37,6 +37,7 @@ const HAVE_GIT_BASH = !!GIT_BASH;
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const SCRIPT_WIN = join(HERE, "..", "hooks", "flowy-activate.sh");
 const HELPER_WIN = join(HERE, "..", "hooks", "flowy-paths.sh");
+const RESOLVE_WIN = join(HERE, "..", "hooks", "flowy-resolve.sh");
 
 function toPosix(p: string): string {
   return p.replace(/^([A-Za-z]):/, (_m, d) => `/${d.toLowerCase()}`).replace(/\\/g, "/");
@@ -75,6 +76,8 @@ function makeDirs(projectName = "project dir"): Dirs {
   mkdirSync(hooksWin, { recursive: true });
   // The script sources <plugin-root>/hooks/flowy-paths.sh — give it the real one.
   copyFileSync(HELPER_WIN, join(hooksWin, "flowy-paths.sh"));
+  // An overlay activation also sources <plugin-root>/hooks/flowy-resolve.sh.
+  copyFileSync(RESOLVE_WIN, join(hooksWin, "flowy-resolve.sh"));
   const projectDirEnv = toPosix(projectDirWin);
   const stateDirWin = join(claudeHomeWin, "flowy-state", projectKey(projectDirEnv));
   return {
@@ -93,6 +96,7 @@ function runActivate(opts: {
   flowName?: string;
   flowRef?: string;
   location?: string;
+  flowPluginRoot?: string; // 5th CLI arg — the overlay's own plugin-root
   projectDirEnv?: string | null; // null/undefined => env var unset
   cwd?: string; // Windows path, for the pwd fallback
 }) {
@@ -104,12 +108,30 @@ function runActivate(opts: {
   if (opts.flowName !== undefined) args.push(opts.flowName);
   if (opts.flowRef !== undefined) args.push(opts.flowRef);
   if (opts.location !== undefined) args.push(opts.location);
+  if (opts.flowPluginRoot !== undefined) args.push(opts.flowPluginRoot);
   const res = spawnSync(GIT_BASH, args, { encoding: "utf8", env, cwd: opts.cwd });
   return { code: res.status ?? -1, stdout: res.stdout ?? "", stderr: res.stderr ?? "" };
 }
 
 function pending(dirs: Dirs): string {
   return readFileSync(join(dirs.stateDirWin, "state-PENDING.json"), "utf8");
+}
+
+/**
+ * Build a per-flow OVERLAY plugin dir with flows/<name>/FLOW.md present. By default
+ * it lives under the SAME /plugins/ tree as the engine root (so the resolver's S1
+ * containment guard passes); with outOfTree it lives at <base>/evil (a REAL FLOW.md
+ * but OUTSIDE the plugins tree — S1 must refuse it, proving containment, not absence).
+ */
+function makeOverlay(dirs: Dirs, opts: { outOfTree?: boolean; flowName?: string } = {}) {
+  const flowName = opts.flowName ?? "superpowers";
+  const overlayRootWin = opts.outOfTree
+    ? join(dirs.base, "evil")
+    : join(dirs.claudeHomeWin, "plugins", "cache", "superpowers-overlay", "flowy", "0.1.0");
+  const flowDirWin = join(overlayRootWin, "flows", flowName);
+  mkdirSync(flowDirWin, { recursive: true });
+  writeFileSync(join(flowDirWin, "FLOW.md"), "# Overlay FLOW\nRoute to the right skill. Use TDD.\n");
+  return { overlayRootWin, overlayRootEnv: toPosix(overlayRootWin), flowName };
 }
 
 afterAll(() => {
@@ -138,11 +160,17 @@ d("flowy-activate.sh", () => {
     expect(r.stdout.trim()).toBe(""); // silent on success
     expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(true);
     const j = JSON.parse(pending(dirs));
-    expect(j.schema).toBe("flowy-state-v1");
+    expect(j.schema).toBe("flowy-state-v2");
     expect(j.sessionId).toBe("PENDING");
     expect(typeof j.createdAtEpoch).toBe("number");
+    // A plugin activation carries an EMPTY pluginRoot (overlay-only field).
     expect(j.activeFlows).toEqual([
-      { name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md", location: "plugin" },
+      {
+        name: "superpowers-flow",
+        flowRef: "flows/superpowers-flow/FLOW.md",
+        location: "plugin",
+        pluginRoot: "",
+      },
     ]);
   });
 
@@ -272,6 +300,65 @@ d("flowy-activate.sh", () => {
     });
     expect(r.code).not.toBe(0);
     expect(r.stderr).toMatch(/invalid flow ref/);
+    expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(false);
+  });
+});
+
+d("flowy-activate.sh (location: overlay)", () => {
+  test("valid overlay under the shared /plugins/ tree → exit 0, state carries location:overlay + pluginRoot", () => {
+    const dirs = makeDirs();
+    const overlay = makeOverlay(dirs);
+    const r = runActivate({
+      pluginRoot: dirs.pluginRootEnv,
+      flowName: overlay.flowName,
+      flowRef: `flows/${overlay.flowName}/FLOW.md`,
+      location: "overlay",
+      flowPluginRoot: overlay.overlayRootEnv,
+      projectDirEnv: dirs.projectDirEnv,
+    });
+    expect(r.code).toBe(0);
+    expect(r.stdout.trim()).toBe(""); // silent on success
+    const raw = pending(dirs);
+    const j = JSON.parse(raw);
+    expect(j.schema).toBe("flowy-state-v2");
+    expect(j.activeFlows[0].location).toBe("overlay");
+    expect(j.activeFlows[0].pluginRoot).toBe(overlay.overlayRootEnv);
+    // Exact serialized form the hook greps (both fields on the entry's single line).
+    expect(raw).toContain('"location": "overlay"');
+    expect(raw).toContain(`"pluginRoot": "${overlay.overlayRootEnv}"`);
+  });
+
+  test("out-of-tree overlay root (outside /plugins/) is refused by S1 containment → non-zero, no file", () => {
+    const dirs = makeDirs();
+    // A REAL flows/superpowers/FLOW.md exists under the root — but the root is
+    // OUTSIDE the plugins tree, so flowy_resolve_flowmd's S1 guard discards it and
+    // returns empty. This proves containment (not mere absence) is what refuses it.
+    const overlay = makeOverlay(dirs, { outOfTree: true });
+    const r = runActivate({
+      pluginRoot: dirs.pluginRootEnv,
+      flowName: overlay.flowName,
+      flowRef: `flows/${overlay.flowName}/FLOW.md`,
+      location: "overlay",
+      flowPluginRoot: overlay.overlayRootEnv,
+      projectDirEnv: dirs.projectDirEnv,
+    });
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toMatch(/overlay FLOW\.md not resolvable/);
+    expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(false);
+  });
+
+  test("location overlay with NO flow-plugin-root arg → refused, exit 2, no file", () => {
+    const dirs = makeDirs();
+    const r = runActivate({
+      pluginRoot: dirs.pluginRootEnv,
+      flowName: "superpowers",
+      flowRef: "flows/superpowers/FLOW.md",
+      location: "overlay",
+      // flowPluginRoot omitted → the 5th CLI arg is absent
+      projectDirEnv: dirs.projectDirEnv,
+    });
+    expect(r.code).toBe(2);
+    expect(r.stderr).toMatch(/location overlay requires a flow-plugin-root/);
     expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(false);
   });
 });

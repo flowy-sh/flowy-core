@@ -28,6 +28,7 @@ PLUGIN_ROOT="${1:-}"
 FLOW_NAME="${2:-}"
 FLOW_REF="${3:-}"
 LOCATION="${4:-plugin}"
+FLOW_PLUGIN_ROOT="${5:-}"   # the overlay flow's OWN plugin-root (overlay activations only)
 
 [ -n "$PLUGIN_ROOT" ] || { printf 'flowy-activate: missing plugin root\n' >&2; exit 2; }
 [ -n "$FLOW_NAME" ]   || { printf 'flowy-activate: missing flow name\n' >&2; exit 2; }
@@ -41,10 +42,36 @@ esac
 case "$FLOW_REF" in
   *..* | *[!A-Za-z0-9_./-]*) printf 'flowy-activate: invalid flow ref: %s\n' "$FLOW_REF" >&2; exit 2 ;;
 esac
-case "$LOCATION" in plugin | project) : ;; *) LOCATION="plugin" ;; esac
+case "$LOCATION" in plugin | project | overlay) : ;; *) LOCATION="plugin" ;; esac
+# An overlay activation MUST carry the flow's own plugin-root; without it the hook
+# cannot resolve the overlay FLOW.md, so activating would be a silent no-op. Refuse.
+if [ "$LOCATION" = "overlay" ] && [ -z "$FLOW_PLUGIN_ROOT" ]; then
+  printf 'flowy-activate: location overlay requires a flow-plugin-root arg\n' >&2; exit 2
+fi
+# Traversal-guard the flow-plugin-root before it reaches the resolver or the state file
+# (empty for plugin/project, so this is a no-op there).
+case "$FLOW_PLUGIN_ROOT" in *..*) printf 'flowy-activate: invalid flow-plugin-root\n' >&2; exit 2 ;; esac
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 [ -n "$PROJECT_DIR" ] || { printf 'flowy-activate: no project dir\n' >&2; exit 3; }
+
+# Overlay hard-gate. An overlay activation must resolve to a REAL FLOW.md that lives
+# under the SAME /plugins/ tree as the engine (the S1 containment guard lives inside
+# flowy_resolve_flowmd — Task 3). Enforce it HERE so a bad/out-of-tree overlay root is
+# refused at activation time and never reaches a PENDING file the hook would claim.
+# plugin/project activations skip this block entirely (they never source the resolver).
+if [ "$LOCATION" = "overlay" ]; then
+  . "$PLUGIN_ROOT/hooks/flowy-resolve.sh" 2>/dev/null || {
+    printf 'flowy-activate: cannot source flowy-resolve.sh under %s\n' "$PLUGIN_ROOT" >&2
+    exit 1
+  }
+  # 4th arg (project flows dir) is unused for overlay resolution — a safe placeholder.
+  _FMD="$(flowy_resolve_flowmd "$FLOW_NAME" "$FLOW_REF" "overlay" "$PROJECT_DIR/.flowy/flows" "$PLUGIN_ROOT" "$FLOW_PLUGIN_ROOT")"
+  [ -n "$_FMD" ] || {
+    printf 'flowy-activate: overlay FLOW.md not resolvable (bad root/ref, or outside the plugins tree)\n' >&2
+    exit 3
+  }
+fi
 
 # Canonical state dir via the SINGLE source of truth (same as the hook + GC).
 . "$PLUGIN_ROOT/hooks/flowy-paths.sh" 2>/dev/null || {
@@ -72,11 +99,11 @@ case "$EPOCH" in '' | *[!0-9]*) printf 'flowy-activate: no epoch\n' >&2; exit 7 
 TMP="$STATE_DIR/state-PENDING.json.tmp"
 cat > "$TMP" <<EOF
 {
-  "schema": "flowy-state-v1",
+  "schema": "flowy-state-v2",
   "sessionId": "PENDING",
   "createdAtEpoch": $EPOCH,
   "activeFlows": [
-    { "name": "$FLOW_NAME", "flowRef": "$FLOW_REF", "location": "$LOCATION" }
+    { "name": "$FLOW_NAME", "flowRef": "$FLOW_REF", "location": "$LOCATION", "pluginRoot": "$FLOW_PLUGIN_ROOT" }
   ]
 }
 EOF
