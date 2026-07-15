@@ -22,12 +22,12 @@ function toPosix(p: string): string {
   return p.replace(/^([A-Za-z]):/, (_m, d) => `/${d.toLowerCase()}`).replace(/\\/g, "/");
 }
 
-// flowy_resolve_flowmd NAME REF LOC PROJECT_FLOWS_DIR PLUGIN_ROOT -> resolved path (or "")
-function resolve(name: string, ref: string, loc: string, pfd: string, pr: string): string {
+// flowy_resolve_flowmd NAME REF LOC PROJECT_FLOWS_DIR PLUGIN_ROOT [OVERLAY_PLUGIN_ROOT] -> resolved path (or "")
+function resolve(name: string, ref: string, loc: string, pfd: string, pr: string, flowpr = ""): string {
   if (!GIT_BASH) return "";
   const r = spawnSync(
     GIT_BASH,
-    ['-c', '. "$1"; flowy_resolve_flowmd "$2" "$3" "$4" "$5" "$6"', "_", toPosix(HELPER), name, ref, loc, pfd, pr],
+    ['-c', '. "$1"; flowy_resolve_flowmd "$2" "$3" "$4" "$5" "$6" "$7"', "_", toPosix(HELPER), name, ref, loc, pfd, pr, flowpr],
     { encoding: "utf8" },
   );
   return (r.stdout ?? "").trim();
@@ -73,5 +73,41 @@ describe("flowy_resolve_flowmd (shared resolver contract)", () => {
     expect(resolve("nope", "flows/nope/FLOW.md", "plugin", PFD, PR)).toBe("");
     // project with a missing file -> empty (NO plugin rescue, even though plugin sp exists)
     expect(resolve("sp", "flows/sp/FLOW.md", "project", toPosix(join(base, "empty")), PR)).toBe("");
+  });
+});
+
+describe("flowy_resolve_flowmd (location: overlay)", () => {
+  test("overlay resolves against the 6th arg (overlay root), with plugins-tree containment", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "ov "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const ENGINE = toPosix(engineWin), OVERLAY = toPosix(overlayWin), PFD = toPosix(join(base, "pfd"));
+
+    // 1. legit overlay resolve → the overlay's own FLOW.md (NOT the engine root, $5)
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, OVERLAY))
+      .toBe(`${OVERLAY}/flows/superpowers/FLOW.md`);
+    // 2. missing flow under a root with no canonical FLOW.md → empty
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, toPosix(join(cache, "flowy-empty", "0.1.0"))))
+      .toBe("");
+    // 3. traversal ref dropped, then auto-repairs to the overlay canonical path (NON-empty)
+    expect(resolve("superpowers", "../../etc/x", "overlay", PFD, ENGINE, OVERLAY))
+      .toBe(`${OVERLAY}/flows/superpowers/FLOW.md`);
+    // 4. overlay root containing .. → refused (empty)
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, `${OVERLAY}/../0.1.0`))
+      .toBe("");
+    // 5. S1: overlay root OUTSIDE the engine's /plugins/ tree → refused, even with a real file
+    const evilWin = join(base, "evil"); mkdirSync(join(evilWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(evilWin, "flows", "superpowers", "FLOW.md"), "# attacker routing");
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, toPosix(evilWin)))
+      .toBe("");
+    // 6. plugin mode STILL resolves against the engine root ($5), unchanged
+    mkdirSync(join(engineWin, "flows", "x"), { recursive: true });
+    writeFileSync(join(engineWin, "flows", "x", "FLOW.md"), "x");
+    expect(resolve("x", "flows/x/FLOW.md", "plugin", PFD, ENGINE, OVERLAY)).toBe(`${ENGINE}/flows/x/FLOW.md`);
   });
 });
