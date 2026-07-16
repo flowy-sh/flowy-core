@@ -33,6 +33,36 @@ function resolve(name: string, ref: string, loc: string, pfd: string, pr: string
   return (r.stdout ?? "").trim();
 }
 
+// Same as resolve(), but shadows `realpath` with a shell function that fails (returns 127,
+// no stdout) BEFORE sourcing the helper — command-substitution subshells inside
+// flowy_resolve_flowmd inherit it, so realpath reads as "absent". Used to prove FIX B
+// fails CLOSED (empty) rather than keeping the S1-string-prefix-only result.
+function resolveNoRealpath(name: string, ref: string, loc: string, pfd: string, pr: string, flowpr = ""): string {
+  if (!GIT_BASH) return "";
+  const r = spawnSync(
+    GIT_BASH,
+    ['-c', 'realpath() { return 127; }; . "$1"; flowy_resolve_flowmd "$2" "$3" "$4" "$5" "$6" "$7"', "_", toPosix(HELPER), name, ref, loc, pfd, pr, flowpr],
+    { encoding: "utf8" },
+  );
+  return (r.stdout ?? "").trim();
+}
+
+// CI-GUARD (F12): hard-fail on Windows without Git Bash. The tests below open with
+// `if (!GIT_BASH) return;`, which bun scores as a PASS (not a skip) — so without this
+// guard a Windows/CI box lacking Git Bash would report the entire resolver security suite
+// GREEN with ZERO verification. This guard sits OUTSIDE any skippable block. Mirrors the
+// existing guard in flowy-inject.test.ts.
+test("CI-guard: Git Bash must be present on Windows to run resolver tests", () => {
+  if (process.platform !== "win32") return; // non-Windows cannot run the Git-Bash-targeted resolver
+  expect(!!GIT_BASH).toBe(true);
+  if (!GIT_BASH) {
+    throw new Error(
+      "Git Bash required to run resolver tests on Windows; install it from https://git-scm.com " +
+        "or the resolver suite is unverified.",
+    );
+  }
+});
+
 let root: string;
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), "flowy-resolve-"));
@@ -188,5 +218,60 @@ describe("flowy_resolve_flowmd (location: overlay)", () => {
       // recursive rm here risks deleting through the reparse point instead of it).
       spawnSync("cmd", ["/c", "rmdir", junctionPath]);
     }
+  });
+
+  // ---------------------------------------------------------------------------
+  // F1 (P1) — FIX B must FAIL CLOSED when realpath is unavailable. The old code kept
+  // the S1 string-prefix-only result when realpath was absent, which the adversarial
+  // review REPRODUCED into an out-of-tree junction escape (an attacker FLOW.md injected
+  // as authoritative context). A legit overlay that resolves WITH realpath present must
+  // resolve to EMPTY when realpath cannot canonicalize — containment cannot be proven
+  // without it, so the overlay is refused (the user re-activates). Pre-fix: returned the path.
+  // ---------------------------------------------------------------------------
+  test("F1: a legit overlay resolves EMPTY when realpath is unavailable (fail CLOSED, not open)", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "norp "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const ENGINE = toPosix(engineWin), OVERLAY = toPosix(overlayWin), PFD = toPosix(join(base, "pfd"));
+
+    // Sanity: with realpath present it resolves.
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, OVERLAY))
+      .toBe(`${OVERLAY}/flows/superpowers/FLOW.md`);
+    // With realpath absent: REFUSED (empty). Containment is unprovable, so fail CLOSED.
+    expect(resolveNoRealpath("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, OVERLAY))
+      .toBe("");
+  });
+
+  // ---------------------------------------------------------------------------
+  // The resolver's OWN charset guard (FIX A) must reject an overlay pluginRoot carrying
+  // a disallowed char even when it points at a real, in-tree, resolvable dir — proving the
+  // defense-in-depth copy holds if flowy-activate.sh's write-time guard is ever bypassed
+  // (a hand-edited/foreign state file that never went through the activator).
+  // ---------------------------------------------------------------------------
+  test("FIX A: an overlay root with a disallowed char (backtick) is refused by the resolver itself", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "chr "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-ev`il", "0.1.0"); // real dir, name carries a backtick
+    try {
+      mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+      writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    } catch (e) {
+      console.warn(`[SKIP] cannot create backtick dir on this FS: ${e}`);
+      return;
+    }
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const ENGINE = toPosix(engineWin), OVERLAY = toPosix(overlayWin), PFD = toPosix(join(base, "pfd"));
+
+    // The backtick trips flowy_charset_ok_pluginroot in the resolver → empty, even though
+    // the dir + FLOW.md really exist and sit under the /plugins/ tree.
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE, OVERLAY))
+      .toBe("");
   });
 });

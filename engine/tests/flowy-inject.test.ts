@@ -832,6 +832,10 @@ d("flowy-inject.sh", () => {
   // -------------------------------------------------------------------------
   test("flow active but FLOW.md unresolvable → WARNING line, exit 0 (NOT 2)", () => {
     const dirs = makeDirs();
+    // OWNERSHIP GATE (F_OWN): the engine warns only about a flow it OWNS. A plugin flow is
+    // owned iff $PLUGIN_ROOT/flows/<name>/ exists — create the dir (no FLOW.md) so the flow
+    // is owned-but-unresolvable and still warns (an unowned/foreign flow is now silenced).
+    mkdirSync(join(dirs.pluginRootWin, "flows", "ghost-flow"), { recursive: true });
     writeState(dirs, "A", {
       schema: "flowy-state-v1",
       sessionId: "A",
@@ -1141,6 +1145,9 @@ d("flowy-inject.sh", () => {
 
   test("flowRef with shell metachars and NO valid name → corrupt, exit 0", () => {
     const dirs = makeDirs();
+    // Owned-but-unresolvable (see the ownership-gate note above): the dir exists so the
+    // crafted flowRef path is still exercised AND the flow warns rather than being silenced.
+    mkdirSync(join(dirs.pluginRootWin, "flows", "ghost-flow"), { recursive: true });
     writeState(dirs, "A", {
       schema: "flowy-state-v1",
       sessionId: "A",
@@ -1209,6 +1216,9 @@ d("flowy-inject.sh", () => {
   // -------------------------------------------------------------------------
   test("corrupt flow name with a dot → exactly one warning line, name intact", () => {
     const dirs = makeDirs();
+    // Owned-but-unresolvable (ownership gate): the dir exists so "flow.v2" warns; no FLOW.md
+    // so it stays corrupt. Exercises that a name with a dot is not split across warnings.
+    mkdirSync(join(dirs.pluginRootWin, "flows", "flow.v2"), { recursive: true });
     writeState(dirs, "A", {
       schema: "flowy-state-v1",
       sessionId: "A",
@@ -1512,6 +1522,9 @@ d("flowy-inject.sh", () => {
   test("mixed live + corrupt flows → banner for live, warning for corrupt, both in same run, exit 0", () => {
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
+    // ghost-flow is OWNED (dir exists) but unresolvable (no FLOW.md) → warns; superpowers-flow
+    // resolves → banner. Both appear in one run (see the ownership-gate note above).
+    mkdirSync(join(dirs.pluginRootWin, "flows", "ghost-flow"), { recursive: true });
     writeState(dirs, "A", {
       schema: "flowy-state-v1",
       sessionId: "A",
@@ -1802,6 +1815,63 @@ d("flowy-inject.sh", () => {
     // "unreadable" corrupt line, so this failure mode is never confused with a
     // normal unresolvable single flow.
     expect(r.stdout).toContain("malformed");
+  });
+
+  // F2 (P1) — the hardened parity guard counts VALUE lines, not KEY tokens. A non-string
+  // value (`"pluginRoot": null`) is a KEY with no value line, so the OLD key-count guard
+  // PASSED it while the value-line zip shifted — the adversarial review REPRODUCED "alpha"
+  // (its own root null) firing under a LATER entry's root while the banner named alpha.
+  test("F2 parity guard: a non-string pluginRoot value (null) shifts the zip → whole state malformed, no wrong-fire", () => {
+    const dirs = makeDirs();
+    const cache = join(dirs.pluginRootWin, "..", "..", "..");
+    const betaOverlayWin = join(cache, "flowy-beta", "0.1.0");
+    mkdirSync(join(betaOverlayWin, "flows", "alpha"), { recursive: true });
+    writeFileSync(join(betaOverlayWin, "flows", "alpha", "FLOW.md"), "# beta's alpha (must NOT fire)\n");
+    mkdirSync(join(betaOverlayWin, "flows", "beta"), { recursive: true });
+    writeFileSync(join(betaOverlayWin, "flows", "beta", "FLOW.md"), "# beta routes\n");
+
+    // Raw JSON so entry 1 carries a NON-STRING pluginRoot (null): a key with no value line.
+    const stateJson = [
+      "{",
+      '  "schema": "flowy-state-v2",',
+      '  "sessionId": "A",',
+      '  "activeFlows": [',
+      '    { "name": "alpha", "flowRef": "flows/alpha/FLOW.md", "location": "overlay", "pluginRoot": null },',
+      `    { "name": "beta", "flowRef": "flows/beta/FLOW.md", "location": "overlay", "pluginRoot": "${toPosix(betaOverlayWin)}" }`,
+      "  ]",
+      "}",
+    ].join("\n");
+    writeState(dirs, "A", stateJson);
+
+    const r = run(dirs, stdinFor("A"));
+
+    expect(r.code).toBe(0);
+    expect(r.stdout).not.toContain("Flowy routing ACTIVE"); // alpha must NOT fire under beta's root
+    expect(r.stdout).toContain("malformed");
+  });
+
+  // F_OWN (P1) — the ownership gate SILENCES a flow this engine does not own, instead of
+  // injecting a contradictory "unreadable / run /flowy deactivate" warning into the same
+  // authoritative channel a correct ACTIVE banner rides on. A plugin flow with no dir under
+  // THIS engine belongs to a sibling plugin (resolved by ITS hook) — this engine stays silent.
+  test("F_OWN: an unowned plugin flow (no dir under this engine) is SILENT — no cross-plugin 'unreadable'/'deactivate' spam", () => {
+    const dirs = makeDirs();
+    // Deliberately create NO flows/<name>/ dir under this engine's root.
+    writeState(dirs, "A", {
+      schema: "flowy-state-v2",
+      sessionId: "A",
+      activeFlows: [
+        { name: "a-sibling-plugins-flow", flowRef: "flows/a-sibling-plugins-flow/FLOW.md", location: "plugin", pluginRoot: "" },
+      ],
+    });
+
+    const r = run(dirs, stdinFor("A"));
+
+    expect(r.code).toBe(0);
+    expect(r.stdout).not.toContain("unreadable");
+    expect(r.stdout).not.toContain("deactivate");
+    expect(r.stdout).not.toContain("Flowy routing ACTIVE");
+    expect(r.stdout.trim()).toBe(""); // fully silent — the F_OWN noise fix
   });
 
   test("FIX C parity-holds: every entry carries pluginRoot (one overlay root, one empty for a plugin entry) → both still resolve", () => {

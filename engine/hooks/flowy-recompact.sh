@@ -39,13 +39,25 @@ SB="$(wc -c < "$STATE" 2>/dev/null || echo 0)"
 SC="$(cat "$STATE" 2>/dev/null || true)"
 [ -n "$SC" ] || exit 0
 
-# Resolve the FIRST active flow's FLOW.md (mirror of flowy-inject.sh resolution).
-NAME="$(printf '%s' "$SC" | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
-REF="$(printf '%s' "$SC" | grep -o '"flowRef"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
-LOC="$(printf '%s' "$SC" | grep -o '"location"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
-# overlay: single-value pluginRoot (mirror of flowy-inject.sh's PLUGINROOTS, but this
-# hook resolves only the FIRST active flow, so head -n 1 is enough — no positional pairing).
-FPR="$(printf '%s' "$SC" | grep -o '"pluginRoot"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 | sed 's/.*:[[:space:]]*"//; s/"$//' | tr -d '\r')"
+# F_SCHEMA + F2: same guards as flowy-inject.sh (shared helpers). Refuse a schema this
+# reader doesn't understand, and refuse a state whose positionally-zipped fields are
+# misaligned. The parity guard is what makes the FIRST-entry `head -n 1` extraction below
+# safe: without it, a first entry missing its own pluginRoot (while a later entry has one)
+# would pair name #1 with root #N — a wrong post-compaction re-read into authoritative context.
+flowy_schema_ok "$SC" || exit 0
+flowy_parity_ok "$SC" || {
+  printf '%s\n' "⚠ Flowy: routing state malformed (field/record count mismatch); re-activate with /flowy:<slug>, or run /flowy deactivate."
+  exit 0
+}
+
+# Resolve the FIRST active flow's FLOW.md (mirror of flowy-inject.sh resolution). Parse via
+# the SHARED extractor (flowy-resolve.sh) + take the first line. Safe because flowy_parity_ok
+# above already refused any state where the first entry's fields don't line up (every field is
+# present-on-every-entry or absent-entirely), so the first value-line of each field IS entry 1's.
+NAME="$(flowy_extract_field "$SC" name | head -n 1)"
+REF="$(flowy_extract_field "$SC" flowRef | head -n 1)"
+LOC="$(flowy_extract_field "$SC" location | head -n 1)"
+FPR="$(flowy_extract_field "$SC" pluginRoot | head -n 1)"
 case "$NAME" in '' | *[!A-Za-z0-9_.-]* | *..* ) exit 0 ;; esac
 
 # Resolve via the shared helper (single source of truth with flowy-inject.sh).

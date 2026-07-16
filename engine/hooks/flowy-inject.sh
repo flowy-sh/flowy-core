@@ -22,7 +22,7 @@
 #     read stdin, find no state file, and exit 0 with empty stdout.
 #   * Emit ONLY the intended banner/warning to stdout. Nothing stray.
 #
-# STATE FILE SHAPE — schema "flowy-state-v1"
+# STATE FILE SHAPE — schema "flowy-state-v2"
 #   Written by the activator unit to the OUT-OF-REPO state dir (see RR2 below):
 #     <CLAUDE_HOME>/flowy-state/<project-key>/state-<session_id>.json
 #   (or .../state-PENDING.json before a session_id is known). The dir is derived
@@ -30,16 +30,20 @@
 #   the canonical, path-form-independent key algorithm (0.6.2+).
 #
 #     {
-#       "schema": "flowy-state-v1",
+#       "schema": "flowy-state-v2",
 #       "sessionId": "<id>",
 #       "activeFlows": [
-#         { "name": "superpowers-flow", "flowRef": "flows/superpowers-flow/FLOW.md", "location": "plugin" }
+#         { "name": "superpowers-flow", "flowRef": "flows/superpowers-flow/FLOW.md", "location": "plugin", "pluginRoot": "" }
 #       ]
 #     }
 #
-#   "location" (optional, RR1): "plugin" (default/absent) resolves the FLOW.md
-#   under $CLAUDE_PLUGIN_ROOT; "project" resolves it under
-#   $CLAUDE_PROJECT_DIR/.flowy/flows/<name>/FLOW.md. Parsed positionally with name.
+#   "location" (RR1): "plugin" (default/absent) resolves the FLOW.md under
+#   $CLAUDE_PLUGIN_ROOT; "project" under $CLAUDE_PROJECT_DIR/.flowy/flows/<name>/
+#   FLOW.md; "overlay" under the entry's own "pluginRoot" (a sibling overlay plugin's
+#   root, S1-contained under the same /plugins/ tree — see flowy-resolve.sh). The
+#   activator writes "location" AND "pluginRoot" on EVERY entry (pluginRoot empty for
+#   plugin/project) so the positional zip stays lockstep; flowy_parity_ok refuses a
+#   state where any field's value-line count is out of alignment.
 #
 #   Deliberately flat so we can parse it with grep/sed and NO jq/python/node.
 #   The parser is LINE-ORIENTED: it requires each `"name": "..."` and
@@ -320,6 +324,10 @@ STATE_BYTES="$(wc -c < "$STATE" 2>/dev/null || echo 0)"
 STATE_CONTENT="$(cat "$STATE" 2>/dev/null || true)"
 [ -n "$STATE_CONTENT" ] || exit 0
 
+# F_SCHEMA: only parse a state whose schema this reader understands. A future breaking
+# shape (v3+) must degrade to a no-op here, not be mis-parsed by these v1/v2 grep rules.
+flowy_schema_ok "$STATE_CONTENT" || exit 0
+
 # ---------------------------------------------------------------------------
 # 5. Deactivated / empty state → no-op. Requires both an "activeFlows" key and
 #    at least one "name": entry.
@@ -333,71 +341,32 @@ printf '%s' "$STATE_CONTENT" | grep -q '"name"[[:space:]]*:' || exit 0
 #    so positional pairing holds. We tolerate a missing flowRef (auto-repair
 #    from name still works).
 # ---------------------------------------------------------------------------
-NAMES="$(
-  printf '%s' "$STATE_CONTENT" \
-    | grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' \
-    | sed 's/.*:[[:space:]]*"//; s/"$//' \
-    | tr -d '\r'
-)"
-REFS="$(
-  printf '%s' "$STATE_CONTENT" \
-    | grep -o '"flowRef"[[:space:]]*:[[:space:]]*"[^"]*"' \
-    | sed 's/.*:[[:space:]]*"//; s/"$//' \
-    | tr -d '\r'
-)"
-# RR1: optional per-entry "location" — "plugin" (default/absent) resolves under
-# $PLUGIN_ROOT; "project" resolves under $PROJECT_DIR/.flowy/flows/<name>/FLOW.md.
-# Parsed line-oriented and paired POSITIONALLY with NAMES, exactly like REFS. The
-# activator writes one "location" per array element (it always emits the field),
-# so the Nth location pairs with the Nth name. If the Nth location is absent/empty
-# we default to plugin resolution — the SAFE direction (never silently project).
-LOCATIONS="$(
-  printf '%s' "$STATE_CONTENT" \
-    | grep -o '"location"[[:space:]]*:[[:space:]]*"[^"]*"' \
-    | sed 's/.*:[[:space:]]*"//; s/"$//' \
-    | tr -d '\r'
-)"
-# overlay: optional per-entry "pluginRoot" — the overlay plugin's absolute root,
-# written by the activator for location:overlay entries. Parsed line-oriented and
-# paired POSITIONALLY with NAMES, exactly like LOCATIONS. The activator writes
-# pluginRoot on EVERY entry (empty for plugin/project) to keep the pairing lockstep.
-# SAFE for the pilot: activations write SINGLE-element activeFlows arrays (each
-# activation overwrites the claimed state — last-writer-wins), so a mixed multi-entry
-# array cannot arise here. Per-object parsing is a Phase-3 prerequisite (multi-overlay).
-PLUGINROOTS="$(
-  printf '%s' "$STATE_CONTENT" \
-    | grep -o '"pluginRoot"[[:space:]]*:[[:space:]]*"[^"]*"' \
-    | sed 's/.*:[[:space:]]*"//; s/"$//' \
-    | tr -d '\r'
-)"
+# Parse the four positionally-zipped fields through the ONE shared extractor
+# (flowy-resolve.sh) so inject and recompact cannot drift on the grep/sed pattern.
+# RR1: "location" — plugin (default/absent) resolves under $PLUGIN_ROOT; project under
+# $PROJECT_DIR/.flowy/flows/<name>/FLOW.md; overlay under the entry's own pluginRoot.
+# The activator writes location AND pluginRoot on EVERY entry (empty for plugin/project)
+# so the Nth value of each field pairs with the Nth name; flowy_parity_ok (below) refuses
+# a state where any field's value-line count is out of lockstep. Activations write
+# SINGLE-element arrays (last-writer-wins); multi-entry states arise only via the
+# model-written Stacking merge, which the parity guard hardens.
+NAMES="$(flowy_extract_field "$STATE_CONTENT" name)"
+REFS="$(flowy_extract_field "$STATE_CONTENT" flowRef)"
+LOCATIONS="$(flowy_extract_field "$STATE_CONTENT" location)"
+PLUGINROOTS="$(flowy_extract_field "$STATE_CONTENT" pluginRoot)"
 
 # ---------------------------------------------------------------------------
-# FIX C (P2) — positional-parity wrong-fire guard. NAMES/REFS/LOCATIONS/
-# PLUGINROOTS above are zipped by RAW LINE INDEX (see section 6 below). If SOME
-# entries carry a "pluginRoot" KEY and some don't (a stacked state that dropped
-# the field, or a foreign/older entry sharing the file), the MISSING key
-# shrinks PLUGINROOTS by one line and shifts every following entry's root out
-# of alignment — the Nth name can then pair with the WRONG non-empty root, an
-# unintended FLOW.md substitution, not a safe no-op. (An empty VALUE, e.g.
-# "pluginRoot": "", still emits a positional line via grep -o above — only a
-# missing KEY shifts the zip.)
-#
-# Count occurrences from the RAW state content — the "name"/"pluginRoot" KEY
-# only, NOT the post-strip PLUGINROOTS value — so an empty-but-present value
-# still counts correctly. Counting the stripped variable instead (e.g. via
-# wc -l on PLUGINROOTS) undercounts exactly the case this guard exists for.
-#
-# Require: pcount is EITHER 0 (legacy/no-overlay state — every entry resolves
-# plugin/project with an empty FPR, today's safe behavior) OR == ncount (every
-# entry carries the field — the positional zip is aligned). A PARTIAL count
-# (0 < pcount < ncount) means misaligned pairing: treat the WHOLE state as
-# corrupt and skip the resolve loop entirely — never guess which pairing (if
-# any) is trustworthy.
+# FIX C (P2, hardened → F2) — positional-parity wrong-fire guard. NAMES/REFS/
+# LOCATIONS/PLUGINROOTS above are zipped by RAW LINE INDEX (section 6 below).
+# flowy_parity_ok (flowy-resolve.sh, SHARED with recompact) counts the VALUE
+# lines the zip actually consumes for EVERY zipped field — not just "pluginRoot"
+# KEY tokens — so a non-string value (`"pluginRoot": null`) OR a dropped
+# "location"/"flowRef" key that shifts the zip is caught (both were REPRODUCED
+# wrong-fires the old key-only guard missed). On a misaligned state, treat the
+# WHOLE state as corrupt and skip the resolve loop — never guess a pairing.
 # ---------------------------------------------------------------------------
-_ncount="$(printf '%s' "$STATE_CONTENT" | grep -o '"name"[[:space:]]*:' | grep -c .)"
-_pcount="$(printf '%s' "$STATE_CONTENT" | grep -o '"pluginRoot"[[:space:]]*:' | grep -c .)"
-if [ "$_pcount" -gt 0 ] && [ "$_pcount" -ne "$_ncount" ]; then
-  printf '%s\n' "⚠ Flowy: routing state malformed (pluginRoot/name count mismatch); re-activate with /flowy:<slug>, or run /flowy deactivate."
+if ! flowy_parity_ok "$STATE_CONTENT"; then
+  printf '%s\n' "⚠ Flowy: routing state malformed (field/record count mismatch); re-activate with /flowy:<slug>, or run /flowy deactivate."
   exit 0
 fi
 
@@ -449,9 +418,12 @@ for NAME in $NAMES; do
   [ -n "$SAFE_NAME" ] || SAFE_NAME="[invalid-name]"
 
   if [ -n "$RESOLVED" ]; then
-    # LIVE_NAMES + LIVE_REFS are comma-joined in lockstep; both emitted in the
-    # banner. RESOLVED is built from PLUGIN_ROOT + the already-allowlisted
-    # REF/NAME (charset-guarded above), so it carries no injection vector.
+    # LIVE_NAMES + LIVE_REFS are comma-joined in lockstep; both emitted in the banner.
+    # RESOLVED is a real on-disk path the resolver already validated: for plugin/project
+    # it is under PLUGIN_ROOT / the project flows dir from an allowlisted REF/NAME; for an
+    # overlay it is the S1+realpath-contained overlay FLOW.md path (charset-guarded root).
+    # It can carry a space or () from a real install dir but never a quote/newline (the
+    # charset allowlist blocks those), so it is an inert path reference, not an injection.
     if [ -z "$LIVE_NAMES" ]; then
       LIVE_NAMES="$SAFE_NAME"
       LIVE_REFS="$RESOLVED"
@@ -460,16 +432,38 @@ for NAME in $NAMES; do
       LIVE_REFS="$LIVE_REFS, $RESOLVED"
     fi
   else
-    # CORRUPT_NAMES is NEWLINE-separated (Fix 6): one warning line per name, and
-    # the read loop below splits ONLY on newline. The old IFS=', ' split also
-    # broke on every space AND comma, which would mangle a name containing a
-    # dot/space; newline iteration mirrors the clean NAMES loop above.
-    if [ -z "$CORRUPT_NAMES" ]; then
-      CORRUPT_NAMES="$SAFE_NAME"
-    else
-      CORRUPT_NAMES="$CORRUPT_NAMES
-$SAFE_NAME"
+    # OWNERSHIP GATE (ADR-032, ported from flowy-flows 0.7.2 + the overlay case). Only
+    # warn about a flow THIS engine owns; a flow another installed Flowy engine owns is
+    # resolved by ITS hook, so warning here injects cross-plugin spam — and a misleading
+    # "run /flowy deactivate" nudge — into the SAME authoritative channel enforcement
+    # rides on. F_OWN: this was the contradictory "ACTIVE" + "unreadable/deactivate" noise
+    # once any overlay was active.
+    #   * location=project → always ours (the user's own .flowy/flows).
+    #   * location=overlay → ours ONLY if this entry carried a non-empty pluginRoot (we
+    #       attempted a real overlay resolve; an empty/absent root is a foreign entry).
+    #   * location=plugin/absent → ours ONLY if $PLUGIN_ROOT/flows/<name>/ exists here.
+    _owned=1
+    if [ "$LOC" = "overlay" ]; then
+      [ -n "$FPR" ] || _owned=0
+    elif [ "$LOC" != "project" ]; then
+      case "$NAME" in
+        '' | *[!A-Za-z0-9_.-]* | *..* ) _owned=0 ;;
+        * ) [ -d "$PLUGIN_ROOT/flows/$NAME" ] || _owned=0 ;;
+      esac
     fi
+    if [ "$_owned" = "1" ]; then
+      # CORRUPT_NAMES is NEWLINE-separated (Fix 6): one warning line per name, and
+      # the read loop below splits ONLY on newline. The old IFS=', ' split also
+      # broke on every space AND comma, which would mangle a name containing a
+      # dot/space; newline iteration mirrors the clean NAMES loop above.
+      if [ -z "$CORRUPT_NAMES" ]; then
+        CORRUPT_NAMES="$SAFE_NAME"
+      else
+        CORRUPT_NAMES="$CORRUPT_NAMES
+$SAFE_NAME"
+      fi
+    fi
+    # _owned=0 → a sibling plugin's flow → silent (no accumulation, no cross-plugin spam).
   fi
 done
 set +f
@@ -507,10 +501,19 @@ if [ -n "$LIVE_NAMES" ]; then
     # Append the lightweight routing table, resolved next to the FIRST live FLOW.md.
     FIRST_REF="$(printf '%s' "$LIVE_REFS" | sed 's/,.*//')"
     COMPACT="$(dirname "$FIRST_REF")/FLOW-compact.md"
-    # Security: only ever serve the compact table from the plugin root. For a project-local
-    # flow, COMPACT would resolve INSIDE the repo, letting a cloned repo plant a crafted
-    # FLOW-compact.md we would cat into the agent's context. Restrict to PLUGIN_ROOT.
-    case "$COMPACT" in "$PLUGIN_ROOT"/* ) : ;; * ) COMPACT="" ;; esac
+    # Security + F11: serve the compact table only from the /plugins/ tree. A project-local
+    # flow's COMPACT resolves INSIDE the repo (a cloned repo could plant a crafted
+    # FLOW-compact.md), so it stays excluded; a plugin flow's FLOW.md is under $PLUGIN_ROOT
+    # and an OVERLAY flow's is S1+realpath-contained under the SAME /plugins/ tree (verified
+    # at resolve time), so BOTH are trusted. The old $PLUGIN_ROOT-only check silently
+    # disabled the periodic refresh for every overlay (an overlay path never starts with
+    # $PLUGIN_ROOT). $FIRST_REF is a resolver output (forward-slash), so normalize the base.
+    _pluginsbase="$(flowy_plugins_base "$PLUGIN_ROOT")"
+    if [ -n "$_pluginsbase" ]; then
+      case "$COMPACT" in "$_pluginsbase"* ) : ;; * ) COMPACT="" ;; esac
+    else
+      COMPACT=""
+    fi
     if [ -n "$COMPACT" ] && [ -f "$COMPACT" ] && [ ! -L "$COMPACT" ]; then
       printf '%s\n' "--- Flowy routing refresh (every $REINJECT_N prompts) — re-read the full FLOW.md if unsure ---"
       cat "$COMPACT" 2>/dev/null || true
