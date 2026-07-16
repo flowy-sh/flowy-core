@@ -3,6 +3,7 @@
   "owner": { "name": "Flowy", "email": "maximo@flowy.sh" },
   "plugins": [
     { "name": "flowy-core", "source": "./engine", "description": "The Flowy enforcement engine: the routing hook + activator that overlays depend on." },
-    { "name": "flowy-superpowers", "source": "./overlays/superpowers", "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate." }
+    { "name": "flowy-superpowers", "source": "./overlays/superpowers", "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate." },
+    { "name": "flowy-ultra-powers", "source": "./overlays/ultra-powers", "description": "Auto-invoked overlay: the everything-Flow (40 skills, 7 suites) with a disambiguating router, on the shared Flowy engine." }
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "name": "flowy-ultra-powers",
+  "version": "0.1.0",
+  "description": "Auto-invoked overlay: the everything-Flow (40 skills across 7 suites) with a disambiguating router, on the shared Flowy engine.",
+  "dependencies": [ { "name": "flowy-core", "version": "^0.1.0" } ]
+}
