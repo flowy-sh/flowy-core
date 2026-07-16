@@ -43,15 +43,15 @@ When more than one branch matches, resolve top-down:
 3. **TDD**: code about to be written gets its failing test first.
 4. **Planning**: no plan means plan before building.
 5. **Brainstorming**: no design means design before planning.
-6. Everything else in lifecycle order. A scope change re-enters the earliest invalidated phase (usually brainstorming or writing-plans).
+6. Everything else in lifecycle order. A scope change re-enters the earliest invalidated phase (usually superpowers:brainstorming or superpowers:writing-plans).
 
 ## Phases
 
-1. **Design**: brainstorming. Gate: approved design doc.
-2. **Plan**: writing-plans. Gate: checkboxed tasks, approved.
-3. **Build**: executing-plans or subagent-driven-development, with TDD inside every code-bearing task. Gate: all boxes checked, tests green.
-4. **Verify**: verification-before-completion. Gate: fresh command output proves each claim.
-5. **Ship**: requesting-code-review, then receiving-code-review, then finishing-a-development-branch. Gate: findings resolved, tests pass, integration chosen.
+1. **Design**: superpowers:brainstorming. Gate: approved design doc.
+2. **Plan**: superpowers:writing-plans. Gate: checkboxed tasks, approved.
+3. **Build**: superpowers:executing-plans or superpowers:subagent-driven-development, with TDD inside every code-bearing task. Gate: all boxes checked, tests green.
+4. **Verify**: superpowers:verification-before-completion. Gate: fresh command output proves each claim.
+5. **Ship**: superpowers:requesting-code-review, then superpowers:receiving-code-review, then superpowers:finishing-a-development-branch. Gate: findings resolved, tests pass, integration chosen.
 
 **Shortcuts:** bug → debugging → TDD (regression test) → verify → review → finish (skip Design/Plan). Small feature (under ~200 LOC, no new surface) → plan → build → verify → review → finish (skip Design). Typo or config → fix → verify.
 
