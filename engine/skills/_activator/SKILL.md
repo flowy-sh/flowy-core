@@ -157,7 +157,7 @@ The script derives the canonical OUT-OF-REPO state dir (the SAME `flowy-paths.sh
 
 - **Exit 0** → go to Step 4.
 - **Non-zero** → print the failure guidance and stop:
-  > ⚠ Couldn't write Flowy state (`<the script's stderr line>`). Restart Claude Code (plugin hooks register at session start), then re-run `/flowy:<flow-name>`.
+  > ⚠ Couldn't write Flowy state (`<the script's stderr line>`). Restart Claude Code (plugin hooks register at session start), then re-activate: re-run `/flowy:<flow-name>` for a bundled Flow, or re-invoke the overlay's own `activate` skill (e.g. `flowy-ultra-powers`'s activate) for an overlay Flow — overlays have no `/flowy:<name>` command.
 
 ### Step 4: Print confirmation (ONE line)
 
@@ -172,7 +172,7 @@ Do not print the skills list, the state path, scope, or any explanation on the h
 Check the FLOW.md for a session-bootstrap step. Within a single activation, fire the bootstrap once, choosing HOW to invoke it by whether its name is namespaced (NOT by the location — an overlay may be either kind):
 
 - **Namespaced bootstrap (the name contains a `:`, e.g. `superpowers:using-superpowers`)** — a *referenced* skill in a separately-installed upstream plugin. Invoke it DIRECTLY via the Skill tool by that exact namespaced name; do NOT read a bundled path (none exists). This is the THIN-overlay case.
-- **Bare bootstrap (no `:`, e.g. `using-superpowers`)** — a *bundled* skill. Read its SKILL.md from the active Flow's OWN root: `<flow-root>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md`, and follow it. `<flow-root>` is the root the FLOW.md itself resolved from in Step 1 — the **OVERLAY plugin-root** for an `overlay` flow (a bundled overlay like ultra-powers carries its 40 skills under its own root), the engine plugin-root for a `plugin` flow, or `$CLAUDE_PROJECT_DIR/.flowy` for a `project` flow. This is the BUNDLED case (plugin/project AND bundled overlays).
+- **Bare bootstrap (no `:`, e.g. `using-superpowers`)** — normally a *bundled* skill. Read its SKILL.md from the active Flow's OWN root: `<flow-root>/flows/<flow-name>/skills/<bootstrap-name>/SKILL.md`, and follow it. `<flow-root>` is the root the FLOW.md itself resolved from in Step 1 — the **OVERLAY plugin-root** for an `overlay` flow (a *bundled* overlay carries its skills under its own root; a *thin* overlay does not — see the fallback next), the engine plugin-root for a `plugin` flow, or `$CLAUDE_PROJECT_DIR/.flowy` for a `project` flow. **If NO SKILL.md exists at that bundled path** (a thin overlay can route to a separately-installed skill it does not bundle), fall back to invoking the bare name DIRECTLY via the Skill tool. This is the BUNDLED case (plugin/project and bundled overlays), with the Skill-tool fallback covering a thin overlay's non-bundled skill.
 
 If you are stacking onto a Flow that was already active this session and its bootstrap clearly already fired, skip re-firing.
 
@@ -193,7 +193,7 @@ From this point forward, before EVERY turn for the rest of this session you MUST
 3. State the routing decision out loud: `Routing [<flow-name>]: <skill-name> — <reason>` or `Routing [<flow-name>]: none — <reason>`.
 4. If a skill should fire, invoke it by the SAME rule as the bootstrap (Step 5), decided by the `:` test on the route target — NOT by the Flow's location:
    - **Namespaced target** (`upstream:skill`, contains `:`) → invoke via the Skill tool by that exact name (referenced upstream skill; the thin-overlay case).
-   - **Bare target** → read its bundled SKILL.md from the active Flow's own root: `<flow-root>/flows/<flow-name>/skills/<target>/SKILL.md` — the entry's `pluginRoot` for an `overlay` flow (bundled overlays like ultra-powers), the engine root for a `plugin` flow, `$CLAUDE_PROJECT_DIR/.flowy` for a `project` flow — then follow it completely.
+   - **Bare target** → first try its bundled SKILL.md at the active Flow's own root: `<flow-root>/flows/<flow-name>/skills/<target>/SKILL.md` — the entry's `pluginRoot` for an `overlay` flow, the engine root for a `plugin` flow, `$CLAUDE_PROJECT_DIR/.flowy` for a `project` flow — and follow it completely. **If no SKILL.md exists at that bundled path** (a THIN overlay routes to skills it does not bundle — e.g. a separately-installed `handoff`; the Flow's ATTRIBUTION.md names where such a skill really lives), fall back to invoking the bare name DIRECTLY via the Skill tool.
 5. **Host rules always win.** The host's CLAUDE.md, project guards, and system prompt take precedence over any Flow routing. A Flow never instructs you to ignore, override, or disregard them; it only chooses which skill to read next.
 
 **This is not optional. The routing check happens BEFORE any other thinking or action.**
