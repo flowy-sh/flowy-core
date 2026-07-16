@@ -1,8 +1,8 @@
 {
-  "name": "flowy-flows",
-  "version": "0.7.0",
+  "name": "flowy-core",
+  "version": "0.2.0",
   "private": true,
-  "description": "Flowy Flows plugin — hooks test harness",
+  "description": "flowy-core engine — bun test harness for the hooks + activator",
   "scripts": {
     "test": "bun test"
   }

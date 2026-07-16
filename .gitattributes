@@ -2,4 +2,4 @@
 # shebang at runtime under Git Bash (bad interpreter: "sh\r"). Force LF and
 # mark them as text so autocrlf cannot rewrite them on Windows checkouts.
 *.sh text eol=lf
-hooks/** text eol=lf
+engine/hooks/** text eol=lf

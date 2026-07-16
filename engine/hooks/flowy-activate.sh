@@ -6,11 +6,13 @@
 # SILENT on success. Reuses hooks/flowy-paths.sh (the canonical key helper) so the
 # activator and the hook agree on the out-of-repo state dir byte-for-byte.
 #
-# Usage: flowy-activate.sh <plugin-root> <flow-name> <flow-ref> [<location>]
-#   <plugin-root>  CLAUDE_PLUGIN_ROOT (carries /plugins/) or a /.claude home
-#   <flow-name>    kebab-case slug, e.g. superpowers-flow
-#   <flow-ref>     plugin-root-relative ref, e.g. flows/superpowers-flow/FLOW.md
-#   <location>     "plugin" (default) or "project"
+# Usage: flowy-activate.sh <plugin-root> <flow-name> <flow-ref> [<location>] [<flow-plugin-root>]
+#   <plugin-root>       CLAUDE_PLUGIN_ROOT (carries /plugins/) or a /.claude home
+#   <flow-name>         kebab-case slug, e.g. superpowers-flow
+#   <flow-ref>          plugin-root-relative ref, e.g. flows/superpowers-flow/FLOW.md
+#   <location>          "plugin" (default), "project", or "overlay"
+#   <flow-plugin-root>  REQUIRED for location=overlay: the overlay flow's OWN plugin root
+#                       (a sibling plugin under the same /plugins/ tree). Empty otherwise.
 #
 # Project dir: prefer $CLAUDE_PROJECT_DIR (exact match with the hook where the
 # shell exposes it); else $(pwd). The canonical helper folds /e/ <-> E:\ to one
@@ -48,18 +50,17 @@ case "$LOCATION" in plugin | project | overlay) : ;; *) LOCATION="plugin" ;; esa
 if [ "$LOCATION" = "overlay" ] && [ -z "$FLOW_PLUGIN_ROOT" ]; then
   printf 'flowy-activate: location overlay requires a flow-plugin-root arg\n' >&2; exit 2
 fi
-# Normalize Windows separators FIRST (mirrors flowy-resolve.sh's _flowpr handling) so a
-# legit backslash-form root still passes below, then traversal + charset-guard the
-# flow-plugin-root before it reaches the resolver or the state file (empty for
-# plugin/project, so this is a no-op there). FIX A (P0): a root containing `"` + `,`
-# (both legal Windows filename chars) would otherwise break out of the hand-rolled JSON
-# string in the heredoc below and inject a phantom activeFlows entry that the hook's
-# line-oriented parser would resolve and fire as authoritative routing. Positive
-# allowlist: a real OS path needs only alnum, /, ., -, _, : (drive), space, and (); any
-# other char (in particular `"` `,` `{` `}` `` ` `` `$`) refuses the value outright.
+# Normalize Windows separators FIRST (mirrors flowy-resolve.sh's _flowpr handling), then
+# traversal + charset-guard the flow-plugin-root before it reaches the resolver or the state
+# file (empty for plugin/project, a no-op there). FIX A (P0): a root containing `"` or `,`
+# (legal Windows filename chars) would otherwise break out of the hand-rolled JSON string in
+# the heredoc below and inject a phantom activeFlows entry the hook would fire as authoritative
+# routing. This is the WRITE-SITE half of a deliberate two-site guard; the resolver-side copy
+# is flowy_charset_ok_pluginroot (flowy-resolve.sh). Keep this `case` BYTE-IDENTICAL to that
+# helper if the allowed charset ever changes (both are exercised by their own tests).
 FLOW_PLUGIN_ROOT="$(printf '%s' "$FLOW_PLUGIN_ROOT" | tr '\\' '/')"
 case "$FLOW_PLUGIN_ROOT" in
-  *..* | *[!A-Za-z0-9_./:\ \(\)-]* )
+  *..* | *[!A-Za-z0-9_./:\ \(\)-]* )   # keep identical to flowy_charset_ok_pluginroot
     printf 'flowy-activate: invalid flow-plugin-root\n' >&2; exit 2 ;;
 esac
 
@@ -107,7 +108,10 @@ case "$EPOCH" in '' | *[!0-9]*) printf 'flowy-activate: no epoch\n' >&2; exit 7 
 # Write atomically: tmp + mv, so the hook never claims a half-written file. We rm
 # the real file above first, so the mv targets a non-existent path (avoids the
 # Windows replace-over-existing quirk).
-TMP="$STATE_DIR/state-PENDING.json.tmp"
+# F4: unique per-writer tmp ($$ = pid) so two concurrent same-project activations don't race
+# on ONE shared tmp path (the loser would otherwise hit the mv-failed branch with a misleading
+# "cannot write state" error). The failure cleanup below uses $TMP, so it stays consistent.
+TMP="$STATE_DIR/state-PENDING.json.$$.tmp"
 cat > "$TMP" <<EOF
 {
   "schema": "flowy-state-v2",

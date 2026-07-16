@@ -1,6 +1,6 @@
 {
   "name": "flowy-ultra-powers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Thin auto-invoked overlay: routes to the ultra-powers skill-pack (ultra-powers:<skill>) at each gate, on the shared Flowy engine.",
-  "dependencies": [ { "name": "flowy-core", "version": "^0.1.0" } ]
+  "dependencies": [ { "name": "flowy-core", "version": "^0.2.0" } ]
 }
