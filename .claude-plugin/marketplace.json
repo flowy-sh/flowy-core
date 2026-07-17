@@ -4,6 +4,7 @@
   "plugins": [
     { "name": "flowy-core", "source": "./engine", "description": "The Flowy enforcement engine: the routing hook + activator that overlays depend on." },
     { "name": "flowy-superpowers", "source": "./overlays/superpowers", "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate." },
-    { "name": "flowy-ultra-powers", "source": "./overlays/ultra-powers", "description": "Auto-invoked overlay: the everything-Flow (40 skills, 7 suites) with a disambiguating router, on the shared Flowy engine." }
+    { "name": "flowy-ultra-powers", "source": "./overlays/ultra-powers", "description": "Auto-invoked overlay: the everything-Flow (40 skills, 7 suites) with a disambiguating router, on the shared Flowy engine." },
+    { "name": "flowy-growth-marketing", "source": "./overlays/growth-marketing", "description": "Auto-invoked overlay: the growth-marketing funnel (research -> validate) routed to Corey Haines' marketing-skills, on the shared Flowy engine." }
   ]
 }
