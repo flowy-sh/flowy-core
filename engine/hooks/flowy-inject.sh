@@ -478,7 +478,7 @@ if [ -n "$LIVE_NAMES" ]; then
   # the FLOW.md READ (the lever that took adherence 38%->100%) AND the per-skill YES/NO+
   # reason commit AND the invoke-each-YES gate AND the FLOW.md ref. Keep it one line (tests
   # assert this); do not split or drop a clause. $LIVE_NAMES/$LIVE_REFS sanitized upstream.
-  printf '%s\n' "⚑ Flowy routing ACTIVE: $LIVE_NAMES. Before any other tool: READ the FLOW.md in full (path below), then per its phase commit each candidate skill ('Routing: <skill> = YES,<reason>' / 'NO,<reason>') and invoke each YES. FLOW.md (re-read after compaction): $LIVE_REFS"
+  printf '%s\n' "⚑ Flowy routing ACTIVE: $LIVE_NAMES. MANDATORY, not advisory: before any other tool, and before you write code or answer, you MUST have READ the FLOW.md in full (path below) and invoked every YES skill. Per its phase, commit each candidate skill ('Routing: <skill> = YES,<reason>' / 'NO,<reason>') and invoke each YES. FLOW.md (re-read after compaction): $LIVE_REFS"
 
   # V2: periodic lightweight FLOW.md reinject (every Nth prompt). The counter is a
   # SIDECAR file (NOT the state file) so the grep/sed state parse stays clean. It only
