@@ -26,7 +26,7 @@ After launch, cycle Research, Optimize, and Validate continuously.
 
 ## Routing
 
-**The rule:** when a trigger matches, INVOKE the named `marketing-skills:<skill>` via the Skill tool BEFORE producing the asset yourself. Writing the copy, the audit, or claiming 'done' without first invoking is the failure this Flow exists to stop.
+**The rule (MANDATORY, not advisory):** when a trigger matches, INVOKE the named `marketing-skills:<skill>` via the Skill tool BEFORE producing the asset yourself — do not draft the asset or claim 'done' until you have READ this FLOW.md and invoked every matched skill. Writing the copy, the audit, or claiming 'done' without first invoking is the failure this Flow exists to stop.
 
 ```
 USER MESSAGE

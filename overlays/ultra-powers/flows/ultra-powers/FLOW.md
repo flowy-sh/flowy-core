@@ -19,7 +19,7 @@ Five suites overlap on purpose. The Flow's value is knowing which to fire:
 
 ## Routing
 
-**The rule:** when a trigger matches, INVOKE the named skill BEFORE doing the task yourself. Writing the code, patching the bug, or claiming 'done' without first invoking is the failure this Flow exists to stop.
+**The rule (MANDATORY, not advisory):** when a trigger matches, INVOKE the named skill BEFORE doing the task yourself — do not write code, run a tool, or claim 'done' until you have READ this FLOW.md and invoked every matched skill. Writing the code, patching the bug, or claiming 'done' without first invoking is the failure this Flow exists to stop.
 
 ```
 USER MESSAGE
