@@ -1,6 +1,6 @@
 {
   "name": "flowy-growth-marketing",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Thin auto-invoked overlay: routes the growth funnel (research -> copy -> acquisition -> launch -> optimize -> validate) to Corey Haines' marketing-skills (marketing-skills:<skill>), on the shared Flowy engine.",
-  "dependencies": [ { "name": "flowy-core", "version": "^0.2.0" } ]
+  "dependencies": [ { "name": "flowy-core", "version": "^0.3.0" } ]
 }
