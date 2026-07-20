@@ -33,7 +33,7 @@ sh -c '. "$1/hooks/flowy-paths.sh"; flowy_state_dir "${CLAUDE_PROJECT_DIR:-$2}" 
 - `<project-dir>` = the project root path (the working directory Claude Code shows you). Substitute the ACTUAL path and KEEP the double-quotes shown: it can contain a space (e.g. `Projects VS`), so an unquoted value would word-split and produce the wrong key. Never pass the literal `<project-dir>` placeholder. The command prefers the live `$CLAUDE_PROJECT_DIR` when the Bash env exposes it and falls back to the literal you pass. The helper **canonicalizes either form to the same key**, so you do not need to match any particular path style; that canonicalization is what guarantees you and the hook agree.
 - Capture the single line it prints — that absolute path is your **STATE_DIR** for the rest of this skill. If it prints NOTHING, the plugin layout is unexpected (no `/.claude` home); report that and stop — do NOT guess a path.
 
-ACTIVATE writes `state-PENDING.json` here via `flowy-activate.sh` (Step 3, below); DEACTIVATE and STATUS use this `<STATE_DIR>` directly to edit/read `state-*.json`.
+**Only DEACTIVATE and STATUS run this helper model-side** — they need `<STATE_DIR>` to edit/read `state-*.json`. **ACTIVATE does NOT:** `flowy-activate.sh` (Step 3) computes the state dir internally and writes the PENDING file, and its Exit 0 is your proof it worked. Do not compute or verify the state dir yourself during an activation.
 
 Throughout this skill, wherever a step names the state dir or `state-*.json`, it means a file in THIS helper-computed **STATE_DIR**. NEVER write a state file under `$CLAUDE_PROJECT_DIR/.flowy/` — the hook will not read it, and a committed one is the exact threat we relocated state to avoid.
 
@@ -74,10 +74,21 @@ The wrapper passes the flow name — or, for an overlay Flow, `overlay <flow-nam
 
 ## ACTIVATE
 
-> **Output discipline.** The activation script does the state-file work and is
-> SILENT. Perform Steps 1-3 silently; on the happy path the user sees exactly ONE
-> success line (Step 4) — no narration of path resolution, the override scan, or the
-> script call. Verbose detail belongs only on an ERROR or when the user runs `status`.
+> **Output discipline + ONE-SHOT.** The activation script does ALL the state-file
+> work and is SILENT. Perform Steps 1-3 silently; on the happy path the user sees
+> exactly ONE success line (Step 4) — no narration of path resolution, the override
+> scan, or the script call. Verbose detail belongs only on an ERROR or when the user
+> runs `status`.
+>
+> **The script's Exit 0 is the authoritative success signal — do NOT verify it.**
+> After Exit 0 do NOT run `flowy_state_dir`, do NOT re-derive or read the state dir,
+> do NOT open the PENDING file, do NOT "double-check" the write. `flowy-activate.sh`
+> derived the state dir with the SAME `flowy-paths.sh` helper the hook uses, so Exit 0
+> already guarantees the hook will find your state. Self-verifying after Exit 0 is the
+> single biggest cause of a clean 2-call activation turning into a 6-call saga — and it
+> walks straight into the `flowy_state_dir` arg-order trap (its **2nd arg is the PLUGIN
+> ROOT, not the flow name**). If you catch yourself reaching for the helper "just to be
+> sure," STOP: that is `status`'s job, not activation's.
 
 ### Step 1: Locate the Flow
 
@@ -166,6 +177,8 @@ Emit exactly one line, nothing else:
 `✓ <flow-name> active.`
 
 Do not print the skills list, the state path, scope, or any explanation on the happy path. If the user wants detail, that is what `status` is for.
+
+This line is the END of activation. After it, the ONLY permitted follow-up is a Step-5 bootstrap **if and only if the FLOW.md defines one**. Do NOT verify the state file, re-run any path helper, or take any other tool call to "confirm" the activation — Exit 0 in Step 3 already confirmed it.
 
 ### Step 5: Bootstrap (if defined)
 
