@@ -426,7 +426,16 @@ test(
     // written commitment ("Routing: X = YES") and separately for an invoke, so
     // writing the line discharged the obligation and the skill never fired.
     // Case-insensitive on purpose: the banner shouts ALREADY for emphasis.
-    expect(res.stdout).toMatch(/already invoked/i); // the Routing line is a RECEIPT
+    // A LONG CONTIGUOUS ANCHOR, not loose keywords. ce:review proved the loose
+    // version was theater: a banner reverted to the exact bug this fixes —
+    // "Write Routing: X = YES for a skill you PLAN TO INVOKE via the Skill tool
+    // ...; failing to invoke afterward is a VIOLATION" — satisfied /already
+    // invoked/i + /Skill tool/i + /violation/i + "Routing:" all at once, because
+    // none of them are anchored to temporal order. This clause cannot be
+    // satisfied by promise-framing.
+    expect(res.stdout).toContain("ONLY for skills you have ALREADY invoked this turn");
+    expect(res.stdout).toMatch(/RECEIPT/); // names the semantic outright
+    expect(res.stdout).toMatch(/never a (plan|promise)/i); // rules out the inverse
     expect(res.stdout).toMatch(/Skill tool/i); // "invoke" bound to the MECHANISM
     expect(res.stdout).toMatch(/violation/i); // the anti-pattern is NAMED
     expect(res.stdout).toContain("Routing:"); // per-skill decision record kept
