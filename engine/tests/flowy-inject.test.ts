@@ -422,7 +422,14 @@ test(
     // HARDENED track: the banner must EXPLICITLY force the FLOW.md read (the measured
     // lever, 38%->100%) on top of the YES/NO commitment — max enforcement = read + commit.
     expect(res.stdout.toLowerCase()).toMatch(/read the flow\.md in full/);
-    expect(res.stdout).toContain("commit each candidate skill"); // keep the YES/NO commitment too
+    // RECEIPT-NOT-PROMISE (2026-07-25). The banner previously asked for a
+    // written commitment ("Routing: X = YES") and separately for an invoke, so
+    // writing the line discharged the obligation and the skill never fired.
+    // Case-insensitive on purpose: the banner shouts ALREADY for emphasis.
+    expect(res.stdout).toMatch(/already invoked/i); // the Routing line is a RECEIPT
+    expect(res.stdout).toMatch(/Skill tool/i); // "invoke" bound to the MECHANISM
+    expect(res.stdout).toMatch(/violation/i); // the anti-pattern is NAMED
+    expect(res.stdout).toContain("Routing:"); // per-skill decision record kept
   });
 });
 
