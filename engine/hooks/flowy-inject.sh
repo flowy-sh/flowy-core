@@ -474,11 +474,15 @@ IFS="$OLD_IFS"
 #    appear. No active resolvable/corrupt flows → no output.
 # ---------------------------------------------------------------------------
 if [ -n "$LIVE_NAMES" ]; then
-  # HARDENED track: MAX enforcement. ONE line carrying BOTH measured levers — it forces
-  # the FLOW.md READ (the lever that took adherence 38%->100%) AND the per-skill YES/NO+
-  # reason commit AND the invoke-each-YES gate AND the FLOW.md ref. Keep it one line (tests
+  # HARDENED track: MAX enforcement, RECEIPT framing. ONE line carrying every measured
+  # lever — it forces the FLOW.md READ (38%->100%), binds "invoke" to the Skill TOOL CALL,
+  # makes the 'Routing:' line a RECEIPT for an already-made call (never a promise), and
+  # NAMES the violation. The receipt ordering is the fix for the 2026-07-25 Opus 5
+  # regression: the previous wording asked for a written commitment and separately for an
+  # invoke, so writing the line discharged the obligation and the skill never fired. More
+  # capitals had already been tried (0.3.0) and did not work. Keep it ONE line (tests
   # assert this); do not split or drop a clause. $LIVE_NAMES/$LIVE_REFS sanitized upstream.
-  printf '%s\n' "⚑ Flowy routing ACTIVE: $LIVE_NAMES. MANDATORY, not advisory: before any other tool, and before you write code or answer, you MUST have READ the FLOW.md in full (path below) and invoked every YES skill. Per its phase, commit each candidate skill ('Routing: <skill> = YES,<reason>' / 'NO,<reason>') and invoke each YES. FLOW.md (re-read after compaction): $LIVE_REFS"
+  printf '%s\n' "⚑ Flowy routing ACTIVE: $LIVE_NAMES. MANDATORY, not advisory: before any other tool, and before you write code or answer, you MUST have READ the FLOW.md in full (path below). Invoke = an actual Skill tool call; following a skill from memory or describing it is NOT invoking. Write 'Routing: <skill> = YES,<reason>' ONLY for skills you have ALREADY invoked this turn, and 'NO,<reason>' for the rest — the line is a RECEIPT, never a plan. Printing a YES you did not invoke is a VIOLATION, not compliance. FLOW.md (re-read after compaction): $LIVE_REFS"
 
   # V2: periodic lightweight FLOW.md reinject (every Nth prompt). The counter is a
   # SIDECAR file (NOT the state file) so the grep/sed state parse stays clean. It only

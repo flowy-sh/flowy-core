@@ -422,7 +422,23 @@ test(
     // HARDENED track: the banner must EXPLICITLY force the FLOW.md read (the measured
     // lever, 38%->100%) on top of the YES/NO commitment — max enforcement = read + commit.
     expect(res.stdout.toLowerCase()).toMatch(/read the flow\.md in full/);
-    expect(res.stdout).toContain("commit each candidate skill"); // keep the YES/NO commitment too
+    // RECEIPT-NOT-PROMISE (2026-07-25). The banner previously asked for a
+    // written commitment ("Routing: X = YES") and separately for an invoke, so
+    // writing the line discharged the obligation and the skill never fired.
+    // Case-insensitive on purpose: the banner shouts ALREADY for emphasis.
+    // A LONG CONTIGUOUS ANCHOR, not loose keywords. ce:review proved the loose
+    // version was theater: a banner reverted to the exact bug this fixes —
+    // "Write Routing: X = YES for a skill you PLAN TO INVOKE via the Skill tool
+    // ...; failing to invoke afterward is a VIOLATION" — satisfied /already
+    // invoked/i + /Skill tool/i + /violation/i + "Routing:" all at once, because
+    // none of them are anchored to temporal order. This clause cannot be
+    // satisfied by promise-framing.
+    expect(res.stdout).toContain("ONLY for skills you have ALREADY invoked this turn");
+    expect(res.stdout).toMatch(/RECEIPT/); // names the semantic outright
+    expect(res.stdout).toMatch(/never a (plan|promise)/i); // rules out the inverse
+    expect(res.stdout).toMatch(/Skill tool/i); // "invoke" bound to the MECHANISM
+    expect(res.stdout).toMatch(/violation/i); // the anti-pattern is NAMED
+    expect(res.stdout).toContain("Routing:"); // per-skill decision record kept
   });
 });
 

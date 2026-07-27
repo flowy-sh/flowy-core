@@ -1,1 +1,1 @@
-{ "name": "flowy-core", "version": "0.3.0", "description": "The Flowy enforcement engine (hook + activator). Overlays depend on this. 0.3.0: one-shot activation (no post-Exit-0 verification) + MANDATORY-framed routing banner." }
+{ "name": "flowy-core", "version": "0.4.0", "description": "The Flowy enforcement engine (hook + activator). Overlays depend on this. 0.4.0: RECEIPT-framed routing — the 'Routing:' line records skills already invoked, so writing it can no longer substitute for invoking them." }
