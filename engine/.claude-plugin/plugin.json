@@ -1,1 +1,1 @@
-{ "name": "flowy-core", "version": "0.4.0", "description": "The Flowy enforcement engine (hook + activator). Overlays depend on this. 0.4.0: RECEIPT-framed routing — the 'Routing:' line records skills already invoked, so writing it can no longer substitute for invoking them." }
+{ "name": "flowy-core", "version": "1.0.0", "description": "The Flowy enforcement engine (hook + activator). Overlays depend on this. 1.0.0: RECEIPT-framed routing — the 'Routing:' line records skills already invoked, so writing it can no longer substitute for invoking them." }
