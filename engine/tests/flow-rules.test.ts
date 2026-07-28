@@ -70,6 +70,58 @@ describe("checkNoOrphanSkills (R1)", () => {
     expect(checkNoOrphanSkills(text)).toEqual([]);
   });
 
+  test("the orphan rule flags the ACTUAL growth-marketing passive index", () => {
+    // A4: this is the defect the whole standard is named after. The unit tests
+    // used `ms:ai-seo`; the real file writes `` `ai-seo` `` in a backticked
+    // list, so the rule returned ZERO errors on its own motivating example.
+    const p = join(
+      import.meta.dir, "..", "..", "overlays", "growth-marketing", "flows", "growth-marketing", "FLOW.md",
+    );
+    const errs = checkNoOrphanSkills(readFileSync(p, "utf8"));
+    expect(errs.length).toBeGreaterThan(20);
+    expect(errs.join("\n")).toContain("ai-seo");
+  });
+
+  test("a backticked bare slug in a prose list is an orphan", () => {
+    const text =
+      "## Routing\n- x? → invoke marketing-skills:cro\n\n## More\n- **Acquisition:** `ads`, `ai-seo`, `schema`\n";
+    const errs = checkNoOrphanSkills(text);
+    expect(errs.length).toBe(3);
+  });
+
+  test("a backticked NON-skill word is not an orphan", () => {
+    // False positives are what get a rule disabled. `bun test` is not a skill.
+    const text =
+      "## Routing\n- x? → invoke marketing-skills:cro\n\nRun `bun test` and `npm run build`.\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
+  test("a bare slug the file already routes is NOT an orphan", () => {
+    // `ms:cro` routes the bare `cro`, and names the plugin `ms`. Flagging either
+    // would tell the author to delete a name the file demonstrably routes.
+    const text =
+      "## Routing\n- x? → invoke marketing-skills:cro\n\n## More\nThe `marketing-skills` plugin ships `cro`.\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
+  test("an HTML comment is authoring guidance, not routing content", () => {
+    // The shipped template documents R3 as "every route line carries the verb
+    // `invoke`", inside a comment. Reading that as a passive index made the
+    // template fail its own rules, which teaches every scaffolded Flow to.
+    const text =
+      "## Routing\n- x? → invoke ms:cro\n\n<!--\n  R3 every route line carries the verb `invoke`.\n-->\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
+  test("a plugin the Attribution section credits is not an orphan", () => {
+    // An attribution-first repo must never have its own linter say "remove the
+    // name" about an upstream credit. A Flow that repackages five plugins under
+    // one namespace names all five in prose to explain the lanes.
+    const text =
+      "## Routing\n- x? → invoke up:cro\n\n## Lanes\n`claude-seo` owns SEO; `marketing-skills` owns GTM.\n\n## Attribution\n- **claude-seo** by AgricIDaniel, MIT\n- **marketing-skills** by Corey Haines, MIT\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
   test("the Attribution section is exempt", () => {
     // Attribution MUST name upstream skills to credit them. Requiring a route
     // for each would force a choice between crediting and validating.

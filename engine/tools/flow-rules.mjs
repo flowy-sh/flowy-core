@@ -21,10 +21,53 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { normalizeLines } from "./text-normalize.mjs";
+import { normalizeText } from "./text-normalize.mjs";
+
+/**
+ * Normalized lines with HTML comments blanked out.
+ *
+ * A comment is authoring guidance, never routing content. The shipped template
+ * documents R3 as "every route line carries the verb `invoke`" inside one, and
+ * reading that as a passive index made the template fail its own rules, which
+ * would teach every scaffolded Flow to fail them too. Line COUNT is preserved,
+ * so `line N:` messages stay correct.
+ */
+function normalizeLines(text) {
+  return normalizeText(text)
+    .replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, " "))
+    .split("\n");
+}
 
 const SKILL_REF = /\b[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*\b/g;
 const ARROW = /(?:→|->)/;
+
+/**
+ * A backticked bare slug in prose: `ai-seo`, `ads`, `programmatic-seo`.
+ *
+ * THE FORM THE DEFECT ACTUALLY TAKES. The real passive index writes bare slugs
+ * in backticks; SKILL_REF requires `ns:skill`, so the rule returned zero errors
+ * on the very file the standard was derived from while the unit tests passed on
+ * a form (`ms:ai-seo`) that does not occur in it.
+ *
+ * SHAPE CANNOT BE THE FILTER. Requiring a hyphen would miss `ads`, `signup`,
+ * `social` and `schema`, a third of that same index. The whole backtick span
+ * must be the slug, which is what excludes `bun test`, `npm run build` and
+ * `.agents/product-marketing.md`: whitespace, a dot, a slash or a colon all
+ * break the match. CONTEXT does the rest: a bare slug is an orphan only when
+ * the file routes nothing by that name on either side of the colon.
+ */
+const BARE_SLUG = /`([a-z0-9]+(?:-[a-z0-9]+)*)`/g;
+
+function bareSlugsIn(text) {
+  return [...text.matchAll(BARE_SLUG)].map((m) => m[1]);
+}
+
+/** `**superpowers**`: how the Attribution section names the plugins it credits. */
+const BOLD_NAME = /\*\*([a-z0-9]+(?:-[a-z0-9]+)*)\*\*/g;
+
+function boldNamesIn(text) {
+  return [...text.matchAll(BOLD_NAME)].map((m) => m[1]);
+}
 
 /** R4: phrasings that authorise answering from memory instead of invoking. */
 const BANNED_ADVISORY = [
@@ -67,6 +110,7 @@ export function checkRouteVerbs(text) {
 /** R1: every skill named outside Attribution must be routed somewhere. */
 export function checkNoOrphanSkills(text) {
   const routed = new Set();
+  const credited = new Set();
   const named = new Map();
   let section = null;
 
@@ -77,17 +121,31 @@ export function checkNoOrphanSkills(text) {
       continue;
     }
     if (isRouteLine(line)) {
-      for (const r of refsIn(line)) routed.add(r);
+      for (const r of refsIn(line)) {
+        routed.add(r);
+        const colon = r.indexOf(":");
+        routed.add(r.slice(colon + 1)); // `ms:ai-seo` also routes the bare `ai-seo`
+        routed.add(r.slice(0, colon)); // ...and names the plugin `ms`
+      }
       continue;
     }
     // Attribution must name upstream skills in order to credit them. Requiring
     // a route for each would force a choice between crediting and validating.
-    if (/^attribution/i.test(section ?? "")) continue;
-    for (const r of refsIn(line)) if (!named.has(r)) named.set(r, i + 1);
+    // And a name Attribution credits is not an orphan ANYWHERE in the file: a
+    // Flow that repackages five plugins under one namespace still has to say
+    // whose work it routes, and an attribution-first repo must never ship a
+    // linter that answers an upstream credit with "remove the name".
+    if (/^attribution/i.test(section ?? "")) {
+      for (const c of [...bareSlugsIn(line), ...boldNamesIn(line)]) credited.add(c);
+      continue;
+    }
+    for (const r of [...refsIn(line), ...bareSlugsIn(line)]) {
+      if (!named.has(r)) named.set(r, i + 1);
+    }
   }
 
   return [...named]
-    .filter(([ref]) => !routed.has(ref))
+    .filter(([ref]) => !routed.has(ref) && !credited.has(ref))
     .map(
       ([ref, line]) =>
         `line ${line}: "${ref}" is named but never routed. Give it a trigger, or remove the name.`,

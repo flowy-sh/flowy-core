@@ -423,7 +423,10 @@ test("CRLF input produces the SAME result as LF", () => {
 - [ ] **Step 2: Run and watch it fail**
 
 Run: `cd engine && bun test tests/flow-rules.test.ts`
-Expected: FAIL — the CRLF case returns `["FLOW.md has no ## sections", 'line 6: "ms:ai-seo" is named but never routed...']`.
+Expected: FAIL — the CRLF case returns `["FLOW.md has no ## sections", 'line 7: "ms:ai-seo" is named but never routed...']`.
+
+**CORRECTED (2026-07-28, during execution):** the plan said `line 6`. The fixture's
+Attribution line is line 7. Observed exactly as written above.
 
 - [ ] **Step 3: Create the shared normalizer**
 
@@ -471,7 +474,24 @@ Then renormalize: `git add --renormalize . && git status --short`
 - [ ] **Step 6: Run and verify**
 
 Run: `cd engine && bun test`
-Expected: PASS. Note the trailing-newline change in `normalizeText` also closes B10; regenerate the manifest: `node ../engine/tools/flowy-provenance.mjs generate` from the repo root.
+Expected: PASS. Note the trailing-newline change in `normalizeText` also closes B10; regenerate the manifest: `node engine/tools/flowy-provenance.mjs generate` from the repo root.
+
+**CORRECTED (2026-07-28):** the command read `node ../engine/tools/...` while saying
+"from the repo root". The `../` is a leftover from `cd engine` and resolves outside
+the repo.
+
+**PROOF RUN (2026-07-28), which the plan asked for and did not specify.** The main
+working tree passed before this task only because the template FLOW.md happened to
+have been written LF in-session. A `git worktree add --detach` of the PARENT commit
+`11ae182` checks the template out with **71 CRLFs** and `bun test
+tests/flow-rules.test.ts` there gives **19 pass / 2 fail**: "the shipped template
+passes its own rules" and "scaffolding a flow yields one that passes BOTH checkers".
+`checkSectionOrder` on that checked-out template returns
+`["FLOW.md has no ## sections"]`. A worktree of THIS task's commit checks the same
+files out at 0 CRLFs and passes 22/0; forcing all 34 markdown files back to CRLF in
+that worktree still gives **55 pass / 0 fail** across flow-rules, provenance and
+provenance-manifest. The normalizer is the fix; the `.gitattributes` line only stops
+the working tree from varying.
 
 - [ ] **Step 7: Commit**
 
@@ -527,31 +547,72 @@ Expected: the first two FAIL with `0` errors.
 - [ ] **Step 3: Recognise the bare-slug form**
 
 ```javascript
-/** A backticked bare slug in prose: `ai-seo`, `programmatic-seo`.
- *  Requires a hyphen or a length of 4+, so `bun`, `npm`, `cd` are not skills,
- *  and rejects anything containing whitespace or a path separator. */
-const BARE_SLUG = /`([a-z0-9]+(?:-[a-z0-9]+)+)`/g;
+/** A backticked bare slug in prose: `ai-seo`, `ads`, `programmatic-seo`.
+ *  The WHOLE backtick span must be the slug, which is what rejects `bun test`,
+ *  `npm run build` and `.agents/product-marketing.md`: whitespace, a dot, a
+ *  slash or a colon all break the match. Shape cannot be the filter. */
+const BARE_SLUG = /`([a-z0-9]+(?:-[a-z0-9]+)*)`/g;
 
 function bareSlugsIn(text) {
   return [...text.matchAll(BARE_SLUG)].map((m) => m[1]);
 }
 ```
 
-In `checkNoOrphanSkills`, collect both forms on non-route lines, and record a routed bare slug whenever a route line's namespaced ref ends with it:
+**CORRECTED (2026-07-28, during execution). The plan's own regex contradicted its
+own comment AND its own test, in three directions:**
+
+1. The regex was `(?:-[a-z0-9]+)+` (a hyphen REQUIRED). The comment said "a hyphen
+   or a length of 4+". Neither form matches `ads`, and Step 1's second test asserts
+   exactly 3 errors from `` `ads` ``, `` `ai-seo` ``, `` `schema` `` — 1 and 2
+   respectively under the two readings. Measured on the real file, the hyphen-only
+   form yields **20** orphans, so Step 1's `toBeGreaterThan(20)` would have failed
+   against the plan's own implementation.
+2. Requiring a hyphen misses `ads`, `signup`, `social`, `sms`, `offers`, `popups`,
+   `paywalls`, `onboarding`, `pricing`, `schema`, `analytics`, `revops`, `aso`,
+   `emails`, `video`, `image`, `competitors`, `prospecting`, `referrals` — 19 of the
+   38 entries in the very index this rule exists to catch. Shape cannot separate
+   `ads` from `bun`; only CONTEXT can. The final quantifier is `*`, not `+`.
+3. Two false-positive classes the plan did not anticipate, both of which break the
+   PRE-EXISTING test "the shipped template passes its own rules":
+   - **HTML comments.** The template documents R3 as "every route line carries the
+     verb `` `invoke` ``" inside a comment. `normalizeLines` now blanks comments
+     while preserving line count.
+   - **Upstream plugin names.** `ultra-powers` names `` `superpowers` ``,
+     `` `compound-engineering` ``, `` `gstack` ``, `` `claude-seo` `` and
+     `` `marketing-skills` `` in prose to explain the lanes, and credits all five in
+     Attribution as `**bold**`. A name Attribution credits is now exempt everywhere
+     in the file, not only inside the section. An attribution-first repo must never
+     ship a linter that answers an upstream credit with "remove the name" — the same
+     failure A3 produced by accident.
+
+In `checkNoOrphanSkills`, collect both forms on non-route lines, and record a routed bare slug whenever a route line's namespaced ref ends with it. Record the NAMESPACE side too, so a plugin the file demonstrably routes is not reported as an orphan:
 
 ```javascript
     if (isRouteLine(line)) {
       for (const r of refsIn(line)) {
         routed.add(r);
-        routed.add(r.slice(r.indexOf(":") + 1)); // `ms:ai-seo` also routes `ai-seo`
+        const colon = r.indexOf(":");
+        routed.add(r.slice(colon + 1)); // `ms:ai-seo` also routes the bare `ai-seo`
+        routed.add(r.slice(0, colon));  // ...and names the plugin `ms`
       }
       continue;
     }
-    if (/^attribution$/i.test((section ?? "").trim())) continue;
+    if (/^attribution/i.test(section ?? "")) {
+      for (const c of [...bareSlugsIn(line), ...boldNamesIn(line)]) credited.add(c);
+      continue;
+    }
     for (const r of [...refsIn(line), ...bareSlugsIn(line)]) {
       if (!named.has(r)) named.set(r, i + 1);
     }
 ```
+
+Filter on `!routed.has(ref) && !credited.has(ref)`.
+
+**CORRECTED (2026-07-28):** the plan applied Task 7's exact-heading form
+(`/^attribution$/i` on a trimmed section) here and annotated Task 7 with "already
+applied in Task 6". That would leave Task 7's test for it green on arrival, i.e. a
+test that never failed first, which is the exact class of defect this whole plan
+exists to close. The prefix form stays until Task 7's test is RED.
 
 - [ ] **Step 4: Run and verify**
 
@@ -564,7 +625,25 @@ Expected: PASS.
 cd engine && bun -e 'import {checkFlowRules} from "./tools/flow-rules.mjs";import {readFileSync} from "node:fs";for (const n of ["growth-marketing","superpowers","ultra-powers"]) console.log(n, checkFlowRules(readFileSync(`../overlays/${n}/flows/${n}/FLOW.md`,"utf8")).length)'
 ```
 
-Paste the three counts into the plan STATUS block. These are the numbers Task 8 of the authoring plan must drive to zero.
+Paste the three counts into the STATUS block below. These are the numbers Task 8 of the authoring plan must drive to zero.
+
+**STATUS (measured 2026-07-28, after this task).** The plan referred to a STATUS
+block that did not exist; here it is.
+
+| Flow | orphans BEFORE | orphans AFTER | all rules BEFORE | all rules AFTER |
+|---|---|---|---|---|
+| `growth-marketing` | **0** | **38** | 17 | 55 |
+| `superpowers` | 0 | 0 | 2 | 1 |
+| `ultra-powers` | **0** | **1** | 56 | 57 |
+
+`growth-marketing` going 0 to 38 is A4 closed: the rule now sees the passive index
+it was written for, and 38 matches the "40 of 47 skills had no trigger" diagnosis in
+the module header. `superpowers` drops 2 to 1 because A3's phantom "no ## sections"
+error is gone. The one remaining `ultra-powers` orphan is `` `proof` `` at line 95,
+named in a disambiguation that exists to say DO NOT route to it. That is a true
+positive under R1's literal contract and a bad instruction under its remedy text
+("give it a trigger, or remove the name"); it is declared in the module header
+rather than special-cased.
 
 - [ ] **Step 6: Commit**
 
