@@ -80,3 +80,26 @@ name collides with the overlay's flow name (e.g. a standalone `ultra-powers` plu
 
 **Before relying on an overlay, retire (`/plugin uninstall`) any pre-overlay Flowy engine that
 bundles a same-named flow.** The overlay + the shared engine then own routing cleanly.
+
+## License
+
+Dual-licensed, one rule:
+
+    ROUTING CONTENT is CC BY-SA 4.0.  (LICENSE)
+    EVERYTHING THAT EXECUTES is Apache-2.0.  (LICENSE-CODE)
+
+The engine is a mechanism and we want it adopted everywhere, so it is permissive. The routing
+content is the work (which skill fires at which gate, in which order, with which refusal), so
+it carries share-alike. `NOTICE` states the file-by-file split, and
+`engine/tests/license-coverage.test.ts` fails if any tracked file is unassigned.
+
+**Reusing the routing? Read [ATTRIBUTION.md](ATTRIBUTION.md) first.** CC BY-SA 4.0 lets the
+licensor specify the manner of attribution, and we do: named credit, a live followable link to
+https://flowy.sh on the surface where the routing is used, the license named and linked, a link
+to the source file, and a statement of changes. Commercial use is allowed. Attribution and
+share-alike are conditions, not requests.
+
+Every skill our Flows route to belongs to its author under its own license. We bundle none of
+them. See each Flow's own `ATTRIBUTION.md`.
+
+Provenance and the copy-detection tool: [PROVENANCE.md](PROVENANCE.md).

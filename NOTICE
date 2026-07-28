@@ -1,0 +1,54 @@
+Flowy Core
+Copyright 2026 Maximo Correa (Flowy, https://flowy.sh)
+
+This product is dual-licensed. One rule decides which license applies:
+
+    ROUTING CONTENT is CC BY-SA 4.0.
+    EVERYTHING THAT EXECUTES is Apache-2.0.
+
+Concretely:
+
+  CC BY-SA 4.0 (see LICENSE)
+    overlays/*/flows/**/FLOW.md
+    overlays/*/flows/**/FLOW-compact.md
+    overlays/*/flows/**/ATTRIBUTION.md
+    README.md
+    docs/**
+
+  Apache-2.0 (see LICENSE-CODE)
+    engine/**            the hook, the activator, the tools, the tests
+    overlays/*/skills/** the activate/deactivate/status shims
+    overlays/*/.claude-plugin/**
+    .claude-plugin/**
+    every other file in this repository
+
+The split is deliberate. The engine is a mechanism and we want it adopted
+everywhere, so it carries a permissive license with a patent grant. The routing
+content is the work: which skill fires at which gate, in which order, with which
+refusal. That is what took the time, and it carries share-alike so a commercial
+derivative has to stay open on the same terms.
+
+This split is enforced by a test, not just by this file:
+engine/tests/license-coverage.test.ts fails if any file is not covered by
+exactly one bucket.
+
+ATTRIBUTION IS NOT OPTIONAL AND ITS FORM IS SPECIFIED.
+
+CC BY-SA 4.0 section 3(a)(1) lets the licensor state the manner of attribution.
+Flowy states it in ATTRIBUTION.md. Read that file before reusing any routing
+content, commercially or otherwise. The short version: credit Flowy, link to
+https://flowy.sh with a live followable link on the surface where the routing is
+used, name the license, link to the file you took, and say what you changed.
+
+ROUTED SKILLS ARE NOT OURS.
+
+Every Flow in overlays/ routes to skills that live in separately installed,
+independently licensed plugins. Nothing in this repository bundles them and
+nothing here claims them. Each Flow's ATTRIBUTION.md names the upstream author,
+license, and source for every skill it routes to. Upstream licenses govern
+upstream skills. Our license covers only our routing.
+
+CONTACT
+
+  https://flowy.sh
+  maximo@flowy.sh
