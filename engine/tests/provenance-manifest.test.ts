@@ -8,6 +8,7 @@ import {
   CANARY_MIN_WORDS,
   CANARY_MIN_CHARS,
 } from "../tools/provenance-manifest.mjs";
+import { normalizeText } from "../tools/text-normalize.mjs";
 
 /* ============================================================
    MANIFEST FRESHNESS GUARD (2026-07-28)
@@ -79,6 +80,44 @@ describe("extractCanaries", () => {
     expect(extractCanaries(flow)).toEqual([
       "TDD. Run the failing test before you write the code.",
     ]);
+  });
+
+  test("every extracted canary is a literal substring of its source", () => {
+    // B9: the one property the whole matching path depends on, unasserted. A
+    // canary that is not a substring of the file it came from cannot match
+    // anything, ever, and reports as a clean bill.
+    for (const flow of buildManifest(ROOT).flows) {
+      const src = normalizeText(readFileSync(join(ROOT, flow.path), "utf8"));
+      for (const c of flow.canaries) expect(src).toContain(c);
+    }
+  });
+
+  test("a double space after a full stop does not corrupt the canary", () => {
+    // B9: sentences were re-joined with ONE space instead of sliced out of the
+    // original, so any second space vanished from the fingerprint.
+    const flow = '## You are rationalizing if you think…\n\n- "x" → TDD.  Run the failing test before you write the code.\n';
+    const [canary] = extractCanaries(flow);
+    expect(normalizeText(flow)).toContain(canary);
+  });
+
+  test("an inline second arrow does not corrupt the canary", () => {
+    // B9: `line.split(ARROW)` re-joined the pieces, so a reply that itself
+    // contains an arrow had that arrow replaced by a space.
+    const flow = '## You are rationalizing if you think…\n\n- "x" → Route it -> then verify, because a claim is not a result.\n';
+    const [canary] = extractCanaries(flow);
+    expect(normalizeText(flow)).toContain(canary);
+  });
+
+  test("no shipped canary also appears in the scaffold template", () => {
+    // A11: the template ships "After compaction, re-read this file and restate
+    // the phase.", which is a canary of superpowers AND ultra-powers, so a Flow
+    // built with our own scaffolder is flagged on birth with exit 1.
+    const template = normalizeText(
+      readFileSync(join(ROOT, "engine", "templates", "flow-standard", "FLOW.md"), "utf8"),
+    );
+    for (const flow of buildManifest(ROOT).flows) {
+      for (const c of flow.canaries) expect(template).not.toContain(c);
+    }
   });
 
   test("no canary in a shipped Flow is short enough to be a coincidence", () => {

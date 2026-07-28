@@ -42,9 +42,22 @@ export const CANARY_MIN_CHARS = 24;
 
 const isDistinctive = (s) => s.length >= CANARY_MIN_CHARS && s.split(/\s+/).length >= CANARY_MIN_WORDS;
 
-/** Split a reply into sentences, keeping their terminators. */
-function sentences(text) {
-  return text.match(/[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g) ?? [];
+const SENTENCE_RE = /[^.!?]+[.!?]+(?=\s|$)|[^.!?]+$/g;
+
+/**
+ * Where each sentence ENDS, as an offset into `text`.
+ *
+ * Offsets, not the sentence strings, because the canary is then SLICED out of
+ * the original rather than rebuilt from pieces. Rebuilding was the whole of B9:
+ * sentences were trimmed and re-joined with one space, so "TDD.  Run the ..."
+ * produced a canary with a single space that matched nothing, ever. Offsets are
+ * also robust to the regex skipping a run (an abbreviation with no following
+ * space produces a gap), which accumulating lengths is not.
+ */
+function sentenceEnds(text) {
+  const ends = [];
+  for (const m of text.matchAll(SENTENCE_RE)) ends.push(m.index + m[0].length);
+  return ends;
 }
 
 /**
@@ -55,6 +68,12 @@ function sentences(text) {
  * choice. The shortest distinctive prefix is kept, so a copier who edits the
  * tail of the paragraph still trips it, while a reply that opens on a
  * two-word sentence absorbs the next one instead of being thrown away.
+ *
+ * EVERY CANARY IS A LITERAL SLICE OF THE NORMALIZED SOURCE, by construction.
+ * The previous version rebuilt one by re-joining trimmed sentences with a
+ * single space and by splitting on EVERY arrow, so a double space after a full
+ * stop, or a second arrow inside the reply, produced a fingerprint that matched
+ * nothing, ever, and reported as a clean bill.
  */
 export function extractCanaries(flowText) {
   const lines = normalizeText(flowText).split("\n");
@@ -68,21 +87,39 @@ export function extractCanaries(flowText) {
     }
     if (!inSection || !line.trimStart().startsWith("- ")) continue;
 
-    const parts = line.split(ARROW);
-    if (parts.length < 2) continue;
+    const arrowAt = line.search(ARROW);
+    if (arrowAt === -1) continue;
 
-    const reply = parts.slice(1).join(" ").trim();
+    // Slice from the FIRST arrow and drop only that one. A second arrow inside
+    // the reply is part of the author's prose and stays.
+    const reply = line.slice(arrowAt).replace(ARROW, "").trimStart();
 
-    let candidate = "";
-    for (const sentence of sentences(reply)) {
-      candidate = `${candidate} ${sentence.trim()}`.trim();
-      if (isDistinctive(candidate)) break;
+    for (const end of sentenceEnds(reply)) {
+      const candidate = reply.slice(0, end).trim();
+      if (isDistinctive(candidate)) {
+        canaries.push(candidate);
+        break;
+      }
     }
-
-    if (isDistinctive(candidate)) canaries.push(candidate);
   }
 
   return canaries;
+}
+
+/**
+ * The scaffold template is the one file we deliberately hand to third parties,
+ * so a sentence it contains can never be evidence that someone copied us.
+ *
+ * It shipped "After compaction, re-read this file and restate the phase.",
+ * which extracted as a canary of BOTH superpowers and ultra-powers. Every Flow
+ * built with our own scaffolder was therefore born `possible-derivative`
+ * against two of our Flows, on 0% containment, and the CLI exited 1. Subtracted
+ * at BUILD time rather than fixed in the template, because the sentence is good
+ * guidance and the template is not the thing that is wrong.
+ */
+function templateText(root) {
+  const p = join(root, "engine", "templates", "flow-standard", "FLOW.md");
+  return existsSync(p) ? normalizeText(readFileSync(p, "utf8")) : "";
 }
 
 function flowFile(root, overlay) {
@@ -98,6 +135,7 @@ export function buildManifest(root) {
     .sort();
 
   const flows = [];
+  const tmpl = templateText(root);
 
   for (const overlay of overlayNames) {
     const found = flowFile(root, overlay);
@@ -110,7 +148,7 @@ export function buildManifest(root) {
       path: `overlays/${overlay}/flows/${overlay}/FLOW.md`,
       hash: contentHash(text),
       routes: routeSequence(text),
-      canaries: extractCanaries(text),
+      canaries: extractCanaries(text).filter((c) => !tmpl.includes(c)),
     });
   }
 

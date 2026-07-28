@@ -64,8 +64,7 @@
         "TDD. Failing test first, always.",
         "Verification. Run the command in THIS message.",
         "Debugging. Root cause in writing first.",
-        "If you are about to write code to answer, TDD fires.",
-        "After compaction, re-read this file and restate the phase."
+        "If you are about to write code to answer, TDD fires."
       ]
     },
     {
@@ -204,8 +203,7 @@
         "One is the machine, one is the guardrail.",
         "New UI is ultra-powers:frontend-design; *feel* is emil; *reviewing* motion is ultra-powers:review-animations.",
         "ultra-powers:verification-before-completion. Run the command in THIS message.",
-        "ultra-powers:git-commit-push-pr / ultra-powers:finishing-a-development-branch. The PR description and the integration choice matter.",
-        "After compaction, re-read this file and restate the phase."
+        "ultra-powers:git-commit-push-pr / ultra-powers:finishing-a-development-branch. The PR description and the integration choice matter."
       ]
     }
   ]

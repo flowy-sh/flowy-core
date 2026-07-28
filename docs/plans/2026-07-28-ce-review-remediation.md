@@ -1092,14 +1092,34 @@ Expected: the double-space and template tests FAIL.
 ```javascript
     const arrowAt = line.search(ARROW);
     if (arrowAt === -1) continue;
+    // Slice from the FIRST arrow and drop only that one. A second arrow inside
+    // the reply is the author's prose and stays.
     const reply = line.slice(arrowAt).replace(ARROW, "").trimStart();
-    let end = 0;
-    for (const sentence of sentences(reply)) {
-      end += sentence.length;
-      if (isDistinctive(reply.slice(0, end).trim())) break;
+    for (const end of sentenceEnds(reply)) {
+      const candidate = reply.slice(0, end).trim();
+      if (isDistinctive(candidate)) { canaries.push(candidate); break; }
     }
-    const canary = reply.slice(0, end).trim();
 ```
+
+where `sentenceEnds` returns match OFFSETS, not sentence strings:
+
+```javascript
+function sentenceEnds(text) {
+  const ends = [];
+  for (const m of text.matchAll(SENTENCE_RE)) ends.push(m.index + m[0].length);
+  return ends;
+}
+```
+
+**CORRECTED (2026-07-28, during execution): `end += sentence.length` assumes the
+sentence matches are CONTIGUOUS, and they are not.** The sentence regex requires
+whitespace or end-of-string after a terminator, so an abbreviation with no following
+space is skipped and leaves a gap. Measured on
+`"e.g. always run the failing test before you write the code."`: the first match
+starts at index **2**, not 0. Accumulating lengths gives `slice(0, 2)` = `"e."`, and
+every later offset stays shifted by 2 for the rest of the reply. Offsets keep the
+canary a literal slice of the source at every step, which is the invariant the
+matching path depends on and the one B9 broke.
 
 - [ ] **Step 4: Subtract the template's sentences at build time**
 
@@ -1123,6 +1143,24 @@ node tools/scaffold-flow.mjs /tmp/sc demo "Demo Flow" && node tools/flowy-proven
 ```
 
 Expected: tests PASS; the scaffolded check prints "No match" and `EXIT=0`.
+
+**VERIFIED (2026-07-28).** Before: a freshly scaffolded Flow reported
+POSSIBLE-DERIVATIVE against BOTH `superpowers` and `ultra-powers` on 0%
+containment, carrying the single canary
+"After compaction, re-read this file and restate the phase.", and exited **1**.
+After: "No match against any Flowy Flow", **EXIT=0**. Manifest canary counts:
+`superpowers` 5 to 4, `ultra-powers` 6 to 5, `growth-marketing` unchanged at 4.
+
+A second, unlooked-for improvement: `superpowers` and `ultra-powers` no longer
+report POSSIBLE-DERIVATIVE against EACH OTHER. That cross-match was the shared
+template sentence too, so our own two Flows were accusing each other over a line we
+wrote for other people to copy. All three now report IDENTICAL only. obra's 38 files
+still report No match.
+
+**NOTE on Step 1's first test.** "every extracted canary is a literal substring of
+its source" was already GREEN before this task: none of the shipped canaries happened
+to contain a double space or an inline arrow. It is an invariant pin, not a RED. The
+two fixtures that DO go red are the ones that reproduce the defect shape.
 
 - [ ] **Step 6: Commit**
 
