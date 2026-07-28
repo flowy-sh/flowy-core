@@ -37,8 +37,16 @@ refusal. That is what took the time, and it carries share-alike so a commercial
 derivative has to stay open on the same terms.
 
 This split is enforced by a test, not just by this file:
-engine/tests/license-coverage.test.ts fails if any file is not covered by
-exactly one bucket.
+engine/tests/license-coverage.test.ts walks git ls-files through
+engine/tools/license-buckets.mjs and fails if any tracked file is not covered
+by exactly one bucket.
+
+That sentence was false until 2026-07-28. The bucket function ended in a
+catch-all that returned Apache-2.0 for anything it did not recognise, so no
+file could ever be uncovered and the test could not fail. It now returns null
+for a path it does not recognise, and the test fails on that null. Adding a
+new top-level file is expected to fail this test once: the guard is asking
+which bucket it belongs in, and that question is the whole point.
 
 ATTRIBUTION IS NOT OPTIONAL AND ITS FORM IS SPECIFIED.
 

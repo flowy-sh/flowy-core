@@ -68,8 +68,18 @@ node engine/tools/flowy-provenance.mjs generate            # rebuild the record,
 node engine/tools/flowy-provenance.mjs check <file-or-dir> # compare a suspect, print evidence
 ```
 
-`check` exits 0 when nothing matches and 1 when something does, so it can run unattended over a
-public repository.
+`check` has three exit codes, not two:
+
+| Exit | Meaning |
+|---|---|
+| `0` | every target was scanned and nothing matched |
+| `1` | at least one match. Read the evidence; start with an email |
+| `2` | **the scan could not be trusted.** Missing or wrong-shaped manifest, an unreadable target, no readable files, a file that could not be read mid-scan, or an unknown command |
+
+`2` exists because `0` used to cover it. An unreadable target was swallowed and the run still
+printed "No match" and exited `0`, which is a clean bill of health for a scan that never
+happened. If you run this unattended, treat `2` as louder than `1`: `1` is a finding, `2` means
+you do not have one either way.
 
 Run it on your own work before publishing if you want to know where you stand. That is a
 legitimate use and the reason the tool is public.
@@ -87,10 +97,26 @@ exact attribution line to paste. Once per project, never again.
 (`~/.claude/plugins/marketplaces/<name>/.git/config`), comparing `remote.origin.url` to the
 canonical slug. `engine/hooks/flowy-origin.sh`.
 
-**It never phones home.** No request leaves your machine, ever. A test asserts no
-network-capable command appears in that file, and a second test asserts the guard itself can
-still fail. An enforcement hook that reported installs back to its author would be telemetry,
-and shipping that in an open-source plugin is a trust loss we would not get back.
+**It never phones home.** Detection is a file read and nothing in the hook opens a socket. An
+enforcement hook that reported installs back to its author would be telemetry, and shipping
+that in an open-source plugin is a trust loss we would not get back.
+
+What backs that sentence is a source scan, and a source scan is a floor rather than a proof.
+`engine/tests/flowy-origin.test.ts` reads every shell script in `engine/hooks/`, derived from
+the directory so a new hook is covered the day it lands, and fails if any of them names a
+network-capable command: `curl`, `wget`, `nc`, `ping`, `telnet`, `ssh`, `scp`, `ftp`,
+`git ls-remote|fetch|clone|push|pull`, `/dev/tcp/`, `Invoke-WebRequest`, `Invoke-RestMethod`,
+or a bare `fetch(`. A second test proves the guard still catches each of those, because a guard
+nobody watched fail is a guard that might match nothing.
+
+**It cannot catch everything, and the earlier version of this paragraph implied otherwise.**
+That guard used to read one file against seven command names, and `git ls-remote`, `git fetch`,
+`/dev/tcp/`, `Invoke-WebRequest` and a `node -e` calling `fetch()` all walked through it,
+measured. It also never read `flowy-inject.sh`, which is where the notice is emitted. Both are
+fixed, and neither fix turns a denylist into a proof: an interpreter invocation somebody works
+to obscure will still pass. The guarantee worth relying on is the shape of the thing rather
+than the pattern. The hook is POSIX shell, it ships in source form, it has no dependencies to
+hide a call inside, and you can read the whole of `flowy-origin.sh` in a few minutes.
 
 **It fails open.** Unknown layout, missing config, no remote, a tarball install, a vendored
 copy: silence. An origin we cannot determine is treated as canonical, because a false accusation
@@ -110,9 +136,28 @@ range.
 - **A determined copier can strip canaries and shuffle routes.** Then only the license, the
   git timestamp, and ordinary copyright argument remain. Fingerprints raise the cost of a
   clean copy; they do not make one impossible.
-- **Reordering defeats the order signal by design.** That is the point: someone who genuinely
-  re-derived the arrangement should not be flagged, and this is where we accept false
-  negatives to avoid false positives.
+- **Reordering defeats the order signal by design.** Someone who genuinely re-derived the
+  arrangement should not be flagged.
+- **This section used to claim the design "accepts false negatives to avoid false positives".
+  That was not the trade being made.** Both error rates were bad at once, and the 2026-07-28
+  review found them in the same afternoon. Missing real copies: a re-wrapped paragraph plus a
+  `plugin/skill` separator change took a byte-complete copy to `no-match`; `orderScore` divided
+  by route MENTIONS, so a verbatim Routing tree scored 0.46; canaries were rebuilt rather than
+  sliced, so any reply with a double space or an inline arrow produced a fingerprint that
+  matched nothing, ever; `.mdx`, `.mdc` and `.rst` were never walked; and an unreadable target
+  was swallowed and still printed "No match" with exit 0. Accusing honest work at the same
+  time: an independently written router over the same public plugin reached
+  `derivative-likely`, every Flow built with our own scaffolder was born `possible-derivative`
+  on a sentence we wrote for other people to copy, and two of our own Flows were flagging each
+  other over that same sentence. A tool can be blind and trigger-happy simultaneously, and
+  describing that as a deliberate trade is how it stays that way.
+- **The trade we DO make, now, is narrower and one-directional.** `derivative-likely` requires
+  original expression carried across, a canary, alongside the structural signal. So a copier
+  who lifts the routing tree and rewrites every sentence stops at `possible-derivative`. That
+  is a real, accepted false negative, and it is accepted because no signal separates that
+  copier from an honest author who picked the same public skills and arranged them in the same
+  obvious lifecycle. Containment and order alone are not evidence, and a tool that accuses an
+  honest author is worse than no tool.
 - **Our own Flows share canaries with each other**, so checking this repo against itself
   reports cross-Flow hits. Expected, and visible in the evidence line.
 - **A verdict is not a legal conclusion.** It is three numbers and a list of strings. See

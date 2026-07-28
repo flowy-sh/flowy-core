@@ -20,7 +20,10 @@
 #      .git/config. Never a request to a remote host. An enforcement hook that
 #      reported installs back to its author would be telemetry, and shipping
 #      that in an open-source plugin is a trust loss we do not get back. A test
-#      asserts no network-capable command appears in this file.
+#      scans EVERY .sh in this directory, derived from the directory rather
+#      than listed, and fails on a network-capable command. It is a floor, not
+#      a proof: see PROVENANCE.md, "It never phones home", for what a denylist
+#      can and cannot support.
 #   2. FAIL OPEN. Unknown layout, absent config, no remote, not a clone at all:
 #      output NOTHING. A false fork accusation is worse than silence, and the
 #      hook's contract is fail-loud, never fail-closed.
