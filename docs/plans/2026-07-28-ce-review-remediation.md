@@ -1278,12 +1278,14 @@ git commit -m "test(provenance): the CLI had no tests; three real defects behind
 ## Task 12: The license guard cannot fail (A6, C1, C7)
 
 **Files:**
-- Modify: `engine/tools/license-buckets.mjs`, `NOTICE`, `engine/templates/flow-standard/.claude-plugin/*.json`
+- Modify: `engine/tools/license-buckets.mjs`, `NOTICE`, `engine/templates/flow-standard/.claude-plugin/*.json`, `engine/templates/flow-standard/ATTRIBUTION.md`
 - Test: `engine/tests/license-coverage.test.ts`
+
+**DONE 2026-07-28**, commit `2c2551a`. Engine 274 to 279 pass, 0 fail. Manifest byte-identical.
 
 `licenseFor` has a catch-all, so `=== null` is unreachable and NOTICE's "enforced by a test" is false. Proven: adding `THIRD-PARTY-LICENSE.txt` (claims our license over third-party text) and an executable `.sh` under `overlays/*/flows/` (CC-BY-SA on code) left the suite 8 pass / 0 fail. Separately the scaffold template — the routing content most likely to be copied — is bucketed Apache-2.0, i.e. **without share-alike**.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```typescript
 test("an unclassifiable path returns null so the guard can fail", () => {
@@ -1302,12 +1304,31 @@ test("the scaffold template IS routing content and carries share-alike", () => {
 });
 ```
 
-- [ ] **Step 2: Run and watch them fail**
+**EXTENDED (2026-07-28, during execution).** Two additions, both measured:
+
+1. `engine/templates/flow-standard/ATTRIBUTION.md` is also markdown under the template and
+   also moves to CC BY-SA. The plan named only `FLOW.md`, which would have split the template
+   across two licenses on no principle.
+2. The plan pins C7 with NO test, against its own Global Constraint that a finding is only
+   closed when a test pins it. A `describe("scaffold template copy")` block now walks every
+   file the scaffolder stamps. It went RED on THREE files, not the two the plan names: the
+   template's `ATTRIBUTION.md` heading is `# Attribution — __TITLE__`, an em dash in a
+   rendered Markdown heading stamped into every scaffolded Flow. Same defect, one directory
+   over, and the finding's own wording ("a rendered description that gets stamped into every
+   scaffolded Flow") covers it.
+
+An invariant pin was added alongside, labelled as such rather than claimed as a RED:
+`engine/templates/flow-standard/.claude-plugin/plugin.json` was already Apache-2.0 and must
+stay there, so the C1 widening cannot swallow the config sitting beside the content.
+
+- [x] **Step 2: Run and watch them fail**
 
 Run: `cd engine && bun test tests/license-coverage.test.ts`
 Expected: all three FAIL (`Apache-2.0`, `CC-BY-SA-4.0`, `Apache-2.0` respectively).
 
-- [ ] **Step 3: Replace the catch-all with an allowlist**
+**OBSERVED exactly as written**, plus the em-dash test failing on three files. 9 pass / 4 fail.
+
+- [x] **Step 3: Replace the catch-all with an allowlist**
 
 ```javascript
 const CONTENT_EXT = /\.(md|markdown)$/i;
@@ -1337,11 +1358,20 @@ export function licenseFor(path) {
 }
 ```
 
-- [ ] **Step 4: Correct NOTICE's file list and remove the em dash from the template JSON**
+- [x] **Step 4: Correct NOTICE's file list and remove the em dash from the template JSON**
 
 NOTICE's CC BY-SA list gains `engine/templates/flow-standard/**.md`. In both template `.json` files change `"__TITLE__ — a Flowy Flow."` to `"__TITLE__. A Flowy Flow."` (C7: BRAND.md bans em dashes in rendered copy, and this string is stamped into every scaffolded Flow).
 
-- [ ] **Step 5: Run and verify the guard now bites**
+**CORRECTED (2026-07-28, during execution). Doing only what this step says leaves NOTICE
+contradicting itself.** The Apache-2.0 half lists `engine/**` and closes with the catch-all
+line `every other file in this repository`. Adding `engine/templates/flow-standard/**.md` to
+the CC BY-SA half while leaving both of those makes the same path appear under both licenses,
+which is the exact ambiguity the dual license exists to remove, and it keeps NOTICE promising
+a catch-all the code deliberately no longer has. Both sides were corrected: the `engine/**`
+line now names the template's plugin config explicitly, the catch-all line is deleted, and a
+short paragraph says why the two `engine/templates` lines are not a contradiction.
+
+- [x] **Step 5: Run and verify the guard now bites**
 
 ```bash
 cd engine && bun test tests/license-coverage.test.ts
@@ -1350,7 +1380,34 @@ touch ../THIRD-PARTY-LICENSE.txt && git -C .. add ../THIRD-PARTY-LICENSE.txt && 
 
 Expected: PASS first; the second run FAILS on the uncovered file. Before this task it passed.
 
-- [ ] **Step 6: Commit**
+**CORRECTED (2026-07-28): the command above cannot work, for the same reason the plan already
+corrected once in Task 5.** `git -C ..` sets git's working directory to the repo root, so the
+`../THIRD-PARTY-LICENSE.txt` argument then resolves OUTSIDE the repo and git refuses it. The
+paths are relative to two different directories in one line. What was actually run, from the
+repo root:
+
+```bash
+printf 'Copyright (c) 2019 Somebody Else\n' > THIRD-PARTY-LICENSE.txt
+mkdir -p overlays/superpowers/flows/superpowers/bin
+printf '#!/usr/bin/env sh\necho hi\n' > overlays/superpowers/flows/superpowers/bin/run.sh
+git add THIRD-PARTY-LICENSE.txt overlays/superpowers/flows/superpowers/bin/run.sh
+cd engine && bun test tests/license-coverage.test.ts
+```
+
+**MUTATION MEASURED, BEFORE AND AFTER.** Both files staged, both times.
+
+| | BEFORE | AFTER |
+|---|---|---|
+| suite | **8 pass / 0 fail** | **11 pass / 2 fail** |
+| `THIRD-PARTY-LICENSE.txt` | `Apache-2.0` (our license over third-party legal text) | `null`, named as uncovered by BOTH coverage tests |
+| `overlays/**/bin/run.sh` | `CC-BY-SA-4.0` (share-alike on an executable) | `Apache-2.0`, correct, and pinned by its own test |
+| `engine/templates/**/FLOW.md` | `Apache-2.0` (no share-alike) | `CC-BY-SA-4.0` |
+
+Note `run.sh` does NOT fail the coverage guard after the fix, and should not: it is now
+correctly classified. The guard's teeth are the `null`, and the inversion it used to produce is
+pinned by the dedicated test instead.
+
+- [x] **Step 6: Commit**
 
 ```bash
 git add engine/tools/license-buckets.mjs engine/tests/license-coverage.test.ts NOTICE engine/templates/
@@ -1363,11 +1420,14 @@ git commit -m "fix(license): the coverage guard could not fail, and the template
 
 **Files:**
 - Modify: `ATTRIBUTION.md`, `NOTICE`, `README.md`, `engine/hooks/flowy-inject.sh`, and in the marketplace repo `LICENSE`, `apps/web/app/license/page.tsx`, `apps/web/lib/seo/llms-txt.ts`
-- Test: `engine/tests/flowy-inject.test.ts`
+- Test: `engine/tests/flowy-inject.test.ts`, and in the marketplace repo `apps/web/app/license/page.test.tsx`, `apps/web/lib/seo/llms-txt.test.ts`
+
+**DONE 2026-07-28**, commits `294ece8` (flowy-core) and `392ad5c` (marketplace).
+**HOST: `https://www.flowy.sh`. CREDIT: `Routing by Flowy`.** Evidence in Step 3.
 
 ADR-048 says the judo works only if the terms are identical wherever a copier meets them. They are not: the repo mandates `Routing by Flowy` and the site says `Flowy`; the repo says `https://flowy.sh` and the site says `www.flowy.sh`, and the apex 308-redirects, so every link a compliant copier pastes goes through a redirect.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 test("the fork notice hands over the canonical attribution string", () => {
@@ -1377,12 +1437,55 @@ test("the fork notice hands over the canonical attribution string", () => {
 });
 ```
 
-- [ ] **Step 2: Run and watch it fail**
+**EXTENDED (2026-07-28, during execution).** One banner assertion cannot close a finding whose
+whole content is that SEVEN files disagree. Two source scans were added over flowy-core's four
+attribution surfaces (`ATTRIBUTION.md`, `NOTICE`, `README.md`, the hook): no surface may link
+the apex, and no surface may offer a second credit string. Both went RED naming exactly the
+files that were wrong, four and two respectively. The apex pattern matches the SCHEME
+(`https?://flowy\.sh`), so `maximo@flowy.sh` cannot trip it and `https://www.flowy.sh` cannot
+either, and a positive/negative fixture test pins that both ways. The site's three surfaces
+live in the other repo and are pinned by two tests there.
+
+- [x] **Step 2: Run and watch it fail**
 
 Run: `cd engine && bun test tests/flowy-inject.test.ts`
 Expected: FAIL — the banner currently says `Flow routing by Flowy (https://flowy.sh)`.
 
-- [ ] **Step 3: Pick `https://www.flowy.sh` and apply it everywhere**
+**OBSERVED as written.** 78 pass / 3 fail.
+
+- [x] **Step 3: Pick `https://www.flowy.sh` and apply it everywhere**
+
+**VERIFIED (2026-07-28), unauthenticated, before committing to the recommendation:**
+
+```
+curl -D - https://flowy.sh/        HTTP/1.1 308 Permanent Redirect
+                                   Location: https://www.flowy.sh/
+curl -D - https://www.flowy.sh/    HTTP/1.1 200 OK
+```
+
+The plan's premise holds. The strongest form of the argument is not the extra hop: it is that
+requirement 2 in `ATTRIBUTION.md` rules out "a redirect through your own tracker", so mandating
+a link that is itself a redirect makes the clause contradict itself.
+
+**CREDIT STRING: `Routing by Flowy`.** It is what the hook already hands over, it names the
+work rather than only the brand, and a bare "Flowy" is the form `ATTRIBUTION.md` already
+rejects as insufficient. The "where space is tight / where it is not" split is deleted rather
+than kept as an alias: two accepted strings is one too many when the entire value of specifying
+the manner of attribution under section 3(a)(1) is that a copier meets the same terms
+everywhere.
+
+**CORRECTED: applying Step 3 without touching the PRE-EXISTING assertion breaks the suite.**
+`engine/tests/flowy-inject.test.ts` already asserted `toContain("https://flowy.sh")` on the
+notice. That passes on the apex and FAILS on the canonical host, because `https://www.` is not
+a superstring of `https://`. The plan does not mention it.
+
+**CORRECTED: the site side is three strings on three surfaces, not one.** The plan names only
+`/license` section 2 item 1. Measured, "credit Flowy" also appears in the page's 40-to-60-word
+lede (which has its own word-count test, still in range at 49 after the change) and in section
+4's AI-citation clause, and `llms-txt.ts` states it twice, once in the reuse condition and once
+in the crawler invitation. All five were changed. The visible link TEXT on `/license` also read
+"flowy.sh" in the two clauses that specify the exact link a copier must reproduce, while the
+`href` was already correct via `SITE_URL`; a reader transcribing by eye got the apex.
 
 The site's canonical host is `www` (`site-url.ts`, founder decision 2026-07-23), and the apex redirects to it. Declaring the apex means instructing every copier to link a redirect. Replace `https://flowy.sh` with `https://www.flowy.sh` in `ATTRIBUTION.md`, `NOTICE`, `README.md`, the banner string, and the marketplace `LICENSE`.
 
@@ -1394,15 +1497,30 @@ Standardise the credit string on `Routing by Flowy` in all six surfaces, and upd
 </li>
 ```
 
-- [ ] **Step 4: Run and verify**
+- [x] **Step 4: Run and verify**
 
 Run: `cd engine && bun test` and `cd apps/web && bun test`
 Expected: PASS both.
 
-- [ ] **Step 5: Commit (two repos, sequentially)**
+Engine 283 pass / 0 fail. Web 2339 pass / 0 fail. Typecheck clean on `@marketplace/web` and
+`@marketplace/shared`; `@marketplace/mcp` fails at `invoke-skill.ts:77` on a missing `price`
+property, which is pre-existing and unrelated.
+
+- [x] **Step 5: Commit (two repos, sequentially)**
+
+**CORRECTED: the step says "two repos, sequentially" and then gives one command, for one repo,
+with `add -A`.** `add -A` in flowy-core would also have swept up the unrelated in-flight edits
+to this plan file. Both commits were made with an explicit path list and `git commit -F`:
 
 ```bash
-git -C C:/Users/User/flowy-core add -A && git -C C:/Users/User/flowy-core commit -m "fix(license): one credit string, one host, across every surface"
+git -C C:/Users/User/flowy-core add ATTRIBUTION.md NOTICE README.md \
+  engine/hooks/flowy-inject.sh engine/tests/flowy-inject.test.ts
+git -C C:/Users/User/flowy-core commit -F <msg>
+
+git -C "E:/Projects VS/skills marketplace" add LICENSE \
+  apps/web/app/license/page.tsx apps/web/app/license/page.test.tsx \
+  apps/web/lib/seo/llms-txt.ts apps/web/lib/seo/llms-txt.test.ts
+git -C "E:/Projects VS/skills marketplace" commit -F <msg>
 ```
 
 ---
@@ -1410,10 +1528,12 @@ git -C C:/Users/User/flowy-core add -A && git -C C:/Users/User/flowy-core commit
 ## Task 14: Documents that claim more than the code does (D1, D2, D3, D4, D5)
 
 **Files:**
-- Modify: `PROVENANCE.md`, `NOTICE`, `engine/tests/flowy-origin.test.ts`
+- Modify: `PROVENANCE.md`, `NOTICE`, `engine/tests/flowy-origin.test.ts`, `engine/hooks/flowy-origin.sh` (its header repeats the claim D1 narrows)
 - Create: `docs/decisions/2026-07-28-fork-notice.md`
 
-- [ ] **Step 1: Broaden the no-network guard, then narrow the claim**
+**DONE 2026-07-28**, commit `0491192`. Engine 283 to 285 pass, 0 fail.
+
+- [x] **Step 1: Broaden the no-network guard, then narrow the claim**
 
 ```typescript
 const NETWORK_CMD = /(^|[;&|(\s])(curl|wget|nc|ping|telnet|ssh|scp|ftp|git\s+(ls-remote|fetch|clone|push|pull))\s|\/dev\/tcp\/|Invoke-WebRequest|Invoke-RestMethod|\bfetch\s*\(/;
@@ -1422,17 +1542,48 @@ const SCANNED = ["flowy-origin.sh", "flowy-inject.sh"];
 
 Then correct PROVENANCE.md: it scans the helper **and** the file that emits the notice, against a denylist that is a floor rather than a proof.
 
-- [ ] **Step 2: Correct the remaining overclaims**
+**VERIFIED before relying on it.** All six evasion classes were measured walking through the
+old seven-name pattern, and the widened pattern produces **zero** hits across all eight shell
+scripts in `engine/hooks/`, so nothing had to be reworded to accommodate it.
+
+**CORRECTED (2026-07-28, during execution). `SCANNED` must not be a hardcoded list.** A list is
+what produced this finding: `flowy-inject.sh`, the file that actually EMITS the notice, was the
+one nobody remembered to add. Since the widened pattern is clean on every hook, deriving the
+set from `readdirSync(engine/hooks)` costs nothing and covers the next hook the day it lands.
+This is the repo's own recorded lesson from the override scan, whose set drifted twice before
+it was derived from its allowlist. The derived-set test went RED naming all seven missing
+files, which a two-entry list would not have done.
+
+Minor: the plan's pattern drops the `/m` flag the original carried. Kept, since `^` should
+anchor to a line rather than to the file.
+
+- [x] **Step 2: Correct the remaining overclaims**
 
 - Exit codes: add `2` (missing manifest, unreadable target, usage).
 - Known Limits: replace "the trade favours false negatives" with the measured truth — both error rates moved together, and record what Tasks 8 to 10 fixed.
 - NOTICE: "enforced by a test" is true only after Task 12; keep the sentence and add that the guard returns `null` for anything unclassified.
 
-- [ ] **Step 3: Write the missing ADR**
+**All four exit paths verified at the terminal**, not read off the source: `check` on our own
+`FLOW.md` exits **1**, on `engine/templates` exits **0**, on a nonexistent target exits **2**,
+and an unknown subcommand exits **2**. The doc now carries the three-row table plus the reason
+`2` exists at all, which is that `0` used to cover it.
+
+Tasks **8 to 11**, not 8 to 10: Task 11's CLI defects are two of the false negatives (`.mdx`,
+`.mdc` and `.rst` never walked; an unreadable target printing "No match" and exiting 0), and
+leaving them out would have understated the case the rewrite is making.
+
+- [x] **Step 3: Write the missing ADR**
 
 `docs/decisions/2026-07-28-fork-notice.md` recording: local-only detection (no network, ever), once per project, unknown origin treated as canonical, the marker namespaced because three engines share the state dir, and the explicit non-claim — this is not enforcement, a bad actor deletes the hook first.
 
-- [ ] **Step 4: Run and commit**
+Written with all five properties, each cross-referenced to the test that pins it, plus a
+section on what the notice ADDED (a sourced-module contract, a second line on the enforcement
+stdout channel, a persistent artifact in a directory three engines share, and an
+attacker-controlled file read reaching the agent's authoritative context) and four rejected
+alternatives, including the GitHub API call that would produce a better notice and break
+property 1.
+
+- [x] **Step 4: Run and commit**
 
 ```bash
 cd engine && bun test && cd ..
