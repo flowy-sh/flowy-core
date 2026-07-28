@@ -45,15 +45,31 @@ signal that maps onto the actual claim in `ATTRIBUTION.md` section 5.
 | Verdict | Trigger | What it means |
 |---|---|---|
 | `identical` | hash match | The same file. |
-| `derivative-likely` | containment >= 80% **and** order >= 80%, or 2+ canaries | Worth an email. |
+| `derivative-likely` | containment >= 80% **and** order >= 80% **and** 1+ canary, or 2+ canaries alone | Worth an email. |
 | `possible-derivative` | containment >= 50%, or 1 canary | Worth a human look. Nothing more. |
 | `no-match` | everything else | Nothing to discuss. |
 
-**Containment alone never reaches `derivative-likely`.** Every skill we route to is public and
-anyone may route to the same ones. Shared vocabulary is not evidence. Only high containment
-*with preserved order* gets there, because that is the combination an independent author does
-not reproduce: two people building a router over the same public skills do not select the same
-forty and arrange them the same way.
+**Structure alone never reaches `derivative-likely`. Carried original expression is required.**
+
+An earlier version of this file argued the opposite, and it was wrong in a way worth recording
+rather than quietly deleting. It said high containment with preserved order "is the combination
+an independent author does not reproduce: two people building a router over the same public
+skills do not select the same forty and arrange them the same way."
+
+They do. An independently written router over obra's public superpowers plugin, using a table
+instead of a tree, its own trigger wording and section names, and sharing not one sentence with
+any Flowy file, scored **100% containment and 86% order with zero canaries**. It is checked in
+at `engine/tests/fixtures/independent-router.md` and a test asserts it is never graded
+`derivative-likely`.
+
+The reason is structural, not a threshold that needed tuning. Containment divides by OUR route
+count, so a Flow that routes most of one plugin gives 100% to anyone else who also routes that
+plugin: the selection encodes nothing, because the selection is the whole plugin. Order
+saturates for the same reason, because the arrangement is a software lifecycle nobody owns.
+Both signals measure the plugin, not us.
+
+So a canary now has to come with them. A canary is the one thing an independent author cannot
+produce by coincidence, because it is our sentence rather than our subject.
 
 The thresholds deliberately under-claim. A tool that accuses an honest author is worse than no
 tool, and we would have shipped exactly that: **the first version matched the canary `"TDD."`

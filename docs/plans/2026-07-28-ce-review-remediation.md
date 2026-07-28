@@ -10,6 +10,57 @@
 
 **Source review:** seven agents — correctness, security, testing, adversarial, coherence, adversarial-document, project-standards. Finding IDs (A1, B3, E5…) refer to that review and appear on every task so nothing is closed by accident.
 
+## STATUS — ALL 17 TASKS DONE (2026-07-28)
+
+`flowy-core` **285 pass / 0 fail** (baseline 224). Marketplace **2339 pass / 0 fail** (baseline 2233).
+web + shared typecheck clean; the `@marketplace/mcp` `price` error is the documented pre-existing one.
+
+**Headline numbers.**
+- `checkNoOrphanSkills` on the real `growth-marketing/FLOW.md`: **0 -> 38 orphans.** R1 now sees
+  the defect the entire standard is named after. It had returned zero on its own motivating example.
+- Mutation, `flowy-origin.test.ts` with the helper stubbed to a bare shebang: **13 of 27 tests
+  survived before, 3 of 27 after.** The 3 are source scans that legitimately do not depend on runtime.
+- Mutation, license coverage with two hostile files staged: **8 pass / 0 fail before, 11 pass /
+  2 fail after.**
+- The crafted FLOW.md reproducing every defect the rules exist to stop: **0 -> 9 errors.**
+- A Flow built with our own scaffolder: **`possible-derivative` exit 1 -> `no-match` exit 0.**
+- Em dashes live in production: the review found 10 across 2 pages; the guard found **12 across 3**.
+  `/roadmap` was a violator nobody had looked at.
+
+**THE PLAN WAS WRONG IN ELEVEN PLACES.** Workers were told not to trust it and to verify every
+empirical claim. That instruction paid for itself:
+
+1. `Git\bin\sh.exe` is a launcher stub that runs bash with POSIX mode OFF. Following the plan
+   literally, the Task 1 test would have PASSED ON THE BROKEN CODE, leaving the harness as blind
+   as bash. Production resolves `Git\usr\bin\sh.exe`.
+2. Task 7's fence rule would have zeroed the routed set of every shipped Flow (superpowers
+   14 -> 0), because every Flow puts its whole routing tree inside a fence.
+3. `import.meta.main` is `undefined` on Node v20.16.0, the version that runs the CLI. Task 11's
+   fix would have silently reintroduced the bug it was closing.
+4. Task 8's canonicalization inflated our OWN route sets with prose fragments and would have
+   HALVED containment for the true positive, in the name of raising it.
+5. Task 6's `BARE_SLUG` contradicted its own comment and its own test.
+6. Task 2's end-to-end payload asserted original capitalisation against a helper that lowercases:
+   vacuous in both directions, the exact defect being remediated.
+7. Task 12's mutation command pointed git at the repo root then handed it a path outside the repo.
+8. Task 12 named 2 em-dash files; there were 3, and it corrected only half of NOTICE, leaving one
+   path under two licenses.
+9. Task 13's host change breaks a pre-existing assertion the plan never mentions.
+10. Task 9's A10 numbers describe the POST-B1 state, so in the plan's own order that test would
+    have passed on arrival.
+11. Task 10's sentence slicing assumed contiguous matches and mis-sliced on `"e.g."`.
+
+**Found during final verification, after every worker reported done:** `PROVENANCE.md`'s verdict
+table still stated the rule Task 9 had just disproved, and the paragraph under it still asserted
+that high containment with preserved order "is the combination an independent author does not
+reproduce". The code header was corrected; the user-facing table was not. Fixed, with the disproof
+recorded rather than deleted.
+
+**Residual, declared not fixed:** ultra-powers' one remaining orphan is `` `proof` ``, named in a
+disambiguation whose purpose is to say DO NOT ROUTE HERE. A true positive under R1's literal
+contract and bad advice under its remedy text. Declared in the `flow-rules.mjs` header rather than
+special-cased, alongside R1 trigger quality and R4's denylist floor.
+
 ## Global Constraints
 
 - **The hook is FAIL-LOUD, NEVER FAIL-CLOSED.** It always exits 0 and never blocks. No task may add a path that can exit non-zero.
