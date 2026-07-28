@@ -39,7 +39,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # =============================================================================
 
-FLOWY_CANONICAL_ORIGIN="flowy-sh/flowy-core"
+# HOST-QUALIFIED (B2). Without the host, any mirror of this repo on other
+# infrastructure compared equal to the canonical origin and was never told it
+# was a mirror.
+FLOWY_CANONICAL_ORIGIN="github.com/flowy-sh/flowy-core"
 
 # --- Marketplace name from a plugin root -------------------------------------
 # $1 = CLAUDE_PLUGIN_ROOT (.../plugins/cache/<marketplace>/<plugin>/<version>).
@@ -63,8 +66,8 @@ flowy_marketplace_name() {
   printf '%s' "$_name"
 }
 
-# --- Remote URL -> owner/repo slug -------------------------------------------
-# $1 = a git remote URL in any common form. Echoes lowercase "owner/repo",
+# --- Remote URL -> host/owner/repo slug --------------------------------------
+# $1 = a git remote URL in any common form. Echoes lowercase "host/owner/repo",
 # or nothing(+1) when it cannot be read as one.
 flowy_origin_slug() {
   _u="$1"
@@ -83,7 +86,22 @@ flowy_origin_slug() {
   _repo="${_u##*/}"
   _rest="${_u%/*}"
   _owner="${_rest##*/}"
-  [ -n "$_repo" ] && [ -n "$_owner" ] || return 1
+  # THREE segments required. Discarding the host (B2) made every mirror of this
+  # repo on other infrastructure read as canonical: gitlab.com/flowy-sh/
+  # flowy-core is byte-identical in owner/repo to our own origin, so the notice
+  # stayed silent for precisely the case it exists to catch.
+  #
+  # This test is not decoration. Without it a two-segment value would set
+  # _host to _owner (`${_rest%/*}` is a no-op when _rest has no slash) and
+  # synthesize "owner/owner/repo" out of nothing, which is a worse failure than
+  # the one being fixed: a fabricated host in an accusation.
+  case "$_rest" in */*) : ;; *) return 1 ;; esac
+  _hrest="${_rest%/*}"
+  _host="${_hrest%%/*}"
+  [ -n "$_repo" ] && [ -n "$_owner" ] && [ -n "$_host" ] || return 1
+
+  # ssh.github.com and www.github.com are the same origin as github.com.
+  case "$_host" in ssh.github.com | www.github.com ) _host="github.com" ;; esac
 
   # POSITIVE CHARSET ALLOWLIST, matching the SAFE_NAME strip in flowy-inject.sh.
   # This value is printed into the agent's AUTHORITATIVE context, from a file
@@ -97,12 +115,12 @@ flowy_origin_slug() {
   # codepoints; U+00A0 walked straight through it, as did `$(...)` and backticks.
   # The length caps are GitHub's own (39 for an owner, 100 for a repo) and are
   # what stops a long path component being used to flood the banner.
-  case "$_owner$_repo" in *[!A-Za-z0-9._-]* ) return 1 ;; esac
-  [ "${#_owner}" -le 39 ] && [ "${#_repo}" -le 100 ] || return 1
+  case "$_host$_owner$_repo" in *[!A-Za-z0-9._-]* ) return 1 ;; esac
+  [ "${#_host}" -le 253 ] && [ "${#_owner}" -le 39 ] && [ "${#_repo}" -le 100 ] || return 1
 
   # Lowercase: GitHub owners and repos are case-insensitive, so Flowy-SH must
-  # not read as a fork of flowy-sh.
-  printf '%s/%s' "$_owner" "$_repo" | tr 'A-Z' 'a-z'
+  # not read as a fork of flowy-sh. Hostnames are case-insensitive too.
+  printf '%s/%s/%s' "$_host" "$_owner" "$_repo" | tr 'A-Z' 'a-z'
 }
 
 # --- Origin slug for an installed marketplace --------------------------------

@@ -2096,6 +2096,44 @@ describe("fork / mirror license notice", () => {
     expect(out).toContain("Flowy routing ACTIVE");
   });
 
+  test("the notice does not repeat when the marker cannot be written", () => {
+    // B3. The code comment says a per-prompt nag gets the hook deleted, which
+    // would take routing down with it. `printf > MARKER 2>/dev/null || true`
+    // produced exactly that: the write failed, `|| true` swallowed it, and the
+    // notice fired every single prompt forever while leaking a shell error to
+    // stderr each turn. A directory at the marker path is the reproducer, and
+    // it also pins B4: `[ ! -f ]` read a directory as ABSENT.
+    if (!HAVE_SHELL) return;
+    const dirs = activeCase("https://github.com/a-forker/flowy-core.git");
+    mkdirSync(join(dirs.stateDirWin, "origin-notice-flowy-flows"), { recursive: true });
+    const r = run(dirs, stdinFor("forkcase"));
+    expect(r.stdout).not.toContain("Flowy license notice");
+    expect(r.stderr).toBe("");
+    expect(r.stdout).toContain("Flowy routing ACTIVE");
+  });
+
+  test("the marker is namespaced per marketplace, because three engines share the dir", () => {
+    // B4. README declares the state dir shared across three Flowy engines. An
+    // unnamespaced `origin-notice` means whichever engine notices first
+    // silences the other two, so a forked overlay beside a canonical core never
+    // tells anyone it is a fork.
+    if (!HAVE_SHELL) return;
+    const dirs = activeCase("https://github.com/a-forker/flowy-core.git");
+    expect(run(dirs, stdinFor("forkcase")).stdout).toContain("Flowy license notice");
+    expect(existsSync(join(dirs.stateDirWin, "origin-notice-flowy-flows"))).toBe(true);
+    expect(existsSync(join(dirs.stateDirWin, "origin-notice"))).toBe(false);
+  });
+
+  test("a mirror on a non-GitHub host still gets the notice", () => {
+    // B2 end to end: gitlab.com/flowy-sh/flowy-core is byte-identical in
+    // owner/repo to the canonical origin and read as canonical.
+    if (!HAVE_SHELL) return;
+    const out = run(activeCase("https://gitlab.com/flowy-sh/flowy-core.git"), stdinFor("forkcase")).stdout;
+    expect(out).toContain("Flowy license notice");
+    expect(out).toContain("gitlab.com/flowy-sh/flowy-core");
+    expect(out).toContain("Flowy routing ACTIVE");
+  });
+
   test("the CANONICAL origin produces no notice", () => {
     if (!HAVE_SHELL) return;
     const out = run(activeCase("https://github.com/flowy-sh/flowy-core.git"), stdinFor("forkcase")).stdout;

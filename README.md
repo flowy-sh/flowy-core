@@ -49,6 +49,12 @@ across repos with no shared package. If you maintain a sibling engine, match thi
 - **`schema`:** readers gate on a known-schema allowlist; an unknown value is a no-op (so a
   future breaking shape degrades safely instead of being mis-parsed by an old reader).
 
+Sidecars written beside `state-*.json`, which a sibling engine must not collide with:
+`count-<session-id>` (the reinject counter) and `origin-notice-<marketplace>` (the fork-notice
+once-only marker). Both are namespaced, the second because three engines share this directory:
+an unnamespaced marker meant whichever engine ran first silenced the other two, so a forked
+overlay installed beside a canonical core would never announce that it was a fork.
+
 ## Security invariants (do not regress — each has a test)
 
 These were hardened in 0.2.0 after an execute-the-code review found reproduced exploits. See

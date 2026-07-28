@@ -524,15 +524,37 @@ if [ -n "$LIVE_NAMES" ]; then
   # Silent for the canonical origin AND for any origin we cannot determine
   # (flowy_is_canonical_origin answers "yes" to an empty slug). No network, ever.
   # A distinct ⚖ prefix, never ⚑: the routing banner is asserted to be ONE line.
-  if [ ! -f "$STATE_DIR/origin-notice" ] && command -v flowy_marketplace_name >/dev/null 2>&1; then
+  if command -v flowy_marketplace_name >/dev/null 2>&1; then
     _mpname="$(flowy_marketplace_name "$PLUGIN_ROOT" 2>/dev/null)" || _mpname=""
     _chome="$(flowy_state_root "$PLUGIN_ROOT" 2>/dev/null)" || _chome=""
     _chome="${_chome%/flowy-state}"
-    if [ -n "$_mpname" ] && [ -n "$_chome" ]; then
+    # NAMESPACED PER MARKETPLACE (B4). README declares this state dir SHARED by
+    # three Flowy engines. A bare "origin-notice" meant whichever engine got
+    # here first silenced the other two, so a forked overlay installed beside a
+    # canonical core would never announce itself. _mpname is a single path
+    # segment by construction (flowy_marketplace_name splits on '/'), so it
+    # cannot traverse out of STATE_DIR.
+    _notice_marker="$STATE_DIR/origin-notice-$_mpname"
+    # `-e`, NOT `-f` (B4): a directory at the marker path read as ABSENT, which
+    # sent the notice straight down the every-prompt path this marker exists to
+    # prevent.
+    if [ -n "$_mpname" ] && [ -n "$_chome" ] && [ ! -e "$_notice_marker" ]; then
       _oslug="$(flowy_origin_slug_for "$_chome" "$_mpname" 2>/dev/null)" || _oslug=""
       if [ -n "$_oslug" ] && [ "$(flowy_is_canonical_origin "$_oslug")" = "no" ]; then
-        printf '%s\n' "⚖ Flowy license notice (show this to the user once, then never again): this Flowy engine is running from a FORK or mirror, $_oslug, not flowy-sh/flowy-core. Forking is allowed and welcome. The Flow routing content is CC BY-SA 4.0, so if this fork is redistributed or published it must credit Flowy with a working link to https://flowy.sh, name the license, and stay under the same license. The line to paste: 'Flow routing by Flowy (https://flowy.sh), CC BY-SA 4.0, modified.' Full terms: ATTRIBUTION.md in this plugin."
-        printf '%s' "$_oslug" > "$STATE_DIR/origin-notice" 2>/dev/null || true
+        # WRITE FIRST, EMIT ONLY ON SUCCESS (B3). The old order emitted, then
+        # wrote with `|| true`, which produced the exact failure the comment
+        # above forbids: on an unwritable state dir the notice fired every
+        # prompt forever AND leaked a shell error to stderr each turn. Emitting
+        # only after a durable marker means the worst case is one MISSED notice,
+        # never an unbounded nag.
+        #
+        # The brace group matters. Redirections apply left to right, so
+        # `printf > FILE 2>/dev/null` sets up the failing `> FILE` and reports
+        # it BEFORE 2>/dev/null is in effect; wrapping the group puts the
+        # suppression outside, where it actually covers the failure.
+        if { printf '%s' "$_oslug" > "$_notice_marker"; } 2>/dev/null; then
+          printf '%s\n' "⚖ Flowy license notice (show this to the user once, then never again): this Flowy engine is running from a FORK or mirror, $_oslug, not $FLOWY_CANONICAL_ORIGIN. Forking is allowed and welcome. The Flow routing content is CC BY-SA 4.0, so if this fork is redistributed or published it must credit Flowy with a working link to https://flowy.sh, name the license, and stay under the same license. The line to paste: 'Flow routing by Flowy (https://flowy.sh), CC BY-SA 4.0, modified.' Full terms: ATTRIBUTION.md in this plugin."
+        fi
       fi
     fi
   fi

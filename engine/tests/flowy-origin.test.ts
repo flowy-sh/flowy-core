@@ -71,20 +71,20 @@ describe("flowy_marketplace_name", () => {
 
 describe("flowy_origin_slug", () => {
   test("normalizes an https remote", () => {
-    expect(call("flowy_origin_slug", "https://github.com/flowy-sh/flowy-core.git")).toBe("flowy-sh/flowy-core");
+    expect(call("flowy_origin_slug", "https://github.com/flowy-sh/flowy-core.git")).toBe("github.com/flowy-sh/flowy-core");
   });
 
   test("normalizes an ssh remote to the same slug", () => {
-    expect(call("flowy_origin_slug", "git@github.com:flowy-sh/flowy-core.git")).toBe("flowy-sh/flowy-core");
+    expect(call("flowy_origin_slug", "git@github.com:flowy-sh/flowy-core.git")).toBe("github.com/flowy-sh/flowy-core");
   });
 
   test("tolerates a missing .git suffix", () => {
-    expect(call("flowy_origin_slug", "https://github.com/someone/flowy-core")).toBe("someone/flowy-core");
+    expect(call("flowy_origin_slug", "https://github.com/someone/flowy-core")).toBe("github.com/someone/flowy-core");
   });
 
   test("lowercases, because GitHub owners are case-insensitive", () => {
     // Otherwise Flowy-SH/Flowy-Core reads as a fork of flowy-sh/flowy-core.
-    expect(call("flowy_origin_slug", "https://github.com/Flowy-SH/Flowy-Core.git")).toBe("flowy-sh/flowy-core");
+    expect(call("flowy_origin_slug", "https://github.com/Flowy-SH/Flowy-Core.git")).toBe("github.com/flowy-sh/flowy-core");
   });
 
   test("garbage yields nothing rather than a wrong slug", () => {
@@ -129,19 +129,40 @@ describe("flowy_origin_slug", () => {
   });
 
   test("a legitimate slug still passes", () => {
-    // TWO segments here on purpose. Task 3 adds the host and updates this
-    // expectation; asserting the host now would fail until that task lands.
-    expect(call("flowy_origin_slug", "https://github.com/flowy-sh/flowy-core.git")).toBe("flowy-sh/flowy-core");
+    expect(call("flowy_origin_slug", "https://github.com/flowy-sh/flowy-core.git")).toBe("github.com/flowy-sh/flowy-core");
+  });
+
+  test("a value with fewer than three segments is refused, not padded", () => {
+    // Keeping the host (B2) is done with `${_rest%/*}`, which is a NO-OP when
+    // _rest has no slash. Without an explicit three-segment requirement a bare
+    // "owner/repo" would silently become "owner/owner/repo": a FABRICATED host
+    // inside an accusation, which is a worse bug than the one B2 fixes.
+    expect(call("flowy_origin_slug", "flowy-sh/flowy-core")).toBe("");
+    expect(call("flowy_origin_slug", "https://github.com/flowy-core")).toBe("");
+  });
+
+  test("ssh. and www. GitHub hosts are the same origin as github.com", () => {
+    // Otherwise our own users get accused over a remote-URL spelling.
+    expect(call("flowy_origin_slug", "ssh://git@ssh.github.com/flowy-sh/flowy-core.git")).toBe("github.com/flowy-sh/flowy-core");
+    expect(call("flowy_origin_slug", "https://www.github.com/flowy-sh/flowy-core.git")).toBe("github.com/flowy-sh/flowy-core");
   });
 });
 
 describe("flowy_is_canonical_origin", () => {
   test("the canonical slug is canonical", () => {
-    expect(call("flowy_is_canonical_origin", "flowy-sh/flowy-core")).toBe("yes");
+    expect(call("flowy_is_canonical_origin", "github.com/flowy-sh/flowy-core")).toBe("yes");
   });
 
   test("a fork is not", () => {
-    expect(call("flowy_is_canonical_origin", "someone-else/flowy-core")).toBe("no");
+    expect(call("flowy_is_canonical_origin", "github.com/someone-else/flowy-core")).toBe("no");
+  });
+
+  test("a mirror on a non-GitHub host is NOT canonical", () => {
+    // B2: the host was discarded, so gitlab.com/flowy-sh/flowy-core, a full
+    // mirror on someone else's infrastructure, read as our own canonical repo
+    // and the notice stayed silent for exactly the case it exists to catch.
+    expect(call("flowy_is_canonical_origin", "gitlab.com/flowy-sh/flowy-core")).toBe("no");
+    expect(call("flowy_is_canonical_origin", "github.com/flowy-sh/flowy-core")).toBe("yes");
   });
 
   test("an EMPTY slug is treated as canonical, so unknowns never accuse", () => {
@@ -167,7 +188,7 @@ describe("flowy_origin_slug_for (reads .git/config, no network)", () => {
 
   test("reads the origin url out of the marketplace clone's config", () => {
     const claudeHome = fixture("https://github.com/a-forker/flowy-core.git");
-    expect(call("flowy_origin_slug_for", claudeHome, "flowy-core")).toBe("a-forker/flowy-core");
+    expect(call("flowy_origin_slug_for", claudeHome, "flowy-core")).toBe("github.com/a-forker/flowy-core");
   });
 
   test("a config with no remote section yields nothing", () => {
@@ -191,7 +212,7 @@ describe("flowy_origin_slug_for (reads .git/config, no network)", () => {
       `[remote "upstream"]\n\turl = https://github.com/flowy-sh/flowy-core.git\n` +
         `[remote "origin"]\n\turl = https://github.com/a-forker/flowy-core.git\n`,
     );
-    expect(call("flowy_origin_slug_for", join(home, ".claude"), "flowy-core")).toBe("a-forker/flowy-core");
+    expect(call("flowy_origin_slug_for", join(home, ".claude"), "flowy-core")).toBe("github.com/a-forker/flowy-core");
   });
 });
 
