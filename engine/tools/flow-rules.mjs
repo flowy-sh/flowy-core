@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { normalizeLines } from "./text-normalize.mjs";
+
 const SKILL_REF = /\b[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*\b/g;
 const ARROW = /(?:→|->)/;
 
@@ -51,7 +53,7 @@ function refsIn(text) {
 /** R3: a route line must say `invoke`. */
 export function checkRouteVerbs(text) {
   const errors = [];
-  for (const [i, line] of text.split("\n").entries()) {
+  for (const [i, line] of normalizeLines(text).entries()) {
     if (!isRouteLine(line)) continue;
     const after = line.split(ARROW).slice(1).join(" ");
     if (!/\binvoke\b/.test(after)) {
@@ -68,7 +70,7 @@ export function checkNoOrphanSkills(text) {
   const named = new Map();
   let section = null;
 
-  for (const [i, line] of text.split("\n").entries()) {
+  for (const [i, line] of normalizeLines(text).entries()) {
     const h = headingOf(line);
     if (h !== null) {
       section = h;
@@ -94,7 +96,7 @@ export function checkNoOrphanSkills(text) {
 
 /** R5: Routing must be the first `##` section. */
 export function checkSectionOrder(text) {
-  const headings = text.split("\n").map(headingOf).filter((h) => h !== null);
+  const headings = normalizeLines(text).map(headingOf).filter((h) => h !== null);
   if (headings.length === 0) return ["FLOW.md has no ## sections"];
   if (!/^routing/i.test(headings[0])) {
     return [`"## ${headings[0]}" precedes "## Routing". Routing must be the first section.`];
@@ -125,7 +127,7 @@ export function checkDriftClause(text) {
  */
 export function checkClaimedCounts(text) {
   const routed = new Set();
-  for (const line of text.split("\n")) {
+  for (const line of normalizeLines(text)) {
     if (isRouteLine(line)) for (const r of refsIn(line)) routed.add(r);
   }
 

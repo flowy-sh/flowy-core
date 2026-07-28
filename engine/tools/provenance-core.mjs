@@ -29,6 +29,8 @@
 
 import { createHash } from "node:crypto";
 
+import { normalizeText } from "./text-normalize.mjs";
+
 /**
  * Namespaced skill reference: `plugin-name:skill-name`.
  *
@@ -49,15 +51,12 @@ const POSSIBLE_CONTAINMENT = 0.5;
  * Canonicalize so a checkout difference is never mistaken for a content
  * difference. CRLF, trailing spaces, and trailing blank lines all vary by
  * editor and platform and mean nothing.
+ *
+ * Re-exported, not defined here: flow-rules.mjs made the same decision
+ * separately and got it wrong, so there is now exactly one definition and this
+ * module's importers are unchanged.
  */
-export function normalizeText(text) {
-  return String(text ?? "")
-    .replace(/\r\n?/g, "\n")
-    .split("\n")
-    .map((line) => line.replace(/[ \t]+$/, ""))
-    .join("\n")
-    .replace(/\n+$/, "\n");
-}
+export { normalizeText } from "./text-normalize.mjs";
 
 export function contentHash(text) {
   return createHash("sha256").update(normalizeText(text), "utf8").digest("hex");

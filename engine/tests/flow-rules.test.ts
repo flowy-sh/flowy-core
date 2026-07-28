@@ -143,6 +143,15 @@ describe("checkFlowRules", () => {
     expect(errs.length).toBeGreaterThanOrEqual(3); // order + verb + drift
   });
 
+  test("CRLF input produces the SAME result as LF", () => {
+    // A3: on a fresh Windows clone every heading was invisible, so R5 always
+    // errored and R1 started demanding authors delete upstream credits.
+    const lf =
+      "# T\n\n## Routing\n- x? → invoke ms:cro\n\n## Attribution\nms:ai-seo by Corey Haines, MIT.\n\n**Drift:** never license to improvise.\n";
+    expect(checkFlowRules(lf)).toEqual([]);
+    expect(checkFlowRules(lf.replace(/\n/g, "\r\n"))).toEqual([]);
+  });
+
   test("the shipped template passes its own rules", () => {
     // A template that violates the standard teaches every new Flow to violate it.
     // engine/templates/, which is where scaffold-flow.mjs resolves it from.

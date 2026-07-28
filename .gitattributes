@@ -3,3 +3,9 @@
 # mark them as text so autocrlf cannot rewrite them on Windows checkouts.
 *.sh text eol=lf
 engine/hooks/** text eol=lf
+
+# Markdown is parsed by flow-rules.mjs and hashed by the provenance manifest.
+# A CRLF checkout previously made both behave differently on Windows. The
+# normalizer in engine/tools/text-normalize.mjs is the real fix; this only stops
+# the working tree from varying by platform in the first place.
+*.md text eol=lf
