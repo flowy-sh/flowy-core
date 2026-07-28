@@ -74,6 +74,32 @@ public repository.
 Run it on your own work before publishing if you want to know where you stand. That is a
 legitimate use and the reason the tool is public.
 
+## The fork notice
+
+`flowy-provenance` is how *we* check a suspected copy. The fork notice is how *you* find out,
+without asking anyone.
+
+If the engine is running from a fork or mirror rather than `flowy-sh/flowy-core`, the hook
+prints a one-time notice naming the fork, stating that forking is welcome, and handing over the
+exact attribution line to paste. Once per project, never again.
+
+**How it detects.** A local read of the marketplace clone's `.git/config`
+(`~/.claude/plugins/marketplaces/<name>/.git/config`), comparing `remote.origin.url` to the
+canonical slug. `engine/hooks/flowy-origin.sh`.
+
+**It never phones home.** No request leaves your machine, ever. A test asserts no
+network-capable command appears in that file, and a second test asserts the guard itself can
+still fail. An enforcement hook that reported installs back to its author would be telemetry,
+and shipping that in an open-source plugin is a trust loss we would not get back.
+
+**It fails open.** Unknown layout, missing config, no remote, a tarball install, a vendored
+copy: silence. An origin we cannot determine is treated as canonical, because a false accusation
+is worse than no notice.
+
+**It is not enforcement, and is not presented as such.** Anyone forking in order to strip
+attribution deletes the hook first. The notice exists to make compliance effortless for people
+who would comply anyway, which is the entire strategy: a copy that attributes is distribution.
+
 ## Known limits
 
 Stated because a tool whose weaknesses are hidden is a tool that will be trusted past its

@@ -1917,3 +1917,88 @@ d("flowy-inject.sh", () => {
     expect(r.stdout).not.toContain("malformed");
   });
 });
+
+// ---------------------------------------------------------------------------
+// FORK / MIRROR LICENSE NOTICE (2026-07-28)
+//
+// ATTRIBUTION.md states what reuse obliges; this is how a good-faith forker
+// finds out. It is NOT enforcement: anyone forking to strip attribution deletes
+// the hook first. It makes compliance effortless for people who would comply.
+//
+// The three properties that decide whether it helps or backfires all have a
+// test here: it fires on a fork, it fires ONCE, and it stays silent for the
+// canonical origin AND for any origin that cannot be determined.
+// ---------------------------------------------------------------------------
+describe("fork / mirror license notice", () => {
+  function writeMarketplaceOrigin(dirs: Dirs, url: string) {
+    // FIVE levels, not four. pluginRoot is
+    //   .claude/plugins/cache/<marketplace>/<plugin>/<version>
+    // so reaching .claude means stripping version, plugin, marketplace, cache,
+    // plugins. The first draft used four and silently wrote the config under
+    // plugins/plugins/, so the notice never fired and the integration test
+    // caught what six green unit tests could not.
+    const claudeHome = join(dirs.pluginRootWin, "..", "..", "..", "..", "..");
+    const gitDir = join(claudeHome, "plugins", "marketplaces", "flowy-flows", ".git");
+    mkdirSync(gitDir, { recursive: true });
+    writeFileSync(join(gitDir, "config"), `[remote "origin"]\n\turl = ${url}\n`);
+  }
+
+  function activeCase(originUrl?: string): Dirs {
+    const dirs = makeDirs();
+    writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
+    writeState(dirs, "forkcase", {
+      schema: "flowy-state-v1",
+      sessionId: "forkcase",
+      activeFlows: [
+        { name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md", location: "plugin" },
+      ],
+    });
+    if (originUrl) writeMarketplaceOrigin(dirs, originUrl);
+    return dirs;
+  }
+
+  test("a FORK origin produces the license notice, naming the fork and the link", () => {
+    if (!HAVE_GIT_BASH) return;
+    const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
+    expect(out).toContain("Flowy license notice");
+    expect(out).toContain("a-forker/flowy-core");
+    expect(out).toContain("https://flowy.sh");
+    // The paste-ready line is the whole point: removing the work is what gets
+    // attribution actually added.
+    expect(out).toContain("Flow routing by Flowy");
+  });
+
+  test("the notice does NOT repeat on the next prompt, and routing still fires", () => {
+    if (!HAVE_GIT_BASH) return;
+    const dirs = activeCase("https://github.com/a-forker/flowy-core.git");
+    expect(run(dirs, stdinFor("forkcase")).stdout).toContain("Flowy license notice");
+    const second = run(dirs, stdinFor("forkcase")).stdout;
+    expect(second).not.toContain("Flowy license notice");
+    expect(second).toContain("Flowy routing ACTIVE");
+  });
+
+  test("the CANONICAL origin produces no notice", () => {
+    if (!HAVE_GIT_BASH) return;
+    const out = run(activeCase("https://github.com/flowy-sh/flowy-core.git"), stdinFor("forkcase")).stdout;
+    expect(out).not.toContain("Flowy license notice");
+    expect(out).toContain("Flowy routing ACTIVE");
+  });
+
+  test("an UNDETERMINABLE origin produces no notice (fail open, never accuse)", () => {
+    if (!HAVE_GIT_BASH) return;
+    const out = run(activeCase(undefined), stdinFor("forkcase")).stdout;
+    expect(out).not.toContain("Flowy license notice");
+    expect(out).toContain("Flowy routing ACTIVE");
+  });
+
+  test("the routing banner is STILL exactly one line when the notice fires", () => {
+    if (!HAVE_GIT_BASH) return;
+    const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
+    expect(out.split("\n").filter((l) => l.startsWith("⚑")).length).toBe(1);
+  });
+
+  test("the hook still exits 0 on a fork (fail-loud, never fail-closed)", () => {
+    if (!HAVE_GIT_BASH) return;
+    expect(run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).code).toBe(0);
+  });
+});

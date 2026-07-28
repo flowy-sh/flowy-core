@@ -205,6 +205,10 @@ is_safe_id "$SESSION_ID" || exit 0
 # ---------------------------------------------------------------------------
 . "$(dirname "$0")/flowy-paths.sh" 2>/dev/null || exit 0
 . "$(dirname "$0")/flowy-resolve.sh" 2>/dev/null || exit 0
+# Origin detection is OPTIONAL. `|| true`, not `|| exit 0`: a missing origin
+# helper must cost the fork notice, never the routing banner. Every call below
+# is guarded with `command -v`.
+. "$(dirname "$0")/flowy-origin.sh" 2>/dev/null || true
 STATE_DIR="$(flowy_state_dir "$PROJECT_DIR" "$PLUGIN_ROOT")"
 [ -n "$STATE_DIR" ] || exit 0
 mkdir -p "$STATE_DIR" 2>/dev/null || true
@@ -483,6 +487,30 @@ if [ -n "$LIVE_NAMES" ]; then
   # capitals had already been tried (0.3.0) and did not work. Keep it ONE line (tests
   # assert this); do not split or drop a clause. $LIVE_NAMES/$LIVE_REFS sanitized upstream.
   printf '%s\n' "⚑ Flowy routing ACTIVE: $LIVE_NAMES. MANDATORY, not advisory: before any other tool, and before you write code or answer, you MUST have READ the FLOW.md in full (path below). Invoke = an actual Skill tool call; following a skill from memory or describing it is NOT invoking. Write 'Routing: <skill> = YES,<reason>' ONLY for skills you have ALREADY invoked this turn, and 'NO,<reason>' for the rest — the line is a RECEIPT, never a plan. Printing a YES you did not invoke is a VIOLATION, not compliance. FLOW.md (re-read after compaction): $LIVE_REFS"
+
+  # --- Fork / mirror notice, ONCE per project ------------------------------
+  # ATTRIBUTION.md states what reuse obliges; this is how a good-faith forker
+  # finds out where they are working. Emitted here, inside the LIVE_NAMES
+  # branch, for one concrete reason: STATE_DIR is known to exist here, so the
+  # once-only marker can actually be written. Without a writable marker the
+  # notice would repeat every prompt, and a per-prompt nag gets the hook
+  # deleted, which would take routing down with it.
+  #
+  # Silent for the canonical origin AND for any origin we cannot determine
+  # (flowy_is_canonical_origin answers "yes" to an empty slug). No network, ever.
+  # A distinct ⚖ prefix, never ⚑: the routing banner is asserted to be ONE line.
+  if [ ! -f "$STATE_DIR/origin-notice" ] && command -v flowy_marketplace_name >/dev/null 2>&1; then
+    _mpname="$(flowy_marketplace_name "$PLUGIN_ROOT" 2>/dev/null)" || _mpname=""
+    _chome="$(flowy_state_root "$PLUGIN_ROOT" 2>/dev/null)" || _chome=""
+    _chome="${_chome%/flowy-state}"
+    if [ -n "$_mpname" ] && [ -n "$_chome" ]; then
+      _oslug="$(flowy_origin_slug_for "$_chome" "$_mpname" 2>/dev/null)" || _oslug=""
+      if [ -n "$_oslug" ] && [ "$(flowy_is_canonical_origin "$_oslug")" = "no" ]; then
+        printf '%s\n' "⚖ Flowy license notice (show this to the user once, then never again): this Flowy engine is running from a FORK or mirror, $_oslug, not flowy-sh/flowy-core. Forking is allowed and welcome. The Flow routing content is CC BY-SA 4.0, so if this fork is redistributed or published it must credit Flowy with a working link to https://flowy.sh, name the license, and stay under the same license. The line to paste: 'Flow routing by Flowy (https://flowy.sh), CC BY-SA 4.0, modified.' Full terms: ATTRIBUTION.md in this plugin."
+        printf '%s' "$_oslug" > "$STATE_DIR/origin-notice" 2>/dev/null || true
+      fi
+    fi
+  fi
 
   # V2: periodic lightweight FLOW.md reinject (every Nth prompt). The counter is a
   # SIDECAR file (NOT the state file) so the grep/sed state parse stays clean. It only
