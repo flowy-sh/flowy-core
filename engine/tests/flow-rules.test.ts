@@ -53,6 +53,13 @@ describe("checkRouteVerbs (R3)", () => {
   test("ASCII arrows count as routes too", () => {
     expect(checkRouteVerbs("  - bug? -> sp:debug\n").length).toBe(1);
   });
+
+  test("R3 accepts a capitalised verb", () => {
+    // A8. Every sibling rule is case-insensitive; this one told authors to
+    // lowercase a sentence-initial verb, which is how a checker gets switched
+    // off.
+    expect(checkRouteVerbs("- x? → Invoke sp:tdd")).toEqual([]);
+  });
 });
 
 describe("checkNoOrphanSkills (R1)", () => {
@@ -128,6 +135,32 @@ describe("checkNoOrphanSkills (R1)", () => {
     const text = "## Routing\n- x? → invoke ms:cro\n\n## Attribution\nms:ai-seo by Corey Haines, MIT.\n";
     expect(checkNoOrphanSkills(text)).toEqual([]);
   });
+
+  test("R1's Attribution exemption is an EXACT heading, not a prefix", () => {
+    // A8: `## Attributions and index` was being treated as Attribution, which
+    // is a one-word rename away from exempting the whole passive index.
+    const text = "## Routing\n- x? → invoke ms:cro\n\n## Attributions and index\nms:ai-seo\n";
+    expect(checkNoOrphanSkills(text).length).toBe(1);
+  });
+
+  test("a fenced code block is not scanned for names", () => {
+    // A8: a shell command is not a route and `test:watch` is not a skill.
+    const text = "## Routing\n- x? → invoke ms:cro\n\n```\n## not a heading\nnpm run test:watch\n```\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
+  test("a route line INSIDE a fence still counts as a route", () => {
+    // LOAD-BEARING. Every shipped Flow puts its ENTIRE routing tree in a fenced
+    // block. Skipping fences wholesale empties `routed` and turns every named
+    // skill into an orphan, which is the exact opposite of the rule.
+    const text = "## Routing\n\n```\n- x? → invoke ms:cro\n```\n\n## Notes\nms:cro is the only one.\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
+
+  test("a port or a time is not a skill reference", () => {
+    const text = "## Routing\n- x? → invoke ms:cro\n\nSee http://localhost:3000, standup 09:30.\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
 });
 
 describe("checkSectionOrder (R5)", () => {
@@ -138,6 +171,12 @@ describe("checkSectionOrder (R5)", () => {
   test("Phases before Routing is an error", () => {
     // growth-marketing led with 7 numbered Phases and pushed routing down.
     expect(checkSectionOrder("# T\n\n## Phases\ny\n\n## Routing\nx\n").length).toBe(1);
+  });
+
+  test("a heading inside a fence is not a section", () => {
+    // A8: `## Phases` shown as an EXAMPLE inside a code block was reordering
+    // the real document.
+    expect(checkSectionOrder("# T\n\n```\n## Phases\n```\n\n## Routing\nx\n")).toEqual([]);
   });
 });
 
@@ -180,6 +219,15 @@ describe("checkClaimedCounts (R6)", () => {
     const errs = checkClaimedCounts("the full 47 skills set\n- a? → invoke x:one\n");
     expect(errs.length).toBe(1);
     expect(errs[0]).toContain("47");
+  });
+
+  test("R6 catches the 47-plus form", () => {
+    // A8: the crafted defect file wrote "47+ skills" and passed with 0 errors.
+    expect(checkClaimedCounts("the 47+ skills bundle\n- a? → invoke x:one\n").length).toBe(1);
+  });
+
+  test("R6 reports one error per distinct over-claim, not per repetition", () => {
+    expect(checkClaimedCounts("40 skills. 40 skills. 40 skills.\n- a? → invoke x:one\n").length).toBe(1);
   });
 
   test("under-claiming is allowed", () => {

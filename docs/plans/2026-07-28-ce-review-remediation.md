@@ -630,11 +630,11 @@ Paste the three counts into the STATUS block below. These are the numbers Task 8
 **STATUS (measured 2026-07-28, after this task).** The plan referred to a STATUS
 block that did not exist; here it is.
 
-| Flow | orphans BEFORE | orphans AFTER | all rules BEFORE | all rules AFTER |
-|---|---|---|---|---|
-| `growth-marketing` | **0** | **38** | 17 | 55 |
-| `superpowers` | 0 | 0 | 2 | 1 |
-| `ultra-powers` | **0** | **1** | 56 | 57 |
+| Flow | orphans BEFORE | orphans AFTER | all rules BEFORE | after T6 | after T7 |
+|---|---|---|---|---|---|
+| `growth-marketing` | **0** | **38** | 17 | 55 | 54 |
+| `superpowers` | 0 | 0 | 2 | 1 | 1 |
+| `ultra-powers` | **0** | **1** | 56 | 57 | 56 |
 
 `growth-marketing` going 0 to 38 is A4 closed: the rule now sees the passive index
 it was written for, and 38 matches the "40 of 47 skills had no trigger" diagnosis in
@@ -685,10 +685,18 @@ test("R1's Attribution exemption is an EXACT heading, not a prefix", () => {
   expect(checkNoOrphanSkills(text).length).toBe(1);
 });
 
-test("a fenced code block is not scanned for routes or headings", () => {
+test("a fenced code block is not scanned for NAMES", () => {
   const text = "## Routing\n- x? → invoke ms:cro\n\n```\n## not a heading\nnpm run test:watch\n```\n";
   expect(checkNoOrphanSkills(text)).toEqual([]);
-  expect(checkSectionOrder(text)).toEqual([]);
+});
+
+test("a route line INSIDE a fence still counts as a route", () => {
+  const text = "## Routing\n\n```\n- x? → invoke ms:cro\n```\n\n## Notes\nms:cro is the only one.\n";
+  expect(checkNoOrphanSkills(text)).toEqual([]);
+});
+
+test("a heading inside a fence is not a section", () => {
+  expect(checkSectionOrder("# T\n\n```\n## Phases\n```\n\n## Routing\nx\n")).toEqual([]);
 });
 
 test("a port or a time is not a skill reference", () => {
@@ -717,7 +725,37 @@ for (const m of text.matchAll(/\b(\d+)\s*\+?[\s-]*skills?\b/gi)) claims.add(Numb
 for (const claimed of claims) { if (claimed > routed.size) errors.push(...); }
 ```
 
-For fenced blocks, track a `inFence` flag toggled by `/^\s*```/` in `checkNoOrphanSkills` and `checkSectionOrder`, and `continue` while set. For the Attribution exemption use `/^attribution$/i.test((section ?? "").trim())` (already applied in Task 6).
+For fenced blocks, track an `inFence` flag toggled by `/^\s*(?:```|~~~)/`. In `checkSectionOrder`, `continue` while set. In `checkNoOrphanSkills`, skip heading detection and NAME collection while set, but KEEP collecting routes. For the Attribution exemption use `/^attribution$/i.test((section ?? "").trim())`.
+
+**CORRECTED (2026-07-28, during execution). The plan's fence instruction would have
+broken every shipped Flow.** "`continue` while set" in `checkNoOrphanSkills` skips
+the route lines too, and EVERY shipped Flow puts its ENTIRE routing tree inside a
+fenced block (`growth-marketing` 31-73, `superpowers` 13-33, `ultra-powers` 24-85,
+the template 32-45). Measured, distinct routes collected:
+
+| Flow | fences INCLUDED (correct) | plan's literal rule |
+|---|---|---|
+| `growth-marketing` | 7 | 3 |
+| `superpowers` | 14 | **0** |
+| `ultra-powers` | 40 | 26 |
+
+`superpowers` at 0 routed means every skill it names becomes an orphan and any count
+claim fires R6. A rule that reports the reference implementation as 100% defective is
+the rule that is wrong. Inside a fence a line is an example or a diagram, so its
+NAMES do not count; its ROUTES still do.
+
+**ALSO CORRECTED:** the plan bundled `expect(checkSectionOrder(text)).toEqual([])`
+into the fenced-block test using a fixture whose fence comes AFTER `## Routing`.
+Measured against the pre-task code, that assertion already returned `[]`, so it was
+vacuous in the "before" direction and would have been declared green without ever
+failing. The replacement puts the fenced heading BEFORE `## Routing`, where it does
+fail first.
+
+**VERIFIED (2026-07-28):** the A8 crafted defect file (passive backticked index,
+quote triggers, `47+ skills`, `## Attributions and index`, and the from-memory
+escape) scored **0** errors before this task and scores **9** across five of the six
+rules after it: order 1, orphans 5, advisory 1, drift 1, counts 1. Verbs is 0 by
+design now, because R3 became case-insensitive and `Invoke` is a legal verb.
 
 - [ ] **Step 4: Run and verify**
 

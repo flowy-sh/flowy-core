@@ -18,6 +18,19 @@
  * calls, and a check pretending to cover them would be a test that can never
  * fail, which this repo has already had to delete once.
  *
+ * STILL UNENFORCED, and named here so nobody mistakes green for compliant. A
+ * crafted FLOW.md reproducing every defect these rules exist to stop passed all
+ * six checks with 0 errors (A8). Four of those holes are now closed. These are
+ * the ones that are not, and are not closeable mechanically:
+ *   - R1 TRIGGER QUALITY. A route line with an empty trigger (`- → invoke p:x`)
+ *     is the passive index by another name, and passes.
+ *   - R1 NEGATIVE MENTIONS. A skill named precisely to say DO NOT ROUTE HERE
+ *     reads as an orphan, and the remedy text ("give it a trigger, or remove
+ *     the name") is wrong advice for it. One such case ships in ultra-powers.
+ *   - R4 is a three-entry denylist. "answer from the skill's GUIDING
+ *     principles" passes. It is a floor, not coverage.
+ *   - R2 (trigger style) and R7 (register) are judgment calls, by design.
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -38,8 +51,26 @@ function normalizeLines(text) {
     .split("\n");
 }
 
-const SKILL_REF = /\b[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*\b/g;
+/**
+ * Namespaced skill reference. BOTH sides must start with a letter, which is
+ * what keeps `http://localhost:3000` and a `09:30` standup out of the results:
+ * a port and a time are not skills, and reporting them as orphans is how a
+ * checker gets switched off.
+ */
+const SKILL_REF = /\b([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)\b/g;
 const ARROW = /(?:→|->)/;
+
+/**
+ * A fenced code block opens and closes on a line whose first non-space run is
+ * three backticks or three tildes.
+ *
+ * NAMES are not collected inside a fence, because a shell command is not a
+ * passive index and `test:watch` is not a skill. ROUTES still are: every
+ * shipped Flow puts its ENTIRE routing tree inside a fence, so skipping fenced
+ * lines wholesale would empty the routed set and report every skill in the file
+ * as an orphan.
+ */
+const FENCE = /^\s*(?:```|~~~)/;
 
 /**
  * A backticked bare slug in prose: `ai-seo`, `ads`, `programmatic-seo`.
@@ -99,7 +130,9 @@ export function checkRouteVerbs(text) {
   for (const [i, line] of normalizeLines(text).entries()) {
     if (!isRouteLine(line)) continue;
     const after = line.split(ARROW).slice(1).join(" ");
-    if (!/\binvoke\b/.test(after)) {
+    // Case-INSENSITIVE, like every sibling rule. Telling an author to lowercase
+    // a sentence-initial verb is how a checker gets switched off.
+    if (!/\binvoke\b/i.test(after)) {
       const ref = refsIn(after)[0] ?? "(unknown)";
       errors.push(`line ${i + 1}: route to "${ref}" has no verb. Write "→ invoke ${ref}".`);
     }
@@ -113,12 +146,19 @@ export function checkNoOrphanSkills(text) {
   const credited = new Set();
   const named = new Map();
   let section = null;
+  let inFence = false;
 
   for (const [i, line] of normalizeLines(text).entries()) {
-    const h = headingOf(line);
-    if (h !== null) {
-      section = h;
+    if (FENCE.test(line)) {
+      inFence = !inFence;
       continue;
+    }
+    if (!inFence) {
+      const h = headingOf(line);
+      if (h !== null) {
+        section = h;
+        continue;
+      }
     }
     if (isRouteLine(line)) {
       for (const r of refsIn(line)) {
@@ -129,13 +169,18 @@ export function checkNoOrphanSkills(text) {
       }
       continue;
     }
+    // Inside a fence a line is an example, a shell command or a diagram. Its
+    // routes counted above; its NAMES do not.
+    if (inFence) continue;
     // Attribution must name upstream skills in order to credit them. Requiring
     // a route for each would force a choice between crediting and validating.
     // And a name Attribution credits is not an orphan ANYWHERE in the file: a
     // Flow that repackages five plugins under one namespace still has to say
     // whose work it routes, and an attribution-first repo must never ship a
     // linter that answers an upstream credit with "remove the name".
-    if (/^attribution/i.test(section ?? "")) {
+    // EXACT heading, not a prefix: `## Attributions and index` was being read as
+    // Attribution, which is one rename away from exempting a whole passive index.
+    if (/^attribution$/i.test((section ?? "").trim())) {
       for (const c of [...bareSlugsIn(line), ...boldNamesIn(line)]) credited.add(c);
       continue;
     }
@@ -154,7 +199,18 @@ export function checkNoOrphanSkills(text) {
 
 /** R5: Routing must be the first `##` section. */
 export function checkSectionOrder(text) {
-  const headings = normalizeLines(text).map(headingOf).filter((h) => h !== null);
+  const headings = [];
+  let inFence = false;
+  for (const line of normalizeLines(text)) {
+    if (FENCE.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue; // `## Phases` shown as an EXAMPLE is not a section
+    const h = headingOf(line);
+    if (h !== null) headings.push(h);
+  }
+
   if (headings.length === 0) return ["FLOW.md has no ## sections"];
   if (!/^routing/i.test(headings[0])) {
     return [`"## ${headings[0]}" precedes "## Routing". Routing must be the first section.`];
@@ -184,14 +240,23 @@ export function checkDriftClause(text) {
  * Under-claiming is fine; a Flow may describe a subset of what it routes.
  */
 export function checkClaimedCounts(text) {
+  const lines = normalizeLines(text);
   const routed = new Set();
-  for (const line of normalizeLines(text)) {
+  for (const line of lines) {
     if (isRouteLine(line)) for (const r of refsIn(line)) routed.add(r);
   }
 
+  // ONE pattern: hyphen or space, singular or plural, optional `+`. The crafted
+  // defect file wrote "47+ skills" and passed with zero errors because two
+  // alternations between them covered neither. DEDUPED, because saying
+  // "40 skills" three times is one over-claim, not three.
+  const claims = new Set();
+  for (const m of lines.join("\n").matchAll(/\b(\d+)\s*\+?[\s-]*skills?\b/gi)) {
+    claims.add(Number(m[1]));
+  }
+
   const errors = [];
-  for (const m of text.matchAll(/\b(\d{2,})[- ]skill\b|\b(\d{2,})\s+skills\b/gi)) {
-    const claimed = Number(m[1] ?? m[2]);
+  for (const claimed of claims) {
     if (claimed > routed.size) {
       errors.push(
         `claims ${claimed} skills but routes ${routed.size}. State a number the file can back.`,
