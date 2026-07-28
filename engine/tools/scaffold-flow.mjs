@@ -55,7 +55,10 @@ stamp(targetDir);
 
 const testsDir = join(targetDir, "tests");
 mkdirSync(testsDir, { recursive: true });
-for (const f of ["validate-flow.mjs", "flow-scan.mjs"]) {
+// Every module validate-flow.mjs imports has to travel with it, or the new
+// repo's own `bun test` dies on a missing transitive import. flow-rules.mjs
+// joined that list on 2026-07-28; a test pins the whole set.
+for (const f of ["validate-flow.mjs", "flow-scan.mjs", "flow-rules.mjs"]) {
   cpSync(join(repoRoot, "tools", f), join(testsDir, f));
 }
 writeFileSync(join(testsDir, "flow.test.ts"), FLOW_TEST);

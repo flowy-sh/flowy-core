@@ -10,6 +10,36 @@
 
 **Spec:** `docs/decisions/2026-07-28-flow-authoring-rules.md`
 
+## STATUS (2026-07-28)
+
+| Task | State |
+|---|---|
+| 1. Rule module: verbs + orphans (R1, R3) | **DONE** |
+| 2. Section order, advisory, drift, counts (R4, R5, R6) | **DONE** |
+| 3. Wire into validate-flow, opt-in | **DONE** |
+| 4. Rewrite growth-marketing FLOW.md | open |
+| 5. growth-marketing FLOW-compact.md | open |
+| 6. ultra-powers sweep | open |
+| 7. superpowers sweep | open |
+| 8. Turn enforcement on | open, blocked by 4-7 |
+| 9. Born-compliant template + scaffold | **DONE** |
+| 10. Banner clause | open |
+| 11. Release | open |
+
+**Task 9 moved earlier than planned, because the plan was wrong about it.** It assumed a
+template existed at `templates/flow-standard/`. It did not exist anywhere in this repo, and
+`scaffold-flow.mjs` copies from `engine/templates/flow-standard` — so **the scaffolder was
+broken and died with ENOENT on every invocation**, untested. Creating the born-compliant
+template fixed the tool and satisfied Task 9 at the same time.
+
+**A pre-existing validator bug surfaced while doing it.** `validate-flow.mjs` scanned the whole
+file for `invoke <slug>`, so the standard's own mandated sentence ("producing it when a trigger
+matched and you did not invoke is a VIOLATION") reported a routed skill named `"is"` and failed
+every Flow that followed the standard. Now scans route lines only. Both fixtures put their route
+on an arrow line, so the check keeps its teeth.
+
+224 tests pass.
+
 ## Global Constraints
 
 - **The banner stays ONE line.** Tests assert it. Do not split it or drop a clause.
