@@ -35,7 +35,7 @@
 | `engine/tools/flow-rules.mjs` | modified. CRLF-safe; sees bare-slug route forms; hardened rules | 5, 6, 7 |
 | `engine/tools/provenance-core.mjs` | modified. Route canonicalization, order scoring, verdict gate, hash | 8, 9, 11 |
 | `engine/tools/provenance-manifest.mjs` | modified. Canary slicing; template exclusion | 10 |
-| `engine/tools/flowy-provenance.mjs` | modified. Manifest validation, walk coverage, failure accounting | 12 |
+| `engine/tools/flowy-provenance.mjs` | modified. Manifest validation, walk coverage, failure accounting | 11 |
 | `engine/tools/license-buckets.mjs` | modified. Allowlist classification returning `null` for unmatched | 13 |
 | `engine/tests/*.test.ts` | modified. Harness returns rc; CRLF cases; negative-space fixture; CLI tests | throughout |
 | `.gitattributes` | modified. `*.md text eol=lf` | 5 |
@@ -1181,7 +1181,28 @@ git commit -m "fix(provenance): canaries that matched nothing, and one that accu
 
 - [ ] **Step 1: Make the module importable**
 
-Wrap the argv dispatch: `if (import.meta.main) { ... }`, and add `export { walk, check, generate };`
+Wrap the argv dispatch and add `export { walk, check, generate };`
+
+```javascript
+const invokedDirectly =
+  import.meta.main ??
+  (process.argv[1] ? resolve(process.argv[1]) === fileURLToPath(import.meta.url) : false);
+```
+
+**CORRECTED (2026-07-28, during execution). A bare `if (import.meta.main)` would have
+turned the documented command into a SILENT NO-OP.** `import.meta.main` is
+`undefined` on **node v20.16.0**, which is what every document in this repo, this
+plan's own commands, and its own Global Constraints tell you to run
+(`node engine/tools/flowy-provenance.mjs generate`). It is `true` only under bun.
+
+Proven in place, by patching the real file to the plan's literal form:
+`node engine/tools/flowy-provenance.mjs generate` printed **nothing** and exited 0,
+and `check overlays` exited **0** with no output. That is B8's exact failure mode
+reintroduced by the fix for B5: a clean bill for a scan that never ran. No unit test
+would have caught it, because the tests call the functions and never the command.
+
+A test now spawns the real `node` command and asserts it produces output, so the
+entry point is covered rather than assumed.
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -1189,8 +1210,15 @@ Wrap the argv dispatch: `if (import.meta.main) { ... }`, and add `export { walk,
 import { walk, check } from "../tools/flowy-provenance.mjs";
 
 test("a wrong-shaped manifest fails with a message, not a stack", () => {
-  writeFileSync(MANIFEST_PATH, '{"schema":"flowy-provenance-v2"}');
-  expect(check([fixtureDir])).toBe(2);
+  // CORRECTED: a TEMP path, and `check` takes the manifest path as an
+  // injectable second argument. The plan wrote the malformed JSON straight to
+  // MANIFEST_PATH, which overwrites the committed evidence artifact this whole
+  // subsystem exists to preserve, breaks the freshness guard in
+  // provenance-manifest.test.ts, and leaves the repo corrupted if the test
+  // fails part-way. A test must not destroy the thing it is testing.
+  const bad = join(mkdtempSync(join(tmpdir(), "flowy-cli-")), "manifest.json");
+  writeFileSync(bad, '{"schema":"flowy-provenance-v2"}', "utf8");
+  expect(check([fixtureDir], bad)).toBe(2);
 });
 
 test("the walk sees .mdx, .mdc and .rst", () => {

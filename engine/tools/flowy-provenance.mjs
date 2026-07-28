@@ -19,21 +19,26 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
-import { join, dirname, relative } from "node:path";
+import { join, dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { compareToCanonical } from "./provenance-core.mjs";
-import { buildManifest } from "./provenance-manifest.mjs";
+import { buildManifest, MANIFEST_SCHEMA } from "./provenance-manifest.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..");
 const MANIFEST_DIR = join(ROOT, "engine", "provenance");
 const MANIFEST_PATH = join(MANIFEST_DIR, "manifest.json");
 
-const TEXT_EXT = /\.(md|markdown|txt|json|ya?ml)$/i;
+/**
+ * Routing prose does not only live in `.md`. Cursor writes `.mdc`, several doc
+ * toolchains write `.mdx`, and `.rst` and `.adoc` are ordinary elsewhere. All
+ * four were silently skipped, so a copy sitting in any of them scanned clean.
+ */
+const TEXT_EXT = /\.(md|markdown|mdx|mdc|txt|rst|adoc|json|ya?ml)$/i;
 const SKIP_DIR = /^(\.git|node_modules|dist|build|\.next)$/;
 
-function walk(target) {
+export function walk(target) {
   const stat = statSync(target);
   if (!stat.isDirectory()) return [target];
 
@@ -49,7 +54,7 @@ function walk(target) {
   return out;
 }
 
-function generate() {
+export function generate() {
   const manifest = buildManifest(ROOT);
   mkdirSync(MANIFEST_DIR, { recursive: true });
   writeFileSync(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
@@ -66,13 +71,14 @@ function generate() {
 
 const pct = (n) => `${Math.round(n * 100)}%`;
 
+/** @returns {boolean|null} true on a hit, false on no match, null if UNREADABLE. */
 function reportFor(file, manifest) {
   let text;
   try {
     text = readFileSync(file, "utf8");
   } catch (err) {
     console.log(`SKIP  ${file}  (${err.code ?? "unreadable"})`);
-    return false;
+    return null; // NOT false. A file we could not read is not a file that matched nothing.
   }
 
   let hit = false;
@@ -111,23 +117,46 @@ function reportFor(file, manifest) {
   return hit;
 }
 
-function check(targets) {
+/**
+ * @param {string[]} targets files or directories to scan
+ * @param {string} manifestPath defaulted, and injectable so a test can hand in
+ *   a malformed manifest WITHOUT overwriting the committed evidence artifact
+ * @returns {0|1|2} 0 clean, 1 at least one match, 2 the scan could not be trusted
+ */
+export function check(targets, manifestPath = MANIFEST_PATH) {
   let manifest;
   try {
-    manifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8"));
+    manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   } catch {
-    console.error(`no manifest at ${relative(ROOT, MANIFEST_PATH)}. Run: generate`);
+    console.error(`no readable manifest at ${relative(ROOT, manifestPath)}. Run: generate`);
     return 2;
   }
 
+  // A manifest of the wrong shape used to reach `manifest.flows` and throw a
+  // raw TypeError stack at whoever ran the documented command.
+  if (manifest?.schema !== MANIFEST_SCHEMA || !Array.isArray(manifest.flows)) {
+    console.error(`manifest is not ${MANIFEST_SCHEMA}. Run: generate`);
+    return 2;
+  }
+
+  // FAILURES ARE FIRST-CLASS STATE, not a swallowed exception. An unreadable
+  // target was dropped and the run still printed "No match" and exited 0, which
+  // is a clean bill of health for a scan that never happened.
+  let unreadable = 0;
   const files = targets.flatMap((t) => {
     try {
       return walk(t);
     } catch (err) {
       console.error(`cannot read ${t}: ${err.code ?? err.message}`);
+      unreadable += 1;
       return [];
     }
   });
+
+  if (unreadable > 0) {
+    console.log(`WARNING: ${unreadable} target(s) unreadable and NOT scanned.`);
+    return 2;
+  }
 
   if (files.length === 0) {
     console.error("no readable files in the given targets");
@@ -135,10 +164,20 @@ function check(targets) {
   }
 
   let anyHit = false;
-  for (const f of files) anyHit = reportFor(f, manifest) || anyHit;
+  let skipped = 0;
+  for (const f of files) {
+    const r = reportFor(f, manifest);
+    if (r === null) skipped += 1;
+    else anyHit = r || anyHit;
+  }
 
   console.log("");
+  if (skipped > 0) {
+    console.log(`WARNING: ${skipped} file(s) unreadable and NOT scanned. This is not a clean bill.`);
+  }
+
   if (!anyHit) {
+    if (skipped > 0) return 2;
     console.log(`checked ${files.length} file(s). No match against any Flowy Flow.`);
     return 0;
   }
@@ -148,14 +187,32 @@ function check(targets) {
   return 1;
 }
 
-const [command, ...rest] = process.argv.slice(2);
+/**
+ * Run the argv dispatch ONLY when invoked as a command, so the module can be
+ * imported and tested. 161 lines of documented entry point had zero coverage
+ * for exactly this reason.
+ *
+ * `import.meta.main` alone is NOT enough: it is `undefined` on node v20, which
+ * is what every document here tells you to run this with. A bare
+ * `if (import.meta.main)` would turn `generate` and `check` into silent no-ops
+ * on the real entry point while every unit test kept passing, because the tests
+ * call the functions and never the command. The argv fallback covers node; a
+ * test asserts the command itself still works.
+ */
+const invokedDirectly =
+  import.meta.main ??
+  (process.argv[1] ? resolve(process.argv[1]) === fileURLToPath(import.meta.url) : false);
 
-if (command === "generate") {
-  process.exit(generate());
-} else if (command === "check" && rest.length > 0) {
-  process.exit(check(rest));
-} else {
-  console.error("usage: flowy-provenance generate");
-  console.error("       flowy-provenance check <file-or-dir>...");
-  process.exit(2);
+if (invokedDirectly) {
+  const [command, ...rest] = process.argv.slice(2);
+
+  if (command === "generate") {
+    process.exit(generate());
+  } else if (command === "check" && rest.length > 0) {
+    process.exit(check(rest));
+  } else {
+    console.error("usage: flowy-provenance generate");
+    console.error("       flowy-provenance check <file-or-dir>...");
+    process.exit(2);
+  }
 }
