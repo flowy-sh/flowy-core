@@ -17,11 +17,11 @@
 | 1. Rule module: verbs + orphans (R1, R3) | **DONE** |
 | 2. Section order, advisory, drift, counts (R4, R5, R6) | **DONE** |
 | 3. Wire into validate-flow, opt-in | **DONE** |
-| 4. Rewrite growth-marketing FLOW.md | open |
+| 4. Rewrite growth-marketing FLOW.md | open, **GATED**: does routed `seo-audit` fire? UNANSWERED |
 | 5. growth-marketing FLOW-compact.md | open |
 | 6. ultra-powers sweep | open |
 | 7. superpowers sweep | open |
-| 8. Turn enforcement on | open, blocked by 4-7 |
+| 8. Turn enforcement on | open, blocked by 4-7 AND by remediation Task 5 (CRLF) on Windows |
 | 9. Born-compliant template + scaffold | **DONE** |
 | 10. Banner clause | open |
 | 11. Release | open |
@@ -67,7 +67,7 @@ on an arrow line, so the check keeps its teeth.
 | `overlays/ultra-powers/flows/ultra-powers/FLOW.md` | verb + orphan sweep |
 | `overlays/ultra-powers/flows/ultra-powers/FLOW-compact.md` | matched to parent |
 | `overlays/superpowers/flows/superpowers/FLOW.md` | sweep only |
-| `templates/flow-standard/FLOW.md` | born-compliant template |
+| `engine/templates/flow-standard/FLOW.md` | born-compliant template. **Path corrected:** the repo-root `templates/flow-standard/` this plan originally named does not exist, and `scaffold-flow.mjs` copies from `engine/templates/flow-standard` |
 | `engine/hooks/flowy-inject.sh` | one added banner clause. LAST task |
 
 ---
@@ -474,6 +474,29 @@ git commit -m "feat(validate): opt-in authoring rules, off by default"
 **Files:**
 - Modify: `overlays/growth-marketing/flows/growth-marketing/FLOW.md`
 
+### BLOCKING GATE. Do not start this task until it is answered.
+
+**Does the already-routed `marketing-skills:seo-audit` actually fire?**
+
+`seo-audit` is the only SEO skill that already has a route, a state trigger and the verb. It is
+the control for the entire missing-route theory, and answering it costs one observation.
+
+- [ ] **Gate step: observe an SEO turn under the CURRENT `growth-marketing` Flow and record
+      whether `marketing-skills:seo-audit` was invoked.**
+
+- **It fires** -> the missing-route theory holds. Routed SEO skills fire, unrouted ones do not,
+  and the difference between them is the route. Proceed with the rewrite exactly as written below.
+- **It does NOT fire** -> **a missing route explains nothing, and this task as written is the
+  wrong fix.** The skill WITH a route behaves the same as the 40 without one, so R1 is not the
+  cause and adding 40 routes adds 40 more routes that also will not fire. The leading explanation
+  is then the namespace contest recorded in the spec's confounder 2: `claude-seo` ships 19 SEO
+  skills and the founder's own `overlays/ultra-powers/flows/ultra-powers/FLOW.md` line 16 says
+  "`claude-seo` owns SEO execution; `marketing-skills` owns GTM", while `growth-marketing` has no
+  disambiguation section at all. The real fix is then a **disambiguation section** stating which
+  namespace owns SEO, and the route sweep becomes secondary hygiene rather than the headline fix.
+
+Record the answer in this plan's STATUS block before proceeding either way.
+
 This is the failing file and the reason the cycle exists. Every installed
 `marketing-skills` skill gets an R1 verdict: a state-based trigger, or its name
 removed. None stays named without a trigger.
@@ -744,6 +767,31 @@ cd engine && bun -e 'import {checkFlowRules} from "./tools/flow-rules.mjs"; impo
 This file is the one that works. Do not rewrite it for consistency with the
 others; every unnecessary edit risks the behaviour we are trying to copy.
 
+- [ ] **Step 2a: ESCAPE HATCH. When a rule flags THIS file, suspect the rule first.**
+
+`superpowers` is the reference implementation. Its ~97% firing is the behaviour the entire cycle
+exists to reproduce elsewhere. So when a rule fires on it, there are two readings, and the
+default one is backwards:
+
+- the file is wrong and the rule caught it, or
+- **the rule encodes something the working file does not do, and the rule is what is wrong.**
+
+For every other file, Task 8's instruction stands: fix the FILE, never the rule. **That
+instruction does not apply to `superpowers`.** Changing this file to satisfy a rule that its
+working version violates is changing the reference implementation to match a guess about why it
+works. That is the one edit with a real chance of destroying the effect being copied.
+
+Procedure per flagged line:
+
+1. Ask what the working file does today and why the rule objects.
+2. If the file's current form is defensible, **amend the rule and its tests**, and record in the
+   rule module's header why `superpowers` is the counter-example.
+3. Only edit `superpowers` when the flagged line is a defect on its own terms, independent of the
+   rule, for example a genuinely broken route target or a count the file cannot back.
+
+The current count is **2** errors on this file (`growth-marketing` is 17 and `ultra-powers` is
+56). Two is small enough to reason about line by line. Do that rather than sweeping them.
+
 - [ ] **Step 3: Regenerate provenance, run the suite, commit**
 
 ```bash
@@ -761,6 +809,15 @@ git commit -m "fix(superpowers): authoring-rule sweep, minimal edits"
 
 **Interfaces:**
 - Consumes: `checkFlowRules` from Task 2, and the compliant files from Tasks 4 to 7.
+
+**BLOCKED ON WINDOWS until Task 5 of `docs/plans/2026-07-28-ce-review-remediation.md` lands.**
+This test reads shipped FLOW.md files off the working tree. On a Windows checkout those files
+have CRLF line endings, and `flow-rules.mjs` splits on `"\n"` without stripping the `\r`, so
+every `##` heading is invisible: `checkSectionOrder` returns "FLOW.md has no ## sections" for
+every Flow and `checkNoOrphanSkills` loses its Attribution exemption. This test therefore cannot
+pass on Windows no matter how compliant the files are. Remediation Task 5 adds the shared
+`engine/tools/text-normalize.mjs` and `*.md text eol=lf` in `.gitattributes`, which fixes both.
+Land that first. A red suite here before then is the CRLF defect, not a non-compliant file.
 
 - [ ] **Step 1: Write the test**
 
@@ -799,6 +856,11 @@ Run: `cd engine && bun test tests/shipped-flows.test.ts`
 Expected: PASS for all three. Any failure means a task 4 to 7 file is not
 actually compliant. Fix the FILE, never the rule.
 
+**One exception, and only one: `superpowers`.** See Task 7 Step 2a. It is the reference
+implementation whose behaviour this cycle is trying to copy, so a rule that flags it is
+evidence against the rule before it is evidence against the file. For `growth-marketing` and
+`ultra-powers` the instruction above holds without exception.
+
 - [ ] **Step 3: Commit**
 
 ```bash
@@ -811,7 +873,7 @@ git commit -m "test(rules): enforce authoring rules on every shipped Flow"
 ## Task 9: Born-compliant template and scaffold
 
 **Files:**
-- Modify: `templates/flow-standard/FLOW.md`
+- Modify: `engine/templates/flow-standard/FLOW.md`
 - Modify: `engine/tools/scaffold-flow.mjs`
 - Test: `engine/tests/flow-rules.test.ts`
 
@@ -820,7 +882,7 @@ git commit -m "test(rules): enforce authoring rules on every shipped Flow"
 ```typescript
 test("the shipped template passes its own rules", () => {
   // A template that violates the standard teaches every new Flow to violate it.
-  const p = join(import.meta.dir, "..", "..", "templates", "flow-standard", "FLOW.md");
+  const p = join(import.meta.dir, "..", "templates", "flow-standard", "FLOW.md");
   expect(checkFlowRules(readFileSync(p, "utf8"))).toEqual([]);
 });
 ```
@@ -850,7 +912,7 @@ the template, update it so the two cannot drift.
 
 ```bash
 cd engine && bun test && cd ..
-git add templates/flow-standard/FLOW.md engine/tools/scaffold-flow.mjs engine/tests/flow-rules.test.ts
+git add engine/templates/flow-standard/FLOW.md engine/tools/scaffold-flow.mjs engine/tests/flow-rules.test.ts
 git commit -m "feat(standard): new Flows are born compliant"
 ```
 
@@ -955,8 +1017,23 @@ git add -A && git commit -m "chore(release): flow authoring rules" && git push
 /flowy:growth-marketing
 ```
 
-Then confirm the ⚑ banner is present and that `FLOW.md` resolves. The founder
-measures firing from here in real usage; no harness is built.
+Then confirm the ⚑ banner is present and that `FLOW.md` resolves.
+
+- [ ] **Step 5: Measure both dials with the harness that already exists**
+
+`experiments/auto-invocation/{extract,judge,score,precision}.mjs` in the marketplace repo, 16
+tests green, merged at `18a3b2a`. Re-point `extract.mjs`'s banner detector at the
+`growth-marketing` banner. That is the whole cost. Nothing in `judge.mjs`, `score.mjs` or
+`precision.mjs` is Flow-specific.
+
+Score the window defined in the spec's expected-effect table, and score **both** dials.
+`docs/handoffs/2026-07-12-auto-invocation-firing-precision-and-overlay-context.md` names this
+cycle as its ranked next step and states the win condition: net correct firing up, precision does
+not crater. Firing alone is not a result. Precision must not fall below **88%**, the conservative
+bound of the prior band, or the cycle is reverted starting with the banner clause.
+
+The founder's recorded decision (`docs/OPEN-WORK.md` section 8) is "do not BUILD one". Reusing
+the one that exists is not building one.
 
 ---
 
@@ -964,7 +1041,13 @@ measures firing from here in real usage; no harness is built.
 
 Recorded so a later reader does not think it was forgotten.
 
-- **Any firing-rate harness.** The founder measures in real usage and declined one.
+- **BUILDING a firing-rate harness. One already exists, and Task 11 Step 5 reuses it.** An
+  earlier draft of this line said "any firing-rate harness" was out of scope because the founder
+  "declined one". The instrument is `experiments/auto-invocation/{extract,judge,score,precision}.mjs`
+  in the marketplace repo, 16 tests green, merged at `18a3b2a`. The recorded decision in
+  `docs/OPEN-WORK.md` section 8 is "do not BUILD one", which is not "do not measure". Re-pointing
+  `extract.mjs`'s banner detector is the entire cost, and the 2026-07-12 handoff requires firing
+  and precision to be measured together because they trade against each other.
 - **`REINJECT_N` cadence changes.** Worth having, unmeasured, and changing it alongside the content would confound both.
 - **The activator** (`engine/skills/_activator/SKILL.md`). Already carries receipt-not-promise; not implicated by the differential.
 - **Adding or removing skills from a Flow's curation.** This is a routing change, not a curation change. The only removals permitted are names that cannot be given a trigger (R1).

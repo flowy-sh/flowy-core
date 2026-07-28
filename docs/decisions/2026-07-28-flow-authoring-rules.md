@@ -56,6 +56,46 @@ action, and the model discharged the obligation by writing the line. A route lin
 noun is a reference. A route line that names a verb is an instruction. **Same defect class, one
 layer down**, and it was fixed in the banner while the FLOW.md files were left alone.
 
+### Three confounders this differential does not control for
+
+The six defects above are observed facts about the two files. The causal claim built on them, that
+defect #1 is why SEO skills do not fire, is not established by a two-file comparison. Three
+specific alternatives are live, and none of them is ruled out.
+
+**1. `ultra-powers` is a free third data point, and the differential never consults it.** Run the
+rule engine over all three shipped Flows and the counts are `growth-marketing` **17**,
+`superpowers` **2**, `ultra-powers` **56**. The differential compares the best file to the worst
+and reads the gap as cause. `ultra-powers` carries **more than three times** `growth-marketing`'s
+defect count, so if defect density is what predicts firing, `ultra-powers` should fire worse than
+`growth-marketing`. Nobody has looked. A two-point comparison cannot separate "defect count" from
+every other difference between two files: different domain, different skill counts, different
+upstream plugin, different work the founder actually does in each. The third point is installed,
+in daily use, and is the natural control. Consult it before treating the gap as causal.
+
+**2. The SEO skills may be losing a namespace contest, not missing a trigger.** `claude-seo` is
+installed and ships **19** SEO skills (`seo`, `seo-audit`, `seo-backlinks`, `seo-competitor-pages`,
+`seo-content`, `seo-dataforseo`, `seo-geo`, `seo-google`, `seo-hreflang`, `seo-image-gen`,
+`seo-images`, `seo-local`, `seo-maps`, `seo-page`, `seo-plan`, `seo-programmatic`, `seo-schema`,
+`seo-sitemap`, `seo-technical`). The founder's own
+`overlays/ultra-powers/flows/ultra-powers/FLOW.md` line 16 states the resolution:
+**"`claude-seo` owns SEO execution; `marketing-skills` owns GTM."** That is a routing document in
+the fleet assigning SEO execution AWAY from the exact skills the complaint is about.
+`growth-marketing` has **no disambiguation section at all**, so on an SEO turn the agent sees two
+namespaces competing and one document in the fleet naming the winner, and the winner is not
+`marketing-skills`. This is fully consistent with the founder's observation and R1 does not touch
+it. The fix it implies is a disambiguation section in `growth-marketing` stating which namespace
+owns SEO, which this spec does not currently mandate.
+
+**3. The ~90% figure is PRECISION. The complaint is RECALL. They are not commensurable.** The
+measured ~88% to ~92% answers "when Flowy auto-fires, is it the right skill?". The founder's
+complaint, and every row of the expected-effect table, is "does it fire often enough?". Precision
+cannot be used as a baseline for recall, and improving recall mechanically pressures precision
+downward. Worse, there is currently **no recall baseline at all**: the 2026-07-12 work found that
+per-turn correctness recall was the wrong model for skills that fire once and govern many turns,
+read ~10% as an artifact, and suppressed it (`DIAGNOSIS.md`, root causes RC1 to RC4). So any
+"firing improved" claim needs a recall number defined and measured the same way before and after.
+Neither exists yet. Do not net one against the other.
+
 ## Decisions
 
 Seven authoring rules become part of the Flow Standard. R1 to R6 are corrections; R7 is the
@@ -119,7 +159,7 @@ Founder-selected, all four surfaces.
 2. **`ultra-powers`** FLOW.md and FLOW-compact.md. ~40 distinct skills across 125 route
    references, and the public downloadable Flow, so the largest blast radius.
 3. **`superpowers`** FLOW.md. Already largely compliant; needs the sweep, not a rewrite.
-4. **The Flow Standard**: `templates/flow-standard/FLOW.md`, `engine/tools/validate-flow.mjs`,
+4. **The Flow Standard**: `engine/templates/flow-standard/FLOW.md`, `engine/tools/validate-flow.mjs`,
    `engine/tools/scaffold-flow.mjs`, so a new Flow is born compliant and CI rejects one that is
    not.
 5. **The banner**: one added clause. See the caveat below.
@@ -143,6 +183,23 @@ never fail-closed, and `flowy_plugins_base` containment is not touched.
 The validator must land **with or after** the file fixes. Landing it first fails the repo on its
 own contents, which is how a useful check gets disabled for being annoying.
 
+### GATE, blocking the growth-marketing rewrite
+
+**Answer this before the rewrite starts: does the already-routed `marketing-skills:seo-audit`
+actually fire?**
+
+It is the one SEO skill that already has a route, a trigger and a verb. It is the control the
+whole missing-route theory rests on, and it costs one observation.
+
+- **If it fires**, the missing-route theory holds: routed SEO skills fire, unrouted ones do not,
+  and the difference between them is the route. Proceed with the rewrite as specified.
+- **If it does NOT fire**, a missing route explains nothing. The skill with a route behaves the
+  same as the 40 without one, so R1 cannot be the cause and adding 40 routes is 40 more routes
+  that also will not fire. In that case the namespace contest in confounder 2 is the leading
+  explanation and the real fix is a **disambiguation section** in `growth-marketing`, not routes.
+
+This gate is on plan Task 4. Do not start the rewrite with it unanswered.
+
 1. Validator checks, written but not yet enforced, plus their tests
 2. `growth-marketing` FLOW.md and compact
 3. `ultra-powers` FLOW.md and compact
@@ -153,24 +210,48 @@ own contents, which is how a useful check gets disabled for being annoying.
 
 ## Expected effect, per defect
 
-The founder measures firing in real usage; no harness is built. Recording the expected effect
-per defect is what makes that measurement mean something afterwards.
+Every row below carries a **threshold, a denominator and a window**, so every row can come out
+false. An earlier draft stated directional effects ("begin firing at all", "fewer turns") that no
+observation could contradict, which is a prediction that costs nothing to make and proves nothing
+when it holds.
 
-| Defect fixed | Expected observable |
+**The window** is the first 20 qualifying turns after the rewritten `growth-marketing` Flow is
+active. A **marketing turn** is one whose subject is copy, a channel, a converting surface,
+pricing, a launch, or a growth metric, classified before the invocation is looked at, not after.
+That classification is the denominator; state it before scoring, or the measurement is a
+post-hoc.
+
+| Defect fixed | Falsifiable prediction |
 |---|---|
-| #1 routes for the 40 orphans | SEO and channel skills (`ai-seo`, `programmatic-seo`, `schema`, `site-architecture`, `social`, `emails`, `analytics`) begin firing at all. Currently a floor of zero |
-| #2 state-based triggers | skills fire on paraphrased requests, not only on near-verbatim ones |
-| #3 verbs | fewer "named the skill, then did the work myself" turns |
-| #4 narrowed advisory | fewer advisory answers that should have been invocations |
-| #5, #6 | no direct firing effect; they remove ambiguity and a false claim |
+| #1 routes for the 40 orphans | Of the 20 marketing turns, **at least 8** invoke a `marketing-skills` skill that has NO route today (`ai-seo`, `programmatic-seo`, `schema`, `site-architecture`, `social`, `emails`, `analytics` and the rest of the 40). Fewer than 4 falsifies #1 as the primary cause and points at the namespace confounder below |
+| #2 state-based triggers | Of the 20, **at least 10** of the turns phrased WITHOUT wording close to the old quote triggers invoke a marketing skill. If paraphrased turns still miss at the old rate, R2 did nothing |
+| #3 verbs | Across the same 20, **at most 2** turns name a skill in the reply and then do the work without invoking it. This is the receipt-not-promise defect and it is countable per turn |
+| #4 narrowed advisory | Across the same 20, **zero** replies substitute "the skill's principles", or any equivalent, for an invocation. One occurrence falsifies the denylist as sufficient |
+| #5, #6 | **No firing prediction.** They remove ambiguity and a false claim. They are falsified by the validator failing on a shipped Flow, nowhere else |
+| ALL, precision counter-measure | Firing precision over the same 20 turns **does not fall below 88%**, the conservative bound of the prior measured band. A firing gain bought with a precision fall below 88% is a REGRESSION and the cycle is reverted, starting with the banner clause |
 
-**Counter-signal to watch:** false fires. If plain questions start invoking marketing skills, the
-cause is most likely R7 or the banner clause, in that order, not R1.
+**On the counter-signal.** An earlier draft said that if plain questions start invoking marketing
+skills, the cause is "most likely R7 or the banner clause, in that order, not R1". That sentence
+assigned the only disconfirming observation to two other causes before a single observation had
+been made, which made R1 unfalsifiable by construction. It is deleted. **R1 and R2 are the
+leading suspects for a false fire**, because they are what raise 40 skills from unmatched to
+matched and widen every trigger while doing it. Attribution is decided by which turns fired and
+against which triggers, not in advance.
 
 ## Risks
 
-- **False fires.** R1 raises 40 skills from no-trigger to triggered. The mitigation is R2: a
-  state condition is narrower than a keyword, not broader.
+- **False fires. R2 AMPLIFIES this risk. It does not mitigate it.** R1 raises 40 skills from
+  no-trigger to triggered, and R2 makes every one of those triggers match a SUPERSET of what a
+  user-quote trigger would have matched. That superset is the stated benefit two sections up:
+  "Let's improve the landing page" matches the state condition and misses the quote. Breadth cuts
+  both ways. The same condition that catches the paraphrase also catches turns where no marketing
+  skill was wanted. An earlier draft of this document claimed a state condition is "narrower than
+  a keyword" and offered that as the mitigation. It is not narrower, and the Evidence section
+  says the opposite. Phrasing cannot mitigate what phrasing causes.
+
+  **The real mitigation is measurement, not phrasing.** Run the precision half of the existing
+  harness alongside the firing half, and treat a firing gain bought with a precision fall as a
+  regression. See "Out of scope" below: the harness already exists.
 - **Token cost.** Routing 47 skills makes `growth-marketing` FLOW.md substantially longer. FLOW.md
   is read once per session by the model, not injected per prompt, so this is a session-start cost,
   not a per-prompt one. The per-prompt cost lives in FLOW-compact.md, which stays terse by design.
@@ -181,7 +262,31 @@ cause is most likely R7 or the banner clause, in that order, not R1.
 
 ## Out of scope
 
-- Any firing-rate harness. The founder measures in real usage and previously declined one.
+- **BUILDING a firing-rate harness. One already exists, so this is a reuse, not a build.** An
+  earlier draft said "any firing-rate harness" was out of scope because the founder "previously
+  declined one". That misstates the decision on both halves.
+
+  **The instrument exists.** `experiments/auto-invocation/{extract,judge,score,precision}.mjs` in
+  the marketplace repo, with `*.test.mjs`, 16 tests green under `bun test`, merged at commit
+  `18a3b2a` ("feat(auto-invocation): firing-precision harness + honest ~90% result (Phase 1)").
+  `catalog.json` is the skill catalog the judge sees. The recorded founder decision, in
+  `docs/OPEN-WORK.md` section 8, is **"do not BUILD one"**. Not building a second harness and not
+  measuring are different commitments, and only the first one was made.
+
+  **The cost of using it here is re-pointing one detector.** `extract.mjs` finds the routing
+  banner to segment a transcript into turns; it is pointed at the superpowers-era banner. Pointing
+  it at the `growth-marketing` banner is the entire change. Nothing else in `judge.mjs`,
+  `score.mjs` or `precision.mjs` is Flow-specific.
+
+  **Firing and precision trade against each other, so both must be measured.**
+  `docs/handoffs/2026-07-12-auto-invocation-firing-precision-and-overlay-context.md` records this
+  cycle as its own "next, ranked" item 1, the dictator-language experiment, and states the win
+  condition: net correct firing up, precision does not crater, **measure BOTH dials with this
+  harness**. It also records the prior result: activation on roughly 1 prompt in 4, precision
+  ~88% (sonnet judge, conservative) to ~92% (opus peer-judge plus founder review), n=25, one
+  person's sessions, a known auto/manual classifier bug. Internal-grade, never quoted publicly.
+  Measuring firing alone would let a precision collapse read as a success, which is the exact
+  failure this cycle's own R2 risk describes.
 - `REINJECT_N` cadence changes. A knob worth having, unmeasured, and changing it at the same time
   as the content would confound both.
 - The activator (`engine/skills/_activator/SKILL.md`). Already carries receipt-not-promise and is
