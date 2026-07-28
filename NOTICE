@@ -12,15 +12,23 @@ Concretely:
     overlays/*/flows/**/FLOW.md
     overlays/*/flows/**/FLOW-compact.md
     overlays/*/flows/**/ATTRIBUTION.md
+    engine/templates/flow-standard/**.md    the scaffold template
     README.md
     docs/**
 
   Apache-2.0 (see LICENSE-CODE)
-    engine/**            the hook, the activator, the tools, the tests
+    engine/**            the hook, the activator, the tools, the tests,
+                         and the scaffold template's plugin config
     overlays/*/skills/** the activate/deactivate/status shims
     overlays/*/.claude-plugin/**
     .claude-plugin/**
-    every other file in this repository
+
+  The two engine/templates lines are not a contradiction. The markdown in the
+  scaffold template is routing content: it carries the mandatory-routing
+  paragraph, the tree shape, the priority-on-collision ordering, and the
+  rationalization block. It is the routing most likely to be copied, because it
+  exists to be copied, so it carries share-alike. The plugin config beside it
+  executes, so it does not.
 
 The split is deliberate. The engine is a mechanism and we want it adopted
 everywhere, so it carries a permissive license with a patent grant. The routing

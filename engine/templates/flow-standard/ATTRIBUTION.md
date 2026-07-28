@@ -1,4 +1,4 @@
-# Attribution — __TITLE__
+# Attribution: __TITLE__
 
 Every skill this Flow routes to belongs to its author under its own license. This Flow bundles
 none of them; it routes to separately installed plugins.

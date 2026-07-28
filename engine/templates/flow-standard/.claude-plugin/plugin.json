@@ -1,6 +1,6 @@
 {
   "name": "__SLUG__",
   "version": "0.1.0",
-  "description": "__TITLE__ — a Flowy Flow.",
+  "description": "__TITLE__. A Flowy Flow.",
   "dependencies": { "flowy-core": "^1.0.0" }
 }

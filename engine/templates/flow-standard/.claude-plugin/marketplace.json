@@ -1,5 +1,5 @@
 {
   "name": "__SLUG__",
   "owner": { "name": "__TITLE__" },
-  "plugins": [{ "name": "__SLUG__", "source": ".", "description": "__TITLE__ — a Flowy Flow." }]
+  "plugins": [{ "name": "__SLUG__", "source": ".", "description": "__TITLE__. A Flowy Flow." }]
 }
