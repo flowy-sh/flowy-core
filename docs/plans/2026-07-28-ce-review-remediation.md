@@ -972,7 +972,28 @@ test("orderScore measures arrangement, not verbosity", () => {
 - [ ] **Step 3: Run and watch them fail**
 
 Run: `cd engine && bun test tests/provenance.test.ts`
-Expected: verdict is `derivative-likely`; orderScore is `0.6`.
+Expected: orderScore is `0.6`. Then, and ONLY then, the A10 test fails.
+
+**CORRECTED (2026-07-28, during execution). The two findings are ORDERED, and the
+plan's A10 numbers describe the post-B1 state, not the current one.** Measured
+against the fixture before any change: containment 1.0, order **0.46**, canaries 0,
+verdict **possible-derivative** — not `derivative-likely`, and not "100% order".
+
+B1 is what creates A10. Deduping the order signal takes the same fixture from 0.46
+to **0.857**, over the 0.8 threshold, and only then does the verdict become
+`derivative-likely`. Written in the plan's order the A10 test would have passed on
+arrival: a test that never failed, which is the defect class this plan exists to
+close. Fix `orderScore` FIRST, watch A10 go red, then gate the verdict.
+
+**ALSO CORRECTED: the plan does not say what to do with the test its own change
+breaks.** `reworded prose that keeps the routes and their order is flagged` asserts
+`derivative-likely` for a fixture that is structurally IDENTICAL to the honest
+negative control: same routes, same order, no carried prose. Under the new gate it
+becomes `possible-derivative`. That test is not deleted. It is renamed to state the
+truth, keeps its 100/100 evidence assertions, adds a `matchedRoutes` assertion, and
+expects `possible-derivative`. The sensitivity loss is real, deliberate, and must be
+visible in the suite rather than quietly dropped: no signal separates a copier who
+rewrote every sentence from an honest author who picked the same public skills.
 
 - [ ] **Step 4: Dedupe the order signal and gate the verdict**
 

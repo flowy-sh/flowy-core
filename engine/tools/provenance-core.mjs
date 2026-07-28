@@ -19,10 +19,19 @@
  *
  * SPECIFICITY IS THE DESIGN CONSTRAINT. Every skill we route to is public and
  * anyone may route to the same ones. Shared vocabulary is not evidence.
- * Containment alone is not evidence. Only high containment WITH preserved order
- * reaches `derivative-likely`, because that is the combination an independent
- * author does not reproduce. A tool that accuses an honest author is worse than
- * no tool, so the thresholds are deliberately set to under-claim.
+ * Containment alone is not evidence, and STRUCTURE ALONE IS NOT EVIDENCE
+ * EITHER: high containment with preserved order was believed to be the
+ * combination an independent author does not reproduce, and it is not. An
+ * independently written table over obra's public superpowers plugin scored 100%
+ * containment and 86% order with zero carried prose, because the selection was
+ * the whole plugin and the arrangement was a lifecycle nobody owns. That file
+ * is checked in at engine/tests/fixtures/independent-router.md.
+ *
+ * `derivative-likely` therefore requires ORIGINAL EXPRESSION carried across: a
+ * canary alongside the structural signal, or two canaries alone. Everything
+ * structural without it tops out at `possible-derivative`, which reports the
+ * same evidence and withholds only the word "likely". A tool that accuses an
+ * honest author is worse than no tool, so the thresholds under-claim.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -152,13 +161,18 @@ function longestCommonSubsequence(a, b) {
  *
  * Restricted to shared routes on purpose: a copier who deletes half our routes
  * has still copied the arrangement of the half they kept.
+ *
+ * FIRST-OCCURRENCE DEDUP on both sides. Repeating a route is verbosity, not
+ * arrangement, and it was diluting the denominator: our own superpowers FLOW.md
+ * mentions 14 distinct routes 26 times, so a VERBATIM copy of its Routing tree
+ * scored 0.46, and appending a skill index dropped it further.
  */
 export function orderScore(canonical, suspect) {
   const canonSet = new Set(canonical);
   const suspectSet = new Set(suspect);
 
-  const ours = canonical.filter((r) => suspectSet.has(r));
-  const theirs = suspect.filter((r) => canonSet.has(r));
+  const ours = [...new Set(canonical.filter((r) => suspectSet.has(r)))];
+  const theirs = [...new Set(suspect.filter((r) => canonSet.has(r)))];
   if (ours.length === 0 || theirs.length === 0) return 0;
 
   return longestCommonSubsequence(ours, theirs) / Math.max(ours.length, theirs.length);
@@ -189,8 +203,22 @@ export function compareToCanonical(canonical, suspectText) {
   let verdict = "no-match";
   if (exact) {
     verdict = "identical";
+    // STRUCTURE ALONE IS NOT EVIDENCE. Routing most of one plugin in lifecycle
+    // order is what an honest author independently produces: the selection is
+    // the whole plugin, so it encodes nothing, and the arrangement is a
+    // lifecycle nobody owns. An independently written table over obra's public
+    // superpowers plugin scored 100% containment and 86% order with zero
+    // canaries; engine/tests/fixtures/independent-router.md is that file.
+    // `derivative-likely` now requires ORIGINAL EXPRESSION carried across (a
+    // canary) alongside the structural signal.
+    //
+    // THE COST IS REAL AND DELIBERATE. A copier who lifts the routing tree and
+    // rewrites ALL the prose now reaches `possible-derivative`, not
+    // `derivative-likely`. That case and the honest author are structurally
+    // identical, and PROVENANCE.md already chose: "A tool that accuses an
+    // honest author is worse than no tool."
   } else if (
-    (containment >= DERIVATIVE_CONTAINMENT && order >= DERIVATIVE_ORDER) ||
+    (containment >= DERIVATIVE_CONTAINMENT && order >= DERIVATIVE_ORDER && canaryHits.length >= 1) ||
     canaryHits.length >= DERIVATIVE_CANARIES
   ) {
     verdict = "derivative-likely";

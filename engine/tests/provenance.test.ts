@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   normalizeText,
@@ -8,6 +10,8 @@ import {
   orderScore,
   compareToCanonical,
 } from "../tools/provenance-core.mjs";
+
+const MANIFEST_PATH = join(import.meta.dir, "..", "provenance", "manifest.json");
 
 /* ============================================================
    PROVENANCE / FINGERPRINT CORE (2026-07-28)
@@ -126,6 +130,12 @@ describe("orderScore", () => {
   test("no shared routes scores 0", () => {
     expect(orderScore(["a:1"], ["z:9"])).toBe(0);
   });
+
+  test("orderScore measures arrangement, not verbosity", () => {
+    // B1: repeated MENTIONS diluted the denominator, so a verbatim Routing tree
+    // scored 0.34 and an appended skill index dropped it below the threshold.
+    expect(orderScore(["a:1", "b:2", "c:3"], ["a:1", "a:1", "a:1", "b:2", "c:3"])).toBe(1);
+  });
 });
 
 describe("compareToCanonical", () => {
@@ -147,8 +157,17 @@ describe("compareToCanonical", () => {
     expect(r.exact).toBe(true);
   });
 
-  test("reworded prose that keeps the routes and their order is flagged", () => {
-    // The real case: a copier rewrites the descriptions, keeps the routing.
+  test("reworded prose that keeps the routes and their order reports FULL evidence, but does not accuse", () => {
+    // Was: expected `derivative-likely`. A10 forced this down to
+    // `possible-derivative`, and the demotion is the point, not a regression.
+    // This fixture and engine/tests/fixtures/independent-router.md are
+    // structurally IDENTICAL: same routes, same order, no carried prose. No
+    // signal separates a copier who rewrote every sentence from an honest
+    // author who picked the same public skills and arranged them by lifecycle.
+    // The evidence is still reported in full at 100/100, so a human reading the
+    // report sees exactly what a human needs to see. Only the machine's word
+    // "likely" is withheld, and PROVENANCE.md already chose that side: "A tool
+    // that accuses an honest author is worse than no tool."
     const reworded = `# My Router
 
   - want to know if the idea is good?   → ultra-powers:office-hours
@@ -162,7 +181,8 @@ describe("compareToCanonical", () => {
     expect(r.exact).toBe(false);
     expect(r.routeContainment).toBe(1);
     expect(r.orderScore).toBe(1);
-    expect(r.verdict).toBe("derivative-likely");
+    expect(r.matchedRoutes.length).toBe(5);
+    expect(r.verdict).toBe("possible-derivative");
   });
 
   test("canary strings carried verbatim are reported individually", () => {
@@ -224,6 +244,33 @@ describe("compareToCanonical", () => {
 
     expect(r.verdict).not.toBe("derivative-likely");
     expect(r.verdict).not.toBe("identical");
+  });
+
+  test("an INDEPENDENT router over the same public plugin is not accused", () => {
+    // A10, and it only becomes reachable once B1 is fixed: deduping the order
+    // signal takes this fixture from 0.46 to 0.857, over the threshold, at 100%
+    // containment with ZERO canaries. Every trigger phrase, section name and
+    // tie-break sentence in the fixture is original to it.
+    // PROVENANCE.md: "A tool that accuses an honest author is worse than no tool."
+    const manifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8"));
+    const sp = manifest.flows.find((f: { id: string }) => f.id === "superpowers");
+    const text = readFileSync(join(import.meta.dir, "fixtures", "independent-router.md"), "utf8");
+    const r = compareToCanonical(sp, text);
+
+    expect(r.routeContainment).toBe(1);
+    expect(r.canaryHits.length).toBe(0);
+    expect(r.verdict).not.toBe("derivative-likely");
+  });
+
+  test("a reworded copy that keeps routes AND a canary is still flagged", () => {
+    const d = {
+      id: "d",
+      hash: "",
+      routes: ["ns:a", "ns:b"],
+      canaries: ["Memory is not a research brief"],
+    };
+    const copy = "- when? → invoke ns:a\n- then? → invoke ns:b\nMemory is not a research brief.\n";
+    expect(compareToCanonical(d, copy).verdict).toBe("derivative-likely");
   });
 
   test("the report carries the evidence, not just a verdict", () => {
