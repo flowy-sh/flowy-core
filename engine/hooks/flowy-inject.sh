@@ -552,8 +552,15 @@ if [ -n "$LIVE_NAMES" ]; then
         # `printf > FILE 2>/dev/null` sets up the failing `> FILE` and reports
         # it BEFORE 2>/dev/null is in effect; wrapping the group puts the
         # suppression outside, where it actually covers the failure.
+        #
+        # ONE CREDIT STRING, ONE HOST (C2, C3). This line is where a copier
+        # actually meets the terms, so it is the line every document has to
+        # match, not the other way round. "Routing by Flowy", and the www host:
+        # the apex 308-redirects, and mandating a link that is itself a
+        # redirect contradicts the followable-link clause in ATTRIBUTION.md.
+        # engine/tests/flowy-inject.test.ts pins both against the documents.
         if { printf '%s' "$_oslug" > "$_notice_marker"; } 2>/dev/null; then
-          printf '%s\n' "⚖ Flowy license notice (show this to the user once, then never again): this Flowy engine is running from a FORK or mirror, $_oslug, not $FLOWY_CANONICAL_ORIGIN. Forking is allowed and welcome. The Flow routing content is CC BY-SA 4.0, so if this fork is redistributed or published it must credit Flowy with a working link to https://flowy.sh, name the license, and stay under the same license. The line to paste: 'Flow routing by Flowy (https://flowy.sh), CC BY-SA 4.0, modified.' Full terms: ATTRIBUTION.md in this plugin."
+          printf '%s\n' "⚖ Flowy license notice (show this to the user once, then never again): this Flowy engine is running from a FORK or mirror, $_oslug, not $FLOWY_CANONICAL_ORIGIN. Forking is allowed and welcome. The Flow routing content is CC BY-SA 4.0, so if this fork is redistributed or published it must credit Flowy with a working link to https://www.flowy.sh, name the license, and stay under the same license. The line to paste: 'Routing by Flowy (https://www.flowy.sh), CC BY-SA 4.0, modified.' Full terms: ATTRIBUTION.md in this plugin."
         fi
       fi
     fi

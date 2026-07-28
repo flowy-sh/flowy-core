@@ -1,5 +1,5 @@
 Flowy Core
-Copyright 2026 Maximo Correa (Flowy, https://flowy.sh)
+Copyright 2026 Maximo Correa (Flowy, https://www.flowy.sh)
 
 This product is dual-licensed. One rule decides which license applies:
 
@@ -44,9 +44,12 @@ ATTRIBUTION IS NOT OPTIONAL AND ITS FORM IS SPECIFIED.
 
 CC BY-SA 4.0 section 3(a)(1) lets the licensor state the manner of attribution.
 Flowy states it in ATTRIBUTION.md. Read that file before reusing any routing
-content, commercially or otherwise. The short version: credit Flowy, link to
-https://flowy.sh with a live followable link on the surface where the routing is
-used, name the license, link to the file you took, and say what you changed.
+content, commercially or otherwise. The short version: credit "Routing by Flowy",
+link to https://www.flowy.sh with a live followable link on the surface where the
+routing is used, name the license, link to the file you took, and say what you
+changed. That credit string and that host are the same everywhere: this file,
+ATTRIBUTION.md, README.md, the fork notice the hook prints, and the terms
+published at https://www.flowy.sh/license.
 
 ROUTED SKILLS ARE NOT OURS.
 
@@ -58,5 +61,5 @@ upstream skills. Our license covers only our routing.
 
 CONTACT
 
-  https://flowy.sh
+  https://www.flowy.sh
   maximo@flowy.sh

@@ -100,10 +100,10 @@ it carries share-alike. `NOTICE` states the file-by-file split, and
 `engine/tests/license-coverage.test.ts` fails if any tracked file is unassigned.
 
 **Reusing the routing? Read [ATTRIBUTION.md](ATTRIBUTION.md) first.** CC BY-SA 4.0 lets the
-licensor specify the manner of attribution, and we do: named credit, a live followable link to
-https://flowy.sh on the surface where the routing is used, the license named and linked, a link
-to the source file, and a statement of changes. Commercial use is allowed. Attribution and
-share-alike are conditions, not requests.
+licensor specify the manner of attribution, and we do: the credit string `Routing by Flowy`, a
+live followable link to https://www.flowy.sh on the surface where the routing is used, the
+license named and linked, a link to the source file, and a statement of changes. Commercial use
+is allowed. Attribution and share-alike are conditions, not requests.
 
 Every skill our Flows route to belongs to its author under its own license. We bundle none of
 them. See each Flow's own `ATTRIBUTION.md`.

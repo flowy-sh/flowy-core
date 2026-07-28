@@ -16,15 +16,23 @@ You do not need permission. You need to follow this file.
 
 Every use of the routing content requires all five of these.
 
-**1. Credit by name.** The string `Routing by Flowy` where space is tight, or
-`Flow routing by Flowy` where it is not. Not "Flowy-inspired". Not "based on an open source
-router". The name.
+**1. Credit by name.** One string, exactly: `Routing by Flowy`. Not "Flowy-inspired". Not
+"based on an open source router". Not a bare "Flowy". The name, in that form, wherever the
+credit appears.
 
-**2. A live, followable link to `https://flowy.sh`.** In HTML that means a real
-`<a href="https://flowy.sh">` that a reader and a crawler can both follow: not
+This file used to offer a second, longer form for surfaces with room. Two accepted strings
+is one string too many: the whole point of specifying the manner of attribution is that a
+copier meets the same terms everywhere, and the same string is what the fork notice in
+`engine/hooks/flowy-inject.sh` hands over. A test pins the two together.
+
+**2. A live, followable link to `https://www.flowy.sh`.** In HTML that means a real
+`<a href="https://www.flowy.sh">` that a reader and a crawler can both follow: not
 `rel="nofollow"`, not `rel="sponsored"`, not `display:none`, not behind a click, not a
 redirect through your own tracker. In plain text, Markdown, or a terminal, the bare URL
-`https://flowy.sh` is enough.
+`https://www.flowy.sh` is enough.
+
+The host is `www`, and that is not a detail. The apex `flowy.sh` 308-redirects to it, so a
+link to the apex is itself a redirect, which is the one thing the sentence above rules out.
 
 This is the specified manner, and it is the point of the whole file. Attribution that a
 reader cannot act on is not attribution.
@@ -41,7 +49,7 @@ nothing, say nothing.
 
 ### A compliant credit, in full
 
-> Flow routing by [Flowy](https://flowy.sh), from
+> Routing by [Flowy](https://www.flowy.sh), from
 > [`ultra-powers/FLOW.md`](https://github.com/flowy-sh/flowy-core/blob/main/overlays/ultra-powers/flows/ultra-powers/FLOW.md),
 > licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 > Modified: dropped the GROW branch.
@@ -145,4 +153,4 @@ wins. If you are making a commercial decision that turns on any of this, talk to
 
 ---
 
-Questions, permission requests, commercial licensing: **maximo@flowy.sh** · **https://flowy.sh**
+Questions, permission requests, commercial licensing: **maximo@flowy.sh** · **https://www.flowy.sh**

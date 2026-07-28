@@ -70,7 +70,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // ---------------------------------------------------------------------------
@@ -2055,10 +2055,13 @@ describe("fork / mirror license notice", () => {
     const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
     expect(out).toContain("Flowy license notice");
     expect(out).toContain("a-forker/flowy-core");
-    expect(out).toContain("https://flowy.sh");
+    // C3: www, not the apex. `toContain("https://flowy.sh")` would have passed
+    // on the apex and FAILED on the canonical host, since "https://www." is not
+    // a superstring of "https://".
+    expect(out).toContain("https://www.flowy.sh");
     // The paste-ready line is the whole point: removing the work is what gets
     // attribution actually added.
-    expect(out).toContain("Flow routing by Flowy");
+    expect(out).toContain("Routing by Flowy");
   });
 
   test(
@@ -2157,5 +2160,75 @@ describe("fork / mirror license notice", () => {
   test("the hook still exits 0 on a fork (fail-loud, never fail-closed)", () => {
     if (!HAVE_SHELL) return;
     expect(run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).code).toBe(0);
+  });
+
+  /* --------------------------------------------------------------------
+     C2 + C3 — ONE CREDIT STRING, ONE HOST.
+
+     ADR-048's judo works only if the terms are IDENTICAL wherever a
+     copier meets them. They were not. The repo offered TWO credit
+     strings ("Routing by Flowy" where space is tight, "Flow routing by
+     Flowy" where it is not), the site's /license offered a third
+     ("Flowy"), and every one of them told the copier to link the apex
+     `https://flowy.sh`, which 308-redirects to www. Verified
+     unauthenticated on 2026-07-28:
+
+       https://flowy.sh/       308 Permanent Redirect -> https://www.flowy.sh/
+       https://www.flowy.sh/   200 OK
+
+     So the mandated link was itself a redirect, in a clause whose own
+     wording forbids "a redirect through your own tracker". www is the
+     canonical host by founder decision (2026-07-23,
+     apps/web/lib/seo/site-url.ts).
+     -------------------------------------------------------------------- */
+
+  /** The one string. Short enough for a footer, specific enough that a bare
+   *  "Flowy" cannot pass for it. */
+  const CREDIT = "Routing by Flowy";
+  const CANONICAL_LINK = "https://www.flowy.sh";
+
+  test("the fork notice hands over the canonical attribution string", () => {
+    if (!HAVE_SHELL) return;
+    const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
+    expect(out).toContain(`${CREDIT} (${CANONICAL_LINK}), CC BY-SA 4.0`);
+  });
+
+  /** A URL pointing at the APEX. `maximo@flowy.sh` has no scheme, so the
+   *  contact address never matches, and `https://www.flowy.sh` cannot match
+   *  either because `://` is followed by `www.`. Matching the scheme rather
+   *  than the bare hostname is the same lesson the no-network guard learned
+   *  the hard way: a substring guard that fires on prose gets deleted. */
+  const APEX_URL = /https?:\/\/flowy\.sh/;
+  /** The second credit form. Having two is the defect, not the wording. */
+  const OLD_CREDIT = /Flow routing by Flowy/;
+
+  /** Every flowy-core surface that TELLS a copier what to paste. The site's
+   *  three surfaces (LICENSE, /license, llms-txt.ts) live in the marketplace
+   *  repo and are changed in the same task; this suite cannot reach them. */
+  const ATTRIBUTION_SURFACES = [
+    join(HERE, "..", "..", "ATTRIBUTION.md"),
+    join(HERE, "..", "..", "NOTICE"),
+    join(HERE, "..", "..", "README.md"),
+    SCRIPT,
+  ];
+
+  test("no attribution surface sends a copier to the redirecting apex", () => {
+    const offenders = ATTRIBUTION_SURFACES.filter((f) => APEX_URL.test(readFileSync(f, "utf8")));
+    expect(offenders.map((f) => basename(f))).toEqual([]);
+  });
+
+  test("no attribution surface offers a SECOND credit string", () => {
+    const offenders = ATTRIBUTION_SURFACES.filter((f) => OLD_CREDIT.test(readFileSync(f, "utf8")));
+    expect(offenders.map((f) => basename(f))).toEqual([]);
+  });
+
+  test("both guards actually catch what they exist to catch", () => {
+    // A guard nobody watched fail is a guard that might match nothing.
+    expect("link to https://flowy.sh on your page").toMatch(APEX_URL);
+    expect("Flow routing by Flowy, CC BY-SA 4.0").toMatch(OLD_CREDIT);
+    // ...and do not fire on what they must leave alone.
+    expect("write to maximo@flowy.sh").not.toMatch(APEX_URL);
+    expect(`link to ${CANONICAL_LINK} on your page`).not.toMatch(APEX_URL);
+    expect(`${CREDIT}, CC BY-SA 4.0`).not.toMatch(OLD_CREDIT);
   });
 });
