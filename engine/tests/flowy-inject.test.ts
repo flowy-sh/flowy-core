@@ -40,10 +40,14 @@
  *
  * SHELL PINNING
  * -------------
- * Claude Code runs command hooks via Git Bash on this Windows machine, NOT WSL.
- * These tests spawn the script through the explicit Git Bash binary and assert
- * it resolves to Git Bash. If Git Bash is absent we SKIP loudly rather than
- * silently fall back to WSL (whose path semantics differ).
+ * Claude Code runs command hooks as bare commands, so the script's shebang
+ * (`#!/usr/bin/env sh`) decides the shell: POSIX-mode sh, from the Git for
+ * Windows toolchain on this machine, NOT WSL. These tests spawn the script
+ * through that same `sh.exe`. They previously spawned `bash.exe`, which meant
+ * every test ran in a DIFFERENT shell mode than production, and POSIX-only
+ * behaviour (the `.` special-builtin abort, A1) was structurally invisible to
+ * the suite. If Git's sh is absent we SKIP loudly rather than silently fall
+ * back to WSL (whose path semantics differ).
  *
  * PATH FORMAT
  * -----------
@@ -53,7 +57,7 @@
  * env vars (matching production). Node FS operations use the Windows form.
  */
 
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, setDefaultTimeout, test } from "bun:test";
 import { spawn, spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -66,20 +70,48 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // ---------------------------------------------------------------------------
-// Shell pinning: locate Git Bash explicitly. Must NOT be WSL bash.
+// B11 — SPAWN BUDGET. Every test in this file shells out at least once, and a
+// shell spawn on Windows under full-suite load routinely exceeds bun's 5s
+// default. That produced a red that looks like a hook bug and is not one, on a
+// DIFFERENT test each run, which is precisely how a team learns to ignore red.
+// This is a HARNESS budget, not a weakened assertion: the tests that actually
+// care about latency keep their own `expect(elapsed).toBeLessThan(5000)`, so a
+// genuine hang still fails loudly and for the right reason.
 // ---------------------------------------------------------------------------
-const GIT_BASH_CANDIDATES = [
-  "C:\\Program Files\\Git\\bin\\bash.exe",
-  "C:\\Program Files (x86)\\Git\\bin\\bash.exe",
+setDefaultTimeout(30_000);
+
+// ---------------------------------------------------------------------------
+// PRODUCTION SHELL. hooks.json invokes the script as a bare command, so
+// `#!/usr/bin/env sh` selects POSIX-mode sh. The harness used bash.exe, so every
+// test ran in a DIFFERENT shell mode than production and POSIX-only behaviour
+// (the `.` special-builtin abort, A1) was structurally invisible.
+// Must NOT be WSL bash either — its path semantics differ.
+// ---------------------------------------------------------------------------
+// ORDER MATTERS, AND `Git\bin\sh.exe` IS NOT THE PRODUCTION SHELL.
+// Git for Windows ships TWO things called sh.exe:
+//   Git\bin\sh.exe       47 KB launcher stub. It execs /usr/bin/bash, so $0 is
+//                        "bash", POSIX mode is OFF, and a failing `.` does NOT
+//                        abort. Putting this first left the harness exactly as
+//                        blind as bash.exe was — verified, it printed AFTER.
+//   Git\usr\bin\sh.exe   2.3 MB real binary invoked as `sh`, so bash enters
+//                        POSIX mode ($0 = .../sh, `set -o posix` on) and a
+//                        failing special builtin aborts. THIS is what
+//                        `#!/usr/bin/env sh` resolves to (env finds /usr/bin/sh
+//                        on PATH), so this is the shell production runs under.
+const SHELL_CANDIDATES = [
+  "C:\\Program Files\\Git\\usr\\bin\\sh.exe",
+  "C:\\Program Files (x86)\\Git\\usr\\bin\\sh.exe",
+  "/usr/bin/sh",
+  "/bin/sh",
 ];
 const WSL_BASH = "C:\\Windows\\System32\\bash.exe";
 
-const GIT_BASH = GIT_BASH_CANDIDATES.find((p) => existsSync(p));
-const HAVE_GIT_BASH = !!GIT_BASH;
+const SHELL_BIN = SHELL_CANDIDATES.find((p) => existsSync(p));
+const HAVE_SHELL = !!SHELL_BIN;
 
 // The script under test lives at ../hooks/flowy-inject.sh relative to this file.
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -111,9 +143,9 @@ function projectKey(projectDirEnvValue: string): string {
   // SINGLE SOURCE OF TRUTH: shell out to flowy-paths.sh's flowy_canonical_key so
   // this oracle is byte-identical to what the hook/GC/activator compute. (A
   // regex mirror here is exactly the drift the shared helper exists to kill.)
-  if (!GIT_BASH) return projectDirEnvValue.replace(/[^A-Za-z0-9]/g, "_");
+  if (!SHELL_BIN) return projectDirEnvValue.replace(/[^A-Za-z0-9]/g, "_");
   const res = spawnSync(
-    GIT_BASH,
+    SHELL_BIN,
     ["-c", '. "$1"; flowy_canonical_key "$2"', "_", HELPER, projectDirEnvValue],
     { encoding: "utf8" },
   );
@@ -139,10 +171,10 @@ function runHook(opts: {
   stdin: string;
   env?: Record<string, string>; // extra env (e.g. FLOWY_REINJECT_EVERY_N)
 }): { code: number; stdout: string; stderr: string } {
-  if (!GIT_BASH) {
+  if (!SHELL_BIN) {
     throw new Error("Git Bash not found — test should have been skipped");
   }
-  const res = spawnSync(GIT_BASH, [SCRIPT], {
+  const res = spawnSync(SHELL_BIN, [SCRIPT], {
     input: opts.stdin,
     encoding: "utf8",
     env: {
@@ -174,11 +206,11 @@ function runHookAsync(opts: {
   pluginRoot: string;
   stdin: string;
 }): Promise<{ code: number; stdout: string; stderr: string }> {
-  if (!GIT_BASH) {
+  if (!SHELL_BIN) {
     throw new Error("Git Bash not found — test should have been skipped");
   }
   return new Promise((resolve) => {
-    const child = spawn(GIT_BASH, [SCRIPT], {
+    const child = spawn(SHELL_BIN, [SCRIPT], {
       env: {
         ...process.env,
         CLAUDE_PROJECT_DIR: opts.projectDir,
@@ -197,8 +229,8 @@ function runHookAsync(opts: {
 
 /** Run the flowy-recompact.sh SessionStart hook (V2 compaction recovery). */
 function runRecompact(dirs: Dirs, stdin: string): { code: number; stdout: string; stderr: string } {
-  if (!GIT_BASH) throw new Error("Git Bash not found — test should have been skipped");
-  const res = spawnSync(GIT_BASH, [RECOMPACT_SCRIPT], {
+  if (!SHELL_BIN) throw new Error("Git Bash not found — test should have been skipped");
+  const res = spawnSync(SHELL_BIN, [RECOMPACT_SCRIPT], {
     input: stdin,
     encoding: "utf8",
     env: {
@@ -302,54 +334,54 @@ afterAll(() => {
 });
 
 // ---------------------------------------------------------------------------
-// Sanity: the runner is pinned to Git Bash, not WSL.
+// Sanity: the runner is pinned to the PRODUCTION shell (Git's POSIX sh), not WSL.
 // ---------------------------------------------------------------------------
 describe("shell pinning", () => {
-  test("resolves Git Bash, not WSL bash", () => {
-    if (!HAVE_GIT_BASH) {
+  test("resolves the production POSIX sh, not WSL bash", () => {
+    if (!HAVE_SHELL) {
       // Loud skip — do NOT silently run under WSL.
       console.warn(
-        "[SKIP] Git Bash not found at expected paths; refusing to run hook tests under WSL.",
+        "[SKIP] POSIX sh not found at expected paths; refusing to run hook tests under WSL.",
       );
       return;
     }
-    expect(GIT_BASH).toBeTruthy();
-    expect(GIT_BASH).not.toBe(WSL_BASH);
-    expect(existsSync(GIT_BASH!)).toBe(true);
+    expect(SHELL_BIN).toBeTruthy();
+    expect(SHELL_BIN).not.toBe(WSL_BASH);
+    expect(existsSync(SHELL_BIN!)).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// CI-GUARD: hard-fail on Windows without Git Bash.
+// CI-GUARD: hard-fail on Windows without the production shell.
 //
-// The old pattern was `describe.skip` when HAVE_GIT_BASH is false, which gives
+// The old pattern was `describe.skip` when HAVE_SHELL is false, which gives
 // a deceptively green run with ZERO hook coverage. This guard sits OUTSIDE the
-// skippable describe so it always runs. On Windows (win32) it requires Git Bash
+// skippable describe so it always runs. On Windows (win32) it requires Git's sh
 // to be present; on non-Windows it passes (the hook is documented as
-// Git-Bash/Windows-targeted, so Linux/macOS CI cannot run the hook tests anyway
+// Git-for-Windows-targeted, so Linux/macOS CI cannot run the hook tests anyway
 // — but they also cannot silently green them because they are not win32).
 // ---------------------------------------------------------------------------
 test(
-  "CI-guard: Git Bash must be present on Windows to run hook tests",
+  "CI-guard: POSIX sh must be present on Windows to run hook tests",
   () => {
     if (process.platform !== "win32") {
       // Non-Windows CI: test is vacuously satisfied — this platform cannot run
-      // the Git-Bash-targeted hook tests, but it also cannot silently green them
-      // via describe.skip because this guard is outside the skippable suite.
+      // the Git-for-Windows-targeted hook tests, but it also cannot silently green
+      // them via describe.skip because this guard is outside the skippable suite.
       // Non-Windows builds should run with --testPathPattern to exclude this file
       // or accept this pass, which is accurate (they truly cannot verify the hook).
       return;
     }
-    // On Windows: Git Bash is REQUIRED. Without it the entire hook suite below
+    // On Windows: Git's sh is REQUIRED. Without it the entire hook suite below
     // would be skipped, giving false-green CI coverage on the target platform.
-    expect(HAVE_GIT_BASH).toBe(true);
+    expect(HAVE_SHELL).toBe(true);
     // Provide a clear diagnostic if this fires:
-    if (!HAVE_GIT_BASH) {
+    if (!HAVE_SHELL) {
       throw new Error(
-        "Git Bash required to run hook tests on Windows; " +
-          "install it from https://git-scm.com or the hook suite is unverified. " +
+        "POSIX sh required to run hook tests on Windows; " +
+          "install Git for Windows from https://git-scm.com or the hook suite is unverified. " +
           "Expected at: " +
-          GIT_BASH_CANDIDATES.join(", "),
+          SHELL_CANDIDATES.join(", "),
       );
     }
   },
@@ -361,9 +393,9 @@ test(
 // MSYS form. Pre-fix, the hook (Windows form -> E__) and the activator (MSYS
 // form -> _e_) wrote/read different dirs and the banner silently vanished.
 // ---------------------------------------------------------------------------
-(HAVE_GIT_BASH ? describe : describe.skip)("Bug E + D: path-form independence + invoke banner", () => {
+(HAVE_SHELL ? describe : describe.skip)("Bug E + D: path-form independence + invoke banner", () => {
   test("the hook fires when CLAUDE_PROJECT_DIR is the WINDOWS backslash form (production shape)", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
     writeState(dirs, "winform", {
@@ -385,7 +417,7 @@ test(
   });
 
   test("Windows-form and MSYS-form CLAUDE_PROJECT_DIR resolve the SAME state file", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
     writeState(dirs, "bothforms", {
@@ -402,7 +434,7 @@ test(
   });
 
   test("Bug D: the banner reinforces INVOKE (not just state routing) and carries the resolvable FLOW.md path", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
     writeState(dirs, "bugd", {
@@ -443,6 +475,67 @@ test(
 });
 
 // ---------------------------------------------------------------------------
+// A1 — THE HOOK MUST NOT DIE ON A MISSING OPTIONAL HELPER.
+//
+// `.` is a POSIX SPECIAL BUILTIN. On a missing file a non-interactive POSIX
+// shell ABORTS THE WHOLE SCRIPT before `||` is ever reached, so
+// `. helper 2>/dev/null || true` does NOT make the source optional — it makes
+// the routing banner conditional on a file that is documented as optional.
+// Production resolves `#!/usr/bin/env sh`; the harness used to spawn bash.exe,
+// so the suite was structurally blind to this. The failure is silent and
+// exit-0: no banner, no error, enforcement simply gone.
+// ---------------------------------------------------------------------------
+describe("A1: optional helpers are optional", () => {
+  test("the routing banner SURVIVES a missing origin helper", () => {
+    if (!HAVE_SHELL) return;
+    const dirs = makeDirs();
+    writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
+    writeState(dirs, "nohelper", {
+      schema: "flowy-state-v1",
+      sessionId: "nohelper",
+      activeFlows: [
+        { name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md", location: "plugin" },
+      ],
+    });
+    const helper = join(dirname(SCRIPT), "flowy-origin.sh");
+    const saved = readFileSync(helper, "utf8");
+    try {
+      rmSync(helper);
+      const r = run(dirs, stdinFor("nohelper"));
+      expect(r.stdout).toContain("Flowy routing ACTIVE");
+      expect(r.code).toBe(0);
+    } finally {
+      writeFileSync(helper, saved);
+    }
+  });
+
+  test("the routing banner SURVIVES a missing constants helper", () => {
+    // Same latent defect, same file, one source line apart. The TTL fallback
+    // (`|| FLOWY_PENDING_TTL_SECONDS=120`) could never run either.
+    if (!HAVE_SHELL) return;
+    const dirs = makeDirs();
+    writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
+    writeState(dirs, "noconst", {
+      schema: "flowy-state-v1",
+      sessionId: "noconst",
+      activeFlows: [
+        { name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md", location: "plugin" },
+      ],
+    });
+    const helper = join(dirname(SCRIPT), "flowy-constants.sh");
+    const saved = readFileSync(helper, "utf8");
+    try {
+      rmSync(helper);
+      const r = run(dirs, stdinFor("noconst"));
+      expect(r.stdout).toContain("Flowy routing ACTIVE");
+      expect(r.code).toBe(0);
+    } finally {
+      writeFileSync(helper, saved);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // DERIVATION CORRECTNESS — pure-string check of `${PLUGIN_ROOT%/plugins/*}`
 // and the no-op when there is no /plugins/ segment. (Test #6.)
 // Runs even without Git Bash present (the first assertion is a TS mirror; the
@@ -450,13 +543,13 @@ test(
 // ---------------------------------------------------------------------------
 describe("CLAUDE_HOME derivation", () => {
   test("${PLUGIN_ROOT%/plugins/*} over a realistic input yields the .claude home", () => {
-    if (!HAVE_GIT_BASH) {
+    if (!HAVE_SHELL) {
       console.warn("[SKIP] Git Bash not found; cannot exercise the shell derivation.");
       return;
     }
     const input = "/c/Users/U/.claude/plugins/cache/flowy-flows/flowy/0.4.2";
     const res = spawnSync(
-      GIT_BASH!,
+      SHELL_BIN!,
       ["-c", `P="${input}"; printf '%s' "\${P%/plugins/*}"`],
       { encoding: "utf8" },
     );
@@ -465,7 +558,7 @@ describe("CLAUDE_HOME derivation", () => {
   });
 
   test("PLUGIN_ROOT without /plugins/ → hook no-ops (CLAUDE_HOME == PLUGIN_ROOT)", () => {
-    if (!HAVE_GIT_BASH) {
+    if (!HAVE_SHELL) {
       console.warn("[SKIP] Git Bash not found.");
       return;
     }
@@ -486,7 +579,7 @@ describe("CLAUDE_HOME derivation", () => {
   });
 
   test("CLAUDE_HOME not ending in /.claude → hook no-ops", () => {
-    if (!HAVE_GIT_BASH) {
+    if (!HAVE_SHELL) {
       console.warn("[SKIP] Git Bash not found.");
       return;
     }
@@ -505,7 +598,7 @@ describe("CLAUDE_HOME derivation", () => {
   });
 });
 
-const d = HAVE_GIT_BASH ? describe : describe.skip;
+const d = HAVE_SHELL ? describe : describe.skip;
 
 d("flowy-inject.sh", () => {
   // =========================================================================
@@ -1436,7 +1529,7 @@ d("flowy-inject.sh", () => {
   // =========================================================================
 
   test("CLAUDE_PROJECT_DIR unset/empty → no-op, exit 0", () => {
-    if (!GIT_BASH) throw new Error("Git Bash not found — test should have been skipped");
+    if (!SHELL_BIN) throw new Error("Git Bash not found — test should have been skipped");
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
     writeState(dirs, "A", {
@@ -1444,7 +1537,7 @@ d("flowy-inject.sh", () => {
       sessionId: "A",
       activeFlows: [{ name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md" }],
     });
-    const res = spawnSync(GIT_BASH, [SCRIPT], {
+    const res = spawnSync(SHELL_BIN, [SCRIPT], {
       input: stdinFor("A"),
       encoding: "utf8",
       env: {
@@ -1458,7 +1551,7 @@ d("flowy-inject.sh", () => {
   });
 
   test("CLAUDE_PLUGIN_ROOT unset/empty → no-op, exit 0", () => {
-    if (!GIT_BASH) throw new Error("Git Bash not found — test should have been skipped");
+    if (!SHELL_BIN) throw new Error("Git Bash not found — test should have been skipped");
     const dirs = makeDirs();
     writeFlowMd(dirs, "flows/superpowers-flow/FLOW.md");
     writeState(dirs, "A", {
@@ -1466,7 +1559,7 @@ d("flowy-inject.sh", () => {
       sessionId: "A",
       activeFlows: [{ name: "superpowers-flow", flowRef: "flows/superpowers-flow/FLOW.md" }],
     });
-    const res = spawnSync(GIT_BASH, [SCRIPT], {
+    const res = spawnSync(SHELL_BIN, [SCRIPT], {
       input: stdinFor("A"),
       encoding: "utf8",
       env: {
@@ -1578,7 +1671,7 @@ d("flowy-inject.sh", () => {
   // The hook `mkdir -p`s the state dir, then finds nothing in it.
   // -------------------------------------------------------------------------
   test("relocated state dir absent entirely → empty stdout, exit 0, fast", () => {
-    if (!GIT_BASH) throw new Error("Git Bash not found — test should have been skipped");
+    if (!SHELL_BIN) throw new Error("Git Bash not found — test should have been skipped");
     const dirs = makeDirs();
     // Remove the eagerly-created state dir so the hook must create it.
     rmSync(join(dirs.stateDirWin, ".."), { recursive: true, force: true });
@@ -1958,7 +2051,7 @@ describe("fork / mirror license notice", () => {
   }
 
   test("a FORK origin produces the license notice, naming the fork and the link", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
     expect(out).toContain("Flowy license notice");
     expect(out).toContain("a-forker/flowy-core");
@@ -1968,37 +2061,43 @@ describe("fork / mirror license notice", () => {
     expect(out).toContain("Flow routing by Flowy");
   });
 
-  test("the notice does NOT repeat on the next prompt, and routing still fires", () => {
-    if (!HAVE_GIT_BASH) return;
-    const dirs = activeCase("https://github.com/a-forker/flowy-core.git");
-    expect(run(dirs, stdinFor("forkcase")).stdout).toContain("Flowy license notice");
-    const second = run(dirs, stdinFor("forkcase")).stdout;
-    expect(second).not.toContain("Flowy license notice");
-    expect(second).toContain("Flowy routing ACTIVE");
-  });
+  test(
+    "the notice does NOT repeat on the next prompt, and routing still fires",
+    () => {
+      if (!HAVE_SHELL) return;
+      const dirs = activeCase("https://github.com/a-forker/flowy-core.git");
+      expect(run(dirs, stdinFor("forkcase")).stdout).toContain("Flowy license notice");
+      const second = run(dirs, stdinFor("forkcase")).stdout;
+      expect(second).not.toContain("Flowy license notice");
+      expect(second).toContain("Flowy routing ACTIVE");
+    },
+    // B11: TWO shell spawns. Process spawn under suite load exceeds bun's 5s
+    // default, and a timeout that reads as a hook bug trains people to ignore red.
+    30000,
+  );
 
   test("the CANONICAL origin produces no notice", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const out = run(activeCase("https://github.com/flowy-sh/flowy-core.git"), stdinFor("forkcase")).stdout;
     expect(out).not.toContain("Flowy license notice");
     expect(out).toContain("Flowy routing ACTIVE");
   });
 
   test("an UNDETERMINABLE origin produces no notice (fail open, never accuse)", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const out = run(activeCase(undefined), stdinFor("forkcase")).stdout;
     expect(out).not.toContain("Flowy license notice");
     expect(out).toContain("Flowy routing ACTIVE");
   });
 
   test("the routing banner is STILL exactly one line when the notice fires", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     const out = run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).stdout;
     expect(out.split("\n").filter((l) => l.startsWith("⚑")).length).toBe(1);
   });
 
   test("the hook still exits 0 on a fork (fail-loud, never fail-closed)", () => {
-    if (!HAVE_GIT_BASH) return;
+    if (!HAVE_SHELL) return;
     expect(run(activeCase("https://github.com/a-forker/flowy-core.git"), stdinFor("forkcase")).code).toBe(0);
   });
 });

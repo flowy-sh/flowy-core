@@ -205,10 +205,26 @@ is_safe_id "$SESSION_ID" || exit 0
 # ---------------------------------------------------------------------------
 . "$(dirname "$0")/flowy-paths.sh" 2>/dev/null || exit 0
 . "$(dirname "$0")/flowy-resolve.sh" 2>/dev/null || exit 0
-# Origin detection is OPTIONAL. `|| true`, not `|| exit 0`: a missing origin
-# helper must cost the fork notice, never the routing banner. Every call below
-# is guarded with `command -v`.
-. "$(dirname "$0")/flowy-origin.sh" 2>/dev/null || true
+# Origin detection is OPTIONAL and must cost the fork notice, never the routing
+# banner.
+#
+# THE `|| true` DOES NOT ACHIEVE THAT, which is why the test comes first.
+# `.` is a POSIX SPECIAL BUILTIN: when the file is missing, a non-interactive
+# POSIX shell ABORTS THE WHOLE SCRIPT on the builtin's failure, before `||` is
+# ever reached. Production resolves `#!/usr/bin/env sh` to Git's /usr/bin/sh,
+# which IS bash in POSIX mode, so a missing helper silently killed the routing
+# banner and still exited 0. The suite could not see it because the harness
+# spawned bash.exe (fixed in the same change; note Git\bin\sh.exe is only a
+# launcher stub that re-execs bash with POSIX mode OFF, so it is not the
+# production shell either).
+#
+# Testing for the file OUTSIDE the builtin means the builtin only ever runs on a
+# file that exists, so it cannot abort. `[ ! -L ]` matches the RR3 posture
+# applied to every other file this hook reads.
+_flowy_origin_helper="$(dirname "$0")/flowy-origin.sh"
+if [ -f "$_flowy_origin_helper" ] && [ ! -L "$_flowy_origin_helper" ]; then
+  . "$_flowy_origin_helper" 2>/dev/null || true
+fi
 STATE_DIR="$(flowy_state_dir "$PROJECT_DIR" "$PLUGIN_ROOT")"
 [ -n "$STATE_DIR" ] || exit 0
 mkdir -p "$STATE_DIR" 2>/dev/null || true
@@ -216,7 +232,16 @@ mkdir -p "$STATE_DIR" 2>/dev/null || true
 # (A) Source timing constants. Provides FLOWY_PENDING_TTL_SECONDS (default 120).
 # The 2>/dev/null suppresses "file not found" on clean installs; the fallback
 # ensures the variable is always set even if the constants file is absent.
-. "$(dirname "$0")/flowy-constants.sh" 2>/dev/null || FLOWY_PENDING_TTL_SECONDS=120
+# Same special-builtin hazard as the origin helper above: the `||` fallback here
+# never runs on a missing file, because `.` aborts the script first under POSIX
+# sh. Verified by deleting this file: 0 bytes of stdout, no banner. Guard the
+# existence test outside the builtin so the fallback can actually fire, and seed
+# the default BEFORE the source so the variable is set on every path.
+FLOWY_PENDING_TTL_SECONDS=120
+_flowy_constants="$(dirname "$0")/flowy-constants.sh"
+if [ -f "$_flowy_constants" ] && [ ! -L "$_flowy_constants" ]; then
+  . "$_flowy_constants" 2>/dev/null || FLOWY_PENDING_TTL_SECONDS=120
+fi
 
 # Project-local flow CONTENT root (inert without an out-of-repo state pointer).
 # Only used to RESOLVE FLOW.md for entries marked "location":"project".
