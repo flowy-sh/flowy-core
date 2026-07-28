@@ -815,34 +815,84 @@ Expected: containment `0`, canaryHits `0`.
 - [ ] **Step 3: Canonicalize both sides identically**
 
 ```javascript
-/** Both sides get the SAME transform, so specificity is unchanged: this widens
- *  what counts as "the same route", never what counts as a match. */
-function canonicalizeRoutes(text) {
-  return normalizeText(text)
-    .toLowerCase()
-    .replace(/[ \t]*[:\/]+[ \t]*/g, ":");
-}
-export function routeSequence(text) {
+/** The same reference written with either separator, in either case. */
+const ROUTE_VARIANT_RE = /\b([A-Za-z0-9][A-Za-z0-9-]*)[:/]([A-Za-z0-9][A-Za-z0-9-]*)\b/g;
+
+/** The SUSPECT's route sequence, widened to the separator and case variants of
+ *  routes the canonical file ACTUALLY HAS. `routeSequence` stays strict, so the
+ *  canonical side gains nothing. */
+export function routeSequenceAgainst(text, canonicalRoutes) {
+  const known = new Set(canonicalRoutes);
   const out = [];
-  for (const m of canonicalizeRoutes(text).matchAll(ROUTE_RE)) out.push(m[0]);
+  for (const m of normalizeText(text).matchAll(ROUTE_VARIANT_RE)) {
+    const verbatim = `${m[1]}:${m[2]}`;
+    if (m[0] === verbatim && verbatim === verbatim.toLowerCase()) {
+      out.push(verbatim);
+      continue;
+    }
+    const lower = verbatim.toLowerCase();
+    if (known.has(lower)) out.push(lower);
+  }
   return out;
 }
 /** Canary comparison collapses ALL whitespace, so a re-wrap cannot erase one. */
 const flat = (s) => normalizeText(s).replace(/\s+/g, " ").trim().toLowerCase();
 ```
 
-In `compareToCanonical`, compare `flat(suspectText).includes(flat(c))`.
+In `compareToCanonical`, use `routeSequenceAgainst(suspectText, canonical.routes)` and compare `flat(suspectText).includes(flat(c))`.
+
+**CORRECTED (2026-07-28, during execution). The plan's canonicalization broke the
+two specificity tests it was written to protect, and would have LOWERED sensitivity
+on the true positive.** Measured:
+
+- `routeSequence("Gate: a research brief. Phase: 2.")` returned
+  `["gate:a", "phase:2"]` under the plan's transform. It must return `[]`, and an
+  existing test asserts that. Every `Gate:`, `Phase:` and `Note:` in every scanned
+  file would have become a route.
+- `routeSequence("see https://flowy.sh for details")` returned `["https:flowy"]`.
+  The plan anticipated only half of this ("exclude `//` runs"), which does not help:
+  the `:` and the `//` are one run under `[ \t]*[:\/]+[ \t]*`.
+- Applied to BOTH sides as instructed, the shipped Flows' canonical route sets went
+  `growth-marketing` 7 to 14, `superpowers` 14 to 18, `ultra-powers` 40 to 56. Every
+  addition is a prose fragment: `read:invoke` from "READ/invoke", `ceo:eng` from
+  "CEO/eng", `buy:churn` from "buy or churn", `com:coreyhaines31` from a GitHub URL.
+  Containment divides by OUR count, so a copier who lifts the routing tree and
+  rewrites the prose would score 7/14 and be DOWNGRADED out of `derivative-likely`.
+  "Both sides get the same transform, so specificity is unchanged" is true and
+  beside the point: symmetry protects specificity, not sensitivity.
+- The `ns: alpha ns: beta` variant in Step 1 is therefore DROPPED. Whitespace around
+  the separator cannot be collapsed without making `Gate: a` a route. The
+  load-bearing case, and the one A9 actually describes, is `plugin/skill`.
+
+The manifest is byte-identical after this task, which is the proof that the widening
+added nothing to the canonical side.
 
 - [ ] **Step 4: Guard against the new over-match**
 
 ```typescript
-test("canonicalization does not make a URL look like a route", () => {
+test("a slash is not a separator in OUR canonical extraction", () => {
+  expect(routeSequence("we READ/invoke and check CEO/eng")).toEqual([]);
+  expect(routeSequence("see https://github.com/obra/superpowers")).toEqual([]);
   expect(routeSequence("see https://flowy.sh/license for terms")).toEqual([]);
+});
+
+test("a variant separator only counts for a route we ACTUALLY have", () => {
+  const d = { id: "d", hash: "", routes: ["ns:alpha"], canaries: [] };
+  const r = compareToCanonical(d, "ns/alpha and see https://flowy.sh/license");
+  expect(r.routeContainment).toBe(1);
+  expect(r.suspectRouteCount).toBe(1);
 });
 ```
 
 Run: `cd engine && bun test tests/provenance.test.ts`
-Expected: PASS. If the URL test fails, exclude `//` runs from the separator collapse.
+Expected: PASS.
+
+**VERIFIED after this task (the constraint that matters most here).** Manifest
+regenerated: byte-identical. obra's upstream skills at
+`.claude/plugins/cache/claude-plugins-official/superpowers/6.2.0/skills`: 38 files,
+"No match against any Flowy Flow." Our own three Flows: IDENTICAL on hash. The
+pre-existing `superpowers` / `ultra-powers` cross POSSIBLE-DERIVATIVE is unchanged
+and correct, since one is a superset Flow of the other.
 
 - [ ] **Step 5: Regenerate the manifest and commit**
 

@@ -82,6 +82,20 @@ describe("routeSequence", () => {
   test("a prose label followed by a space is not a route", () => {
     expect(routeSequence("Gate: a research brief. Phase: 2.")).toEqual([]);
   });
+
+  test("a slash is not a separator in OUR canonical extraction", () => {
+    // A9's first draft canonicalized `/` to `:` on BOTH sides. Measured on the
+    // shipped Flows that took growth-marketing from 7 routes to 14 and
+    // ultra-powers from 40 to 56, every addition a prose fragment:
+    // `read:invoke` from "READ/invoke", `ceo:eng` from "CEO/eng",
+    // `com:coreyhaines31` from a GitHub URL. Containment divides by OUR count,
+    // so that halves the score for the exact reworded copy this detector
+    // exists to catch. Widen what counts as the SAME route, never what counts
+    // as a route.
+    expect(routeSequence("we READ/invoke and check CEO/eng")).toEqual([]);
+    expect(routeSequence("see https://github.com/obra/superpowers")).toEqual([]);
+    expect(routeSequence("see https://flowy.sh/license for terms")).toEqual([]);
+  });
 });
 
 describe("routeContainment", () => {
@@ -156,6 +170,30 @@ describe("compareToCanonical", () => {
     const r = compareToCanonical(canonical, withCanary);
 
     expect(r.canaryHits).toEqual(["The taste is in the skill"]);
+  });
+
+  test("a separator or case change does not erase the routes", () => {
+    // A9: a byte-complete copy reached `no-match` after a prose re-wrap plus a
+    // `plugin/skill` separator change. Neither transform removes anything.
+    const d = { id: "d", hash: "", routes: ["ns:alpha", "ns:beta"], canaries: [] };
+    for (const variant of ["ns/alpha ns/beta", "NS:Alpha NS:Beta"]) {
+      expect(compareToCanonical(d, variant).routeContainment).toBe(1);
+    }
+  });
+
+  test("a variant separator only counts for a route we ACTUALLY have", () => {
+    // The widening is "the same route written differently", never "one more
+    // thing that counts as a route". `sh/license` in a URL is not a route.
+    const d = { id: "d", hash: "", routes: ["ns:alpha"], canaries: [] };
+    const r = compareToCanonical(d, "ns/alpha and see https://flowy.sh/license");
+    expect(r.routeContainment).toBe(1);
+    expect(r.suspectRouteCount).toBe(1);
+  });
+
+  test("a re-wrapped paragraph does not erase a canary", () => {
+    const d = { id: "d", hash: "", routes: [], canaries: ["The taste is in the skill"] };
+    const rewrapped = "prose prose The taste is\nin the skill. more prose\n";
+    expect(compareToCanonical(d, rewrapped).canaryHits.length).toBe(1);
   });
 
   test("an unrelated router that shares NO routes is not flagged", () => {

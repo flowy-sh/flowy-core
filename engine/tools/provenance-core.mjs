@@ -69,6 +69,59 @@ export function routeSequence(text) {
   return out;
 }
 
+/**
+ * The same reference written with either separator, in either case.
+ * `Superpowers/Brainstorming` is the same route as `superpowers:brainstorming`.
+ */
+const ROUTE_VARIANT_RE = /\b([A-Za-z0-9][A-Za-z0-9-]*)[:/]([A-Za-z0-9][A-Za-z0-9-]*)\b/g;
+
+/**
+ * The suspect's route sequence, widened to the separator and case variants of
+ * routes the canonical file ACTUALLY HAS.
+ *
+ * A byte-complete copy reached `no-match` after nothing more than changing
+ * `plugin:skill` to `plugin/skill` (A9). Neither that nor a case change removes
+ * anything, so neither may erase the evidence.
+ *
+ * WIDENING WHAT COUNTS AS THE SAME ROUTE, NEVER WHAT COUNTS AS A ROUTE. The
+ * first draft canonicalized `/` to `:` across the whole text on both sides.
+ * Measured on the shipped Flows that took growth-marketing from 7 routes to 14
+ * and ultra-powers from 40 to 56, every addition a prose fragment:
+ * `read:invoke` from "READ/invoke", `ceo:eng` from "CEO/eng",
+ * `com:coreyhaines31` from a GitHub URL. Containment divides by OUR count, so
+ * symmetric widening would have HALVED the score for the reworded copy this
+ * detector exists to catch, in the name of raising it. A variant form is
+ * therefore only accepted when it names a route we already have, which adds
+ * exactly zero routes to the canonical side.
+ *
+ * Whitespace around the separator is deliberately NOT collapsed. `ns: alpha`
+ * and `Gate: a research brief` are the same shape, and accepting the first
+ * makes every `Gate:`, `Phase:` and `Note:` in every scanned file a route.
+ */
+export function routeSequenceAgainst(text, canonicalRoutes) {
+  const known = new Set(canonicalRoutes);
+  const out = [];
+
+  for (const m of normalizeText(text).matchAll(ROUTE_VARIANT_RE)) {
+    const verbatim = `${m[1]}:${m[2]}`;
+    if (m[0] === verbatim && verbatim === verbatim.toLowerCase()) {
+      out.push(verbatim); // the strict form, exactly as routeSequence sees it
+      continue;
+    }
+    const lower = verbatim.toLowerCase();
+    if (known.has(lower)) out.push(lower);
+  }
+
+  return out;
+}
+
+/**
+ * Canary comparison collapses ALL whitespace and case, so re-wrapping a
+ * paragraph cannot erase one. A line break is a rendering choice, not a
+ * rewrite.
+ */
+const flat = (s) => normalizeText(s).replace(/\s+/g, " ").trim().toLowerCase();
+
 /** What share of OUR distinct routes appear in theirs. */
 export function routeContainment(canonical, suspect) {
   const canon = new Set(canonical);
@@ -116,16 +169,14 @@ export function orderScore(canonical, suspect) {
  * @param {string} suspectText
  */
 export function compareToCanonical(canonical, suspectText) {
-  const suspectRoutes = routeSequence(suspectText);
-  const normalizedSuspect = normalizeText(suspectText);
+  const suspectRoutes = routeSequenceAgainst(suspectText, canonical.routes);
+  const flatSuspect = flat(suspectText);
 
   const exact = contentHash(suspectText) === canonical.hash;
   const containment = routeContainment(canonical.routes, suspectRoutes);
   const order = orderScore(canonical.routes, suspectRoutes);
 
-  const canaryHits = (canonical.canaries ?? []).filter((c) =>
-    normalizedSuspect.includes(normalizeText(c).trim()),
-  );
+  const canaryHits = (canonical.canaries ?? []).filter((c) => flatSuspect.includes(flat(c)));
 
   // DISTINCT, both of them. A canonical file that names one skill four times
   // was reporting "5/26 routes present (14% containment)": the fraction counted
