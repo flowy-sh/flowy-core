@@ -85,6 +85,21 @@ flowy_origin_slug() {
   _owner="${_rest##*/}"
   [ -n "$_repo" ] && [ -n "$_owner" ] || return 1
 
+  # POSITIVE CHARSET ALLOWLIST, matching the SAFE_NAME strip in flowy-inject.sh.
+  # This value is printed into the agent's AUTHORITATIVE context, from a file
+  # (.git/config) a cloned or vendored install fully controls, so anything
+  # outside GitHub's own legal charset is REFUSED rather than sanitized: a
+  # refused slug is empty, and flowy_is_canonical_origin answers "yes" to empty,
+  # which means silence. Silence is already the documented outcome for an origin
+  # we cannot read, so refusing costs nothing and accuses nobody.
+  #
+  # A DENYLIST WAS THE BUG. The `case "$_u" in *" "*` guard above covers two
+  # codepoints; U+00A0 walked straight through it, as did `$(...)` and backticks.
+  # The length caps are GitHub's own (39 for an owner, 100 for a repo) and are
+  # what stops a long path component being used to flood the banner.
+  case "$_owner$_repo" in *[!A-Za-z0-9._-]* ) return 1 ;; esac
+  [ "${#_owner}" -le 39 ] && [ "${#_repo}" -le 100 ] || return 1
+
   # Lowercase: GitHub owners and repos are case-insensitive, so Flowy-SH must
   # not read as a fork of flowy-sh.
   printf '%s/%s' "$_owner" "$_repo" | tr 'A-Z' 'a-z'
