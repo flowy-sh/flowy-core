@@ -63,11 +63,22 @@ defect #1 is why SEO skills do not fire, is not established by a two-file compar
 specific alternatives are live, and none of them is ruled out.
 
 **1. `ultra-powers` is a free third data point, and the differential never consults it.** Run the
-rule engine over all three shipped Flows and the counts are `growth-marketing` **17**,
-`superpowers` **2**, `ultra-powers` **56**. The differential compares the best file to the worst
-and reads the gap as cause. `ultra-powers` carries **more than three times** `growth-marketing`'s
-defect count, so if defect density is what predicts firing, `ultra-powers` should fire worse than
-`growth-marketing`. Nobody has looked. A two-point comparison cannot separate "defect count" from
+rule engine over all three shipped Flows and the counts are `growth-marketing` **54**,
+`superpowers` **1**, `ultra-powers` **56**.
+
+> **RE-DERIVED 2026-07-29.** This paragraph first said 17 / 2 / 56. Those numbers came from the
+> rule engine BEFORE the ce:review remediation, and that engine was CRLF-broken and blind to the
+> bare-slug form the real passive index uses, so it was undercounting the file the whole standard
+> was derived from. Re-measured after the fix: **54 / 1 / 56**. The argument below survives, and
+> gets sharper: growth-marketing and ultra-powers are now within two errors of each other, so
+> defect COUNT plainly does not separate the Flow that fires from the one that does not. A number
+> derived from a broken instrument is not evidence, which is the same lesson this cycle learned
+> three other ways.
+
+The differential compares the best file to the worst
+and reads the gap as cause. `ultra-powers` and `growth-marketing` now carry **almost identical**
+defect counts, so if defect density is what predicts firing, they should fire about the same.
+Nobody has looked. A two-point comparison cannot separate "defect count" from
 every other difference between two files: different domain, different skill counts, different
 upstream plugin, different work the founder actually does in each. The third point is installed,
 in daily use, and is the natural control. Consult it before treating the gap as causal.
