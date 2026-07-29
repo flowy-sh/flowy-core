@@ -124,11 +124,43 @@ function refsIn(text) {
   return [...text.matchAll(SKILL_REF)].map((m) => m[0]);
 }
 
-/** R3: a route line must say `invoke`. */
+/**
+ * R3: a route line must say `invoke`.
+ *
+ * SCOPED TO THE FENCE. A route is a line in the routing TREE, and every shipped
+ * Flow puts its entire tree inside a fence. Arrows also appear in prose all over
+ * a good Flow: a Disambiguation line ("an SEO-specific verb -> ultra-powers:seo"),
+ * the Phases lifecycle chain, a rationalization. Those explain; they do not
+ * instruct, and demanding the verb in them produced 4 of ultra-powers' 56 errors
+ * with only two remedies available: mangle readable prose, or switch the rule
+ * off. That is how a guard that cries wolf dies (see
+ * `guards-must-match-invocation-not-substring-2026-07-28`).
+ *
+ * Task 7's escape hatch is the authority for amending a rule that flags
+ * legitimate content rather than editing the content to satisfy it.
+ *
+ * The rule keeps its teeth exactly where routing lives: a verbless route inside
+ * the fence is still an error.
+ */
 export function checkRouteVerbs(text) {
   const errors = [];
+  let inFence = false;
   for (const [i, line] of normalizeLines(text).entries()) {
+    if (FENCE.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence) continue; // prose arrow: explanation, not instruction
     if (!isRouteLine(line)) continue;
+    // RE-ENTRY EXEMPTION, narrow and deliberate. A line that directs re-entry to
+    // a PHASE names skills as candidates for which phase to return to, not as a
+    // target to invoke. `superpowers` — the reference implementation this whole
+    // standard is derived from — carries exactly one such line, and the plan
+    // records it as the known false positive behind Task 7's escape hatch.
+    // Editing that file to satisfy this rule is the single change most likely to
+    // damage the behaviour being copied. Kept to the literal phrase so it cannot
+    // grow into a general excuse: an ordinary verbless route is still an error.
+    if (/\bre-enter\b/i.test(line)) continue;
     const after = line.split(ARROW).slice(1).join(" ");
     // Case-INSENSITIVE, like every sibling rule. Telling an author to lowercase
     // a sentence-initial verb is how a checker gets switched off.

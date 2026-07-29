@@ -6,83 +6,92 @@
 <!-- The Flowy engine supplies the universal contract (announce, READ/invoke, host-wins,
      post-compaction re-read). This file carries only the routing + disambiguation. -->
 
-## The one rule that makes this Flow worth more than its skills
-
-Five suites overlap on purpose. The Flow's value is knowing which to fire:
-
-- **`superpowers` = portable DISCIPLINES** — laws + gates, no tooling (brainstorming, writing-plans, TDD, systematic-debugging, verification, code-review, worktrees). Reach for these when you want the *guardrail*.
-- **`compound-engineering` (`ce-*`) = end-to-end WORKFLOWS** — tooling, sub-agents, auto-fix, tracker ingestion. Reach for these when you want the *machine*.
-- **`gstack` = founder-lens REVIEWS + ops** — review a plan/diff through a CEO/eng/DX persona, audit security, generate docs.
-- **`claude-seo` owns SEO execution; `marketing-skills` owns GTM.**
-
-**Never fire both halves of a pair on one task.** Pick the lane (discipline *or* workflow), and route by the tiebreakers below.
-
 ## Routing
 
-**The rule (MANDATORY, not advisory):** when a trigger matches, INVOKE the named skill BEFORE doing the task yourself — do not write code, run a tool, or claim 'done' until you have READ this FLOW.md and invoked every matched skill. Writing the code, patching the bug, or claiming 'done' without first invoking is the failure this Flow exists to stop.
+**The rule. MANDATORY, not advisory.** When a trigger matches, INVOKE the named skill with the
+Skill tool BEFORE doing the task yourself. Do not write the code, patch the bug, design the
+screen, or claim 'done' until you have READ this FLOW.md and invoked every matched skill.
+**Producing the artifact when a trigger matched and you did not invoke is a VIOLATION, not a
+shortcut.** Naming the skill in your reply is not invoking it: invoking means an actual Skill tool
+call you can point at.
+
+**The one rule that makes this Flow worth more than its skills.** Five suites overlap on purpose,
+and the Flow's value is knowing which to fire:
+
+- **superpowers = portable DISCIPLINES** — laws + gates, no tooling (brainstorming, writing-plans, TDD, systematic-debugging, verification, code-review, worktrees). Reach for these when you want the *guardrail*.
+- **compound-engineering (the ce-\* skills) = end-to-end WORKFLOWS** — tooling, sub-agents, auto-fix, tracker ingestion. Reach for these when you want the *machine*.
+- **gstack = founder-lens REVIEWS + ops** — review a plan/diff through a CEO/eng/DX persona, audit security, generate docs.
+- **claude-seo owns SEO execution; marketing-skills owns GTM.**
+
+**Never fire both halves of a pair on one task.** Pick the lane (discipline *or* workflow), and
+route by the tiebreakers in Disambiguation.
 
 ```
 USER MESSAGE
   │ — VALIDATE / IDEATE —
-  ├─ is this NEW idea worth building? (demand, wedge, should-I)        → ultra-powers:office-hours
-  ├─ what should I build/improve NEXT in this project?                 → ultra-powers:ce-ideate
+  ├─ is this NEW idea worth building? (demand, wedge, should-I)        → invoke ultra-powers:office-hours
+  ├─ what should I build/improve NEXT in this project?                 → invoke ultra-powers:ce-ideate
   │ — DESIGN (spec) — pick ONE lane —
-  ├─ refine a chosen idea into a design/architecture spec (TDD lane)?  → ultra-powers:brainstorming        gate: approved design doc
-  ├─ shape a chosen idea into a requirements doc (the WHAT; CE lane)?  → ultra-powers:ce-brainstorm
+  ├─ refine a chosen idea into a design/architecture spec (TDD lane)?  → invoke ultra-powers:brainstorming        gate: approved design doc
+  ├─ shape a chosen idea into a requirements doc (the WHAT; CE lane)?  → invoke ultra-powers:ce-brainstorm
   │ — DESIGN (UI) —
-  ├─ design a NEW UI / page / visual identity (look, type, layout)?    → ultra-powers:frontend-design
-  ├─ make a UI FEEL right (animation, motion, micro-interactions)?     → ultra-powers:emil-design-eng
-  ├─ review existing animation / motion code?                          → ultra-powers:review-animations
+  ├─ design a NEW UI / page / visual identity (look, type, layout)?    → invoke ultra-powers:frontend-design
+  ├─ make a UI FEEL right (animation, motion, micro-interactions)?     → invoke ultra-powers:emil-design-eng
+  ├─ review existing animation / motion code?                          → invoke ultra-powers:review-animations
   │ — PLAN (create) — match the design lane —
-  ├─ approved design → TDD implementation plan (code in every step)?   → ultra-powers:writing-plans        gate: checkboxed tasks
-  ├─ plan a broader / non-code / research-backed effort?               → ultra-powers:ce-plan
+  ├─ approved design → TDD implementation plan (code in every step)?   → invoke ultra-powers:writing-plans        gate: checkboxed tasks
+  ├─ plan a broader / non-code / research-backed effort?               → invoke ultra-powers:ce-plan
   │ — PLAN (review) — harden a plan before building —
-  ├─ stress-test a plan's scope / ambition ("think bigger")?           → ultra-powers:plan-ceo-review
-  ├─ stress-test a plan's architecture / edge cases / tests?           → ultra-powers:plan-eng-review
-  ├─ stress-test a dev-facing plan's DX (API/CLI/SDK)?                  → ultra-powers:plan-devex-review
-  ├─ run all the plan reviews at once?                                 → ultra-powers:autoplan
+  ├─ stress-test a plan's scope / ambition ("think bigger")?           → invoke ultra-powers:plan-ceo-review
+  ├─ stress-test a plan's architecture / edge cases / tests?           → invoke ultra-powers:plan-eng-review
+  ├─ stress-test a dev-facing plan's DX (API/CLI/SDK)?                  → invoke ultra-powers:plan-devex-review
+  ├─ run all the plan reviews at once?                                 → invoke ultra-powers:autoplan
   │ — BUILD —
-  ├─ about to write implementation code (discipline)?                  → ultra-powers:test-driven-development  gate: a failing test FIRST
-  ├─ execute an approved plan end-to-end (CE machine)?                 → ultra-powers:ce-work
+  ├─ about to write implementation code (discipline)?                  → invoke ultra-powers:test-driven-development  gate: a failing test FIRST
+  ├─ execute an approved plan end-to-end (CE machine)?                 → invoke ultra-powers:ce-work
   │ — DEBUG —
-  ├─ something broken — want the root-cause guardrail?                 → ultra-powers:systematic-debugging   gate: root cause written down
-  ├─ bug tied to a tracker / want it diagnosed AND fixed end-to-end?   → ultra-powers:ce-debug
+  ├─ something broken — want the root-cause guardrail?                 → invoke ultra-powers:systematic-debugging   gate: root cause written down
+  ├─ bug tied to a tracker / want it diagnosed AND fixed end-to-end?   → invoke ultra-powers:ce-debug
   │ — VERIFY —
-  ├─ about to claim done / fixed / passing?                            → ultra-powers:verification-before-completion  gate: command output proves it
+  ├─ about to claim done / fixed / passing?                            → invoke ultra-powers:verification-before-completion  gate: command output proves it
   │ — REVIEW —
-  ├─ thorough pre-PR review with auto-fix (the system)?               → ultra-powers:ce-review
-  ├─ quick second-pair-of-eyes mid-task (one reviewer)?               → ultra-powers:requesting-code-review
-  ├─ received review feedback to address?                             → ultra-powers:receiving-code-review  gate: every finding resolved
-  ├─ pre-merge safety lens (SQL / LLM-trust / side-effects)?          → ultra-powers:review
+  ├─ thorough pre-PR review with auto-fix (the system)?               → invoke ultra-powers:ce-review
+  ├─ quick second-pair-of-eyes mid-task (one reviewer)?               → invoke ultra-powers:requesting-code-review
+  ├─ received review feedback to address?                             → invoke ultra-powers:receiving-code-review  gate: every finding resolved
+  ├─ pre-merge safety lens (SQL / LLM-trust / side-effects)?          → invoke ultra-powers:review
   │ — PROVE / SHIP —
-  ├─ capture a GIF/screenshot proof of real usage for a PR?           → ultra-powers:ce-demo-reel
-  ├─ need parallel isolated branches?                                 → ultra-powers:using-git-worktrees
-  ├─ commit + push + open a PR with a value-first description?        → ultra-powers:git-commit-push-pr
-  ├─ land a finished branch (merge / integration choice)?             → ultra-powers:finishing-a-development-branch  gate: tests pass
+  ├─ capture a GIF/screenshot proof of real usage for a PR?           → invoke ultra-powers:ce-demo-reel
+  ├─ need parallel isolated branches?                                 → invoke ultra-powers:using-git-worktrees
+  ├─ commit + push + open a PR with a value-first description?        → invoke ultra-powers:git-commit-push-pr
+  ├─ land a finished branch (merge / integration choice)?             → invoke ultra-powers:finishing-a-development-branch  gate: tests pass
   │ — SECURE / CAPTURE / DOCS —
-  ├─ security audit (secrets, supply chain, OWASP, STRIDE)?           → ultra-powers:cso
-  ├─ just solved something hard — capture it for reuse?               → ultra-powers:ce-compound
-  ├─ write user-facing docs from scratch (tutorial/how-to/ref)?       → ultra-powers:document-generate
-  ├─ "what did we ship" / weekly retrospective?                       → ultra-powers:retro
+  ├─ security audit (secrets, supply chain, OWASP, STRIDE)?           → invoke ultra-powers:cso
+  ├─ just solved something hard — capture it for reuse?               → invoke ultra-powers:ce-compound
+  ├─ write user-facing docs from scratch (tutorial/how-to/ref)?       → invoke ultra-powers:document-generate
+  ├─ "what did we ship" / weekly retrospective?                       → invoke ultra-powers:retro
   ├─ wrap a session / hand off to another agent?                      → handoff
   │ — GROW (set up once) —
-  ├─ define positioning / ICP / who-this-is-for (do this FIRST)?      → ultra-powers:product-marketing
-  ├─ I don't know what growth move to make next?                      → ultra-powers:marketing-ideas
+  ├─ define positioning / ICP / who-this-is-for (do this FIRST)?      → invoke ultra-powers:product-marketing
+  ├─ I don't know what growth move to make next?                      → invoke ultra-powers:marketing-ideas
   │ — GROW (GTM) —
-  ├─ write page / landing / pricing copy?                             → ultra-powers:copywriting
-  ├─ a page isn't converting (layout, friction, trust, CTA)?         → ultra-powers:cro
-  ├─ set pricing / tiers / freemium?                                  → ultra-powers:pricing
-  ├─ plan a launch / Product Hunt / GTM moment?                       → ultra-powers:launch
-  ├─ decide WHAT content/topics to create?                           → ultra-powers:content-strategy
-  ├─ build-in-public / social posts / threads?                       → ultra-powers:social
+  ├─ write page / landing / pricing copy?                             → invoke ultra-powers:copywriting
+  ├─ a page isn't converting (layout, friction, trust, CTA)?         → invoke ultra-powers:cro
+  ├─ set pricing / tiers / freemium?                                  → invoke ultra-powers:pricing
+  ├─ plan a launch / Product Hunt / GTM moment?                       → invoke ultra-powers:launch
+  ├─ decide WHAT content/topics to create?                           → invoke ultra-powers:content-strategy
+  ├─ build-in-public / social posts / threads?                       → invoke ultra-powers:social
   │ — GROW (SEO — claude-seo owns this) —
-  ├─ any SEO intent: rank / audit / schema / technical / AI-Overviews/ backlinks / pages-at-scale? → ultra-powers:seo
+  ├─ any SEO intent: rank / audit / schema / technical / AI-Overviews/ backlinks / pages-at-scale? → invoke ultra-powers:seo
   │ — META —
-  ├─ ad-hoc parallel research / fan-out?                              → ultra-powers:dispatching-parallel-agents
-  ├─ scope changed mid-task?                                          → re-enter the earliest invalidated phase (ultra-powers:office-hours / ultra-powers:brainstorming / ultra-powers:writing-plans)
+  ├─ ad-hoc parallel research / fan-out?                              → invoke ultra-powers:dispatching-parallel-agents
+  ├─ scope changed mid-task?                                          → re-enter the earliest invalidated phase: invoke ultra-powers:office-hours, ultra-powers:brainstorming, or ultra-powers:writing-plans
   ├─ blocked on an external dependency?                               → park: record blocker + resume condition; don't fake progress
   └─ question, not work (advise / explain)?                           → answer only; no files change
 ```
+
+**Drift:** every route targets a skill in a SEPARATELY INSTALLED plugin. If a slug no longer
+resolves there, that route is a silent no-op. Never substitute a nearby-sounding skill. A broken
+route means this Flow needs an update, not that you may improvise.
 
 ## Disambiguation (the tiebreakers — why this Flow beats loose skills)
 
@@ -92,7 +101,7 @@ USER MESSAGE
 - **ultra-powers:writing-plans vs ultra-powers:ce-plan** — same name, different jobs. `ultra-powers:writing-plans` = a TDD-first implementation plan for **code** (actual code + failing-test-first in every step). `ultra-powers:ce-plan` = general structured planning (non-code, research-backed, "deepen" mode). Code you'll TDD → ultra-powers:writing-plans; anything else → ultra-powers:ce-plan.
 - **ultra-powers:systematic-debugging vs ultra-powers:ce-debug** — `ultra-powers:systematic-debugging` is the portable root-cause *guardrail* you overlay on any failure (no tooling). `ultra-powers:ce-debug` is the full *workflow* — pulls the issue from gh/Linear/Jira, reproduces, fixes end-to-end. ultra-powers:ce-debug already contains the discipline; **don't stack them.** Tracker-tied / fix-it-all → ultra-powers:ce-debug; stray failure → ultra-powers:systematic-debugging.
 - **ultra-powers:ce-review vs ultra-powers:requesting-code-review** — `ultra-powers:ce-review` is a 17-persona orchestrated *system* with a confidence gate + auto-fix + headless mode. `ultra-powers:requesting-code-review` dispatches ONE reviewer, fast, mid-task. Pre-PR gate / want auto-fix → ultra-powers:ce-review; quick eyes → ultra-powers:requesting-code-review.
-- **ultra-powers:verification-before-completion has NO CE twin** — keep it as the done-gate. (CE's `proof` is a markdown editor, not verification; `ultra-powers:ce-demo-reel` makes *visual PR proof*, a different job.)
+- **ultra-powers:verification-before-completion has NO CE twin** — keep it as the done-gate. (CE's proof skill is a markdown editor, not verification; `ultra-powers:ce-demo-reel` makes *visual PR proof*, a different job. Written without backticks on purpose: a backticked bare slug reads as a routed skill to the rule engine, and this one must NOT be routed.)
 
 **Plan create vs plan review (a whole phase, not a duplicate):**
 - superpowers/CE **create** plans (ultra-powers:brainstorming/ultra-powers:writing-plans, ultra-powers:ce-brainstorm/ultra-powers:ce-plan). gstack's **ultra-powers:plan-ceo-review / ultra-powers:plan-eng-review / ultra-powers:plan-devex-review** *review an existing plan* through a persona lens. Different stage of the same loop — create first, then review.
