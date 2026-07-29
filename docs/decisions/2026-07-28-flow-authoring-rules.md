@@ -35,6 +35,29 @@ warns about. The routes are live; they are simply not taken.
 
 ### Why #1 is the answer to the founder's actual complaint
 
+> ## ❌ MEASURED FALSE, 2026-07-29. Read this box before the argument below it.
+>
+> The gate was run. `marketing-skills:seo-audit` **fires**. So do the skills with no route:
+> across three single-turn `claude -p` probes with `growth-marketing` active, real `Skill`
+> `tool_use` events were observed for **`ai-seo`**, **`schema`**, **`content-strategy`** and
+> **`product-marketing`** — four skills that appear ONLY in the passive index, with no route
+> line, no trigger and no verb. In that sample they fired MORE often than the routed ones.
+>
+> **So the paragraph below is wrong on its central claim.** "There is no trigger to match" is
+> not what the model does with a passive index: it reads the FLOW.md, finds the name, and
+> invokes it. A missing route is not what stops a skill firing, so adding 40 routes is not
+> what will start them.
+>
+> The reasoning error is worth naming, because it is subtle and this document made it
+> confidently: **defect #1 was inferred from a two-file diff and never tested against a
+> control.** The gate that was supposed to test it had only a positive branch. Full
+> measurement, method and limits: the GATE ANSWER section of
+> `docs/plans/2026-07-28-flow-authoring-rules.md`.
+>
+> R1 survives as an **authoring discipline** (a skill worth naming is worth a condition), not
+> as a firing remedy. Kept below unedited, because a spec that quietly rewrites its own
+> disproved argument teaches nothing.
+
 The complaint was specifically about SEO. `seo-audit` is the **only** SEO skill with a route.
 `ai-seo`, `programmatic-seo`, `schema`, and `site-architecture` appear only in the passive
 index, under a sentence telling the agent to "fire any as `marketing-skills:<name>` when its
@@ -194,7 +217,20 @@ never fail-closed, and `flowy_plugins_base` containment is not touched.
 The validator must land **with or after** the file fixes. Landing it first fails the repo on its
 own contents, which is how a useful check gets disabled for being annoying.
 
-### GATE, blocking the growth-marketing rewrite
+### GATE, blocking the growth-marketing rewrite — ANSWERED 2026-07-29, and the gate was malformed
+
+**Result: `seo-audit` fires. Unrouted skills fire too.** Neither branch below applies, because
+both were written assuming unrouted skills do not fire. Disposition and method:
+`docs/plans/2026-07-28-flow-authoring-rules.md`, GATE ANSWER section.
+
+**The lesson about the gate itself, which is the more reusable half.** This gate cost one
+observation and would have returned the WRONG verdict, because it specified only the positive
+case. "Does the routed skill fire?" has a yes-branch that reads as confirmation, and the
+confirmation is worthless without asking whether the unrouted ones fire too. **A gate that can
+only confirm is not a gate.** Every future one states its control in the same breath as its
+test.
+
+Kept unedited below as the original specification.
 
 **Answer this before the rewrite starts: does the already-routed `marketing-skills:seo-audit`
 actually fire?**

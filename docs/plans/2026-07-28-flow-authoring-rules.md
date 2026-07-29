@@ -17,7 +17,7 @@
 | 1. Rule module: verbs + orphans (R1, R3) | **DONE** |
 | 2. Section order, advisory, drift, counts (R4, R5, R6) | **DONE** |
 | 3. Wire into validate-flow, opt-in | **DONE** |
-| 4. Rewrite growth-marketing FLOW.md | open, **GATED**: does routed `seo-audit` fire? UNANSWERED |
+| 4. Rewrite growth-marketing FLOW.md | open, **GATE ANSWERED 2026-07-29 — and it went the third way. See below.** |
 | 5. growth-marketing FLOW-compact.md | open |
 | 6. ultra-powers sweep | open |
 | 7. superpowers sweep | open |
@@ -25,6 +25,68 @@
 | 9. Born-compliant template + scaffold | **DONE** |
 | 10. Banner clause | open |
 | 11. Release | open |
+
+## GATE ANSWER (2026-07-29): `seo-audit` fires. So do the skills with NO route. R1 is not the cause.
+
+Measured with the documented harness (`docs/solutions/best-practices/headless-claude-p-experiment-harness-windows-2026-06-22.md`
+in the marketplace repo): a fresh sandbox per run, `growth-marketing` activated for that
+sandbox, one `claude -p` turn, then the transcript JSONL parsed for real `Skill` `tool_use`
+events. Never the model's prose.
+
+| Arm | Prompt aimed at | `Skill` events observed |
+|---|---|---|
+| A | routed `seo-audit` (near-verbatim quote match) | `marketing-skills:seo-audit` |
+| B | passive-index `ai-seo` | **`marketing-skills:ai-seo`**, **`marketing-skills:schema`** |
+| C | passive-index `content-strategy` | **`content-strategy`**, **`product-marketing`**, routed `customer-research` |
+
+Banner fired and FLOW.md was read in every arm.
+
+**The gate as written had only two branches, and reality took a third.** It said: *if
+`seo-audit` fires, the missing-route theory holds — routed SEO skills fire, unrouted ones do
+not, and the difference between them is the route.* The first half is true. **The second half
+is false, and it was the load-bearing half.** Four distinct skills that appear ONLY in the
+passive "Additional skills (also available)" index — no route line, no trigger, no verb —
+fired anyway. In this sample they fired MORE often than the routed ones.
+
+One counterexample is enough to kill a universal claim, and there are four.
+
+**The gate could not have caught this, because it only tested the positive case.** Answering
+"does the routed skill fire?" with YES and stopping would have licensed Task 4 as "the fix".
+The control is what made the answer informative, and the control was not in the plan.
+
+### What this does and does not establish
+
+**Establishes:** R1 is not the mechanism behind the founder's complaint. Adding a route to a
+skill that already fires without one cannot be what makes it fire. The passive index is not a
+dead zone — the model reads the FLOW.md, finds the names, and invokes them.
+
+**Also establishes that the expected-effect table cannot be scored as written.** Prediction #1
+("of 20 marketing turns, at least 8 invoke a skill that has NO route today") silently assumes
+the baseline for unrouted firing is about zero. It is not zero, it was never measured, and an
+after-number without a before-number proves nothing. That is this repo's own recurring lesson
+arriving in the measurement plan itself.
+
+**Does NOT establish:** any firing RATE (n is 3 prompts, 1 run each), and nothing at all about
+long sessions. A single `-p` turn measures **selection**, and selection at scale was already
+measured as a NULL. The founder's complaint is that skills do not fire *often enough across
+real work*, which is **recall and continuity over many turns** — the one thing this design
+cannot see. The instrument answered the question the plan asked; the plan asked a question
+whose answer does not reach the complaint.
+
+### Disposition for Tasks 4-8
+
+Proceed, but **reclassified from "the firing fix" to hygiene.** R3 (verbs), R4 (the advisory
+escape that authorises answering from memory), R5 (section order) and R6 (a count the file
+cannot back, missing drift clause) all close real defects, and the validator is sound work
+worth keeping. R1 stays as an authoring discipline — a skill worth naming is worth a
+condition — not as a firing remedy.
+
+**Do not ship a claim that this raised firing.** Nothing measured here supports it.
+
+The live question moves to continuity/recall in long sessions, which needs the
+`experiments/auto-invocation` harness over real transcripts, not single `-p` turns.
+
+---
 
 **Task 9 moved earlier than planned, because the plan was wrong about it.** It assumed a
 template existed at `templates/flow-standard/`. It did not exist anywhere in this repo, and
