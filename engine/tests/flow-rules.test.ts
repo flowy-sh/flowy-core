@@ -31,15 +31,63 @@ import {
    to cover them would be a test that can never fail.
    ============================================================ */
 
+describe("checkRouteVerbs (R3) — a ROUTE is a line in the routing tree, not any arrow", () => {
+  /**
+   * Every shipped Flow puts its entire routing tree inside a fence, and every
+   * Flow also uses arrows in PROSE: a Disambiguation line ("an SEO-specific verb
+   * -> ultra-powers:seo"), a Phases lifecycle chain, a rationalization. Those are
+   * explanation, not instruction, and demanding the verb in them produced 4 of
+   * ultra-powers' 56 errors. The only remedies were to mangle readable prose or
+   * to switch the rule off, which is how a guard that cries wolf dies.
+   *
+   * Task 7's escape hatch covers exactly this: when a rule flags legitimate
+   * content, amend the rule.
+   */
+  test("an arrow in PROSE, outside the fence, is not a route", () => {
+    const prose = "## Disambiguation\nAn SEO-specific verb → ultra-powers:seo; otherwise marketing.\n";
+    expect(checkRouteVerbs(prose)).toEqual([]);
+  });
+
+  test("a lifecycle chain in Phases is not a route either", () => {
+    const phases = "## Phases\nValidate (ultra-powers:office-hours) → Design (ultra-powers:brainstorming)\n";
+    expect(checkRouteVerbs(phases)).toEqual([]);
+  });
+
+  test("a verbless route INSIDE the fence is still an error", () => {
+    // The rule must keep its teeth where routing actually lives.
+    const fenced = "## Routing\n\n```\n  ├─ about to code? → ultra-powers:tdd\n```\n";
+    expect(checkRouteVerbs(fenced).length).toBe(1);
+    expect(checkRouteVerbs(fenced)[0]).toContain("ultra-powers:tdd");
+  });
+
+  test("a verbed route inside the fence passes", () => {
+    const ok = "## Routing\n\n```\n  ├─ about to code? → invoke ultra-powers:tdd\n```\n";
+    expect(checkRouteVerbs(ok)).toEqual([]);
+  });
+});
+
 describe("checkRouteVerbs (R3)", () => {
+  /**
+   * Wrap a route in a fence, because R3 is scoped to the routing tree and every
+   * shipped Flow fences its tree.
+   *
+   * These fixtures were BARE when the rule matched any arrow. After fence-scoping
+   * landed, the two positive cases below ("verb passes", "capitalised verb")
+   * started passing for the WRONG reason: with no fence the line was skipped, so
+   * they asserted [] against a rule that never looked. They were green and
+   * vacuous. Wrapping every fixture, not just the ones that went red, is what
+   * keeps them meaningful.
+   */
+  const fenced = (line: string) => "## Routing\n\n\`\`\`\n" + line + "\`\`\`\n";
+
   test("a route line with the verb passes", () => {
-    expect(checkRouteVerbs("  ├─ about to code? → invoke sp:tdd\n")).toEqual([]);
+    expect(checkRouteVerbs(fenced("  ├─ about to code? → invoke sp:tdd\n"))).toEqual([]);
   });
 
   test("a route line naming a skill with NO verb is an error", () => {
     // The receipt-not-promise defect one layer down: a noun is a reference,
     // a verb is an instruction.
-    const errs = checkRouteVerbs("  ├─ about to code? → sp:tdd\n");
+    const errs = checkRouteVerbs(fenced("  ├─ about to code? → sp:tdd\n"));
     expect(errs.length).toBe(1);
     expect(errs[0]).toContain("sp:tdd");
   });
@@ -47,18 +95,44 @@ describe("checkRouteVerbs (R3)", () => {
   test("prose that mentions a skill is NOT a route line", () => {
     // Disambiguation and Attribution name skills constantly. Treating those as
     // routes would make the rule unsatisfiable.
-    expect(checkRouteVerbs("sp:tdd and sp:review overlap on purpose.\n")).toEqual([]);
+    expect(checkRouteVerbs(fenced("sp:tdd and sp:review overlap on purpose.\n"))).toEqual([]);
   });
 
   test("ASCII arrows count as routes too", () => {
-    expect(checkRouteVerbs("  - bug? -> sp:debug\n").length).toBe(1);
+    expect(checkRouteVerbs(fenced("  - bug? -> sp:debug\n")).length).toBe(1);
+  });
+
+  test("a re-entry directive is not a single-skill route", () => {
+    /**
+     * THE DOCUMENTED FALSE POSITIVE. The plan records that `superpowers` sits at
+     * exactly 1 error and that it is "a known false positive on a re-entry
+     * instruction", which is why Task 7 carries an escape hatch: when a rule
+     * flags the reference implementation whose ~97% firing the whole cycle
+     * exists to reproduce, the RULE is wrong before the file is.
+     *
+     * The line directs re-entry to a PHASE. The skills in parentheses are
+     * candidates for which phase to return to, not a target to invoke, so
+     * demanding a verb misreads what the line does. Editing the reference file
+     * to satisfy it is the one change with a real chance of destroying the
+     * behaviour being copied.
+     */
+    const reentry =
+      "## Routing\n\n\`\`\`\n  ├─ scope changed mid-task? → re-enter the earliest invalidated phase (superpowers:brainstorming or superpowers:writing-plans)\n\`\`\`\n";
+    expect(checkRouteVerbs(reentry)).toEqual([]);
+  });
+
+  test("but a plain verbless route is STILL an error, exemption or not", () => {
+    // The exemption must be narrow. If it swallowed ordinary routes it would
+    // disable R3 entirely, which is the failure mode of every escape hatch.
+    const plain = "## Routing\n\n\`\`\`\n  ├─ about to code? → superpowers:tdd\n\`\`\`\n";
+    expect(checkRouteVerbs(plain).length).toBe(1);
   });
 
   test("R3 accepts a capitalised verb", () => {
     // A8. Every sibling rule is case-insensitive; this one told authors to
     // lowercase a sentence-initial verb, which is how a checker gets switched
     // off.
-    expect(checkRouteVerbs("- x? → Invoke sp:tdd")).toEqual([]);
+    expect(checkRouteVerbs(fenced("- x? → Invoke sp:tdd\n"))).toEqual([]);
   });
 });
 
@@ -77,16 +151,45 @@ describe("checkNoOrphanSkills (R1)", () => {
     expect(checkNoOrphanSkills(text)).toEqual([]);
   });
 
-  test("the orphan rule flags the ACTUAL growth-marketing passive index", () => {
-    // A4: this is the defect the whole standard is named after. The unit tests
-    // used `ms:ai-seo`; the real file writes `` `ai-seo` `` in a backticked
-    // list, so the rule returned ZERO errors on its own motivating example.
+  test("the orphan rule flags a passive index in the REAL shape it took", () => {
+    // A4: the defect the whole standard is named after. The unit tests used
+    // `ms:ai-seo`; the real file wrote `` `ai-seo` `` in a backticked list, so
+    // the rule returned ZERO errors on its own motivating example.
+    //
+    // THIS IS A FIXTURE, not a read of the shipped file. It used to read
+    // growth-marketing/FLOW.md and assert >20 orphans, which pinned the BUG
+    // rather than the RULE: the moment that file was fixed (2026-07-29, 54
+    // errors -> 0) the test failed for the best possible reason. A guard whose
+    // passing condition is "our content is still broken" cannot survive its own
+    // success. The excerpt below is the real index, verbatim, so the rule stays
+    // pinned against the shape that actually occurred.
+    const realPassiveIndex = [
+      "## Routing",
+      "  ├─ page not converting? → invoke marketing-skills:cro",
+      "",
+      "## Additional skills (also available)",
+      "",
+      "The full `marketing-skills` set is available in the installed plugin; fire any as",
+      "**`marketing-skills:<name>`** when its trigger matches. Index by intent:",
+      "",
+      "- **Acquisition / traffic:** `ads`, `ad-creative`, `ai-seo`, `programmatic-seo`, `directory-submissions`, `public-relations`, `prospecting`, `co-marketing`, `community-marketing`, `referrals`",
+      "- **Conversion / on-page:** `signup`, `onboarding`, `paywalls`, `popups`, `offers`, `lead-magnets`, `free-tools`, `marketing-psychology`",
+      "- **Content / channels:** `content-strategy`, `social`, `emails`, `sms`, `video`, `image`, `copy-editing`",
+      "- **Ops / measurement:** `analytics`, `revops`, `churn-prevention`, `schema`, `site-architecture`, `aso`",
+    ].join("\n");
+    const errs = checkNoOrphanSkills(realPassiveIndex);
+    expect(errs.length).toBeGreaterThan(20);
+    expect(errs.join("\n")).toContain("ai-seo");
+  });
+
+  test("and the SHIPPED growth-marketing file now has none of them", () => {
+    // The other half of the pair. The fixture above proves the rule can fire;
+    // this proves the content was actually fixed. Separating them is the point:
+    // one assertion cannot do both without inverting when the fix lands.
     const p = join(
       import.meta.dir, "..", "..", "overlays", "growth-marketing", "flows", "growth-marketing", "FLOW.md",
     );
-    const errs = checkNoOrphanSkills(readFileSync(p, "utf8"));
-    expect(errs.length).toBeGreaterThan(20);
-    expect(errs.join("\n")).toContain("ai-seo");
+    expect(checkNoOrphanSkills(readFileSync(p, "utf8"))).toEqual([]);
   });
 
   test("a backticked bare slug in a prose list is an orphan", () => {
@@ -239,7 +342,13 @@ describe("checkClaimedCounts (R6)", () => {
 
 describe("checkFlowRules", () => {
   test("aggregates every rule's errors", () => {
-    const errs = checkFlowRules("# T\n\n## Phases\np\n\n## Routing\n- a? → x:one\n");
+    // The route sits inside a fence so R3 can see it: R3 is scoped to the
+    // routing tree, and an unfenced arrow is prose. Without the fence this
+    // asserted 3 errors while only 2 rules had fired, so it passed on a
+    // miscount rather than on the aggregation it is named for.
+    const errs = checkFlowRules(
+      "# T\n\n## Phases\np\n\n## Routing\n\n\`\`\`\n- a? → x:one\n\`\`\`\n",
+    );
     expect(errs.length).toBeGreaterThanOrEqual(3); // order + verb + drift
   });
 
