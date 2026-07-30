@@ -98,9 +98,40 @@ mkdir -p "$STATE_DIR" 2>/dev/null || {
   exit 6
 }
 
-# A fresh activation supersedes any unclaimed PENDING. Claimed state-<id>.json
-# files (this or other sessions) are left to the GC + TTL — not our job.
-rm -f "$STATE_DIR/state-PENDING.json" 2>/dev/null || true
+# SESSION ADDRESSING. The hook reads state-<session_id>.json and claims an
+# unaddressed state-PENDING.json on behalf of whichever session prompts FIRST.
+# That claim cannot tell the requesting session from a bystander: the mkdir lock
+# serialises two sessions racing, it does not stop the WRONG one winning. Two
+# Claude Code sessions sharing a project key (a worktree counts) therefore steal
+# each other's activations — REPRODUCED 2026-07-30, and the victim session gets
+# no banner and no error, indefinitely.
+#
+# When the host exposes the session id we name the file directly, so there is no
+# unaddressed envelope to claim and no race to lose. Charset is the hook's own
+# session_id allowlist; anything else (traversal, metacharacters, over-length)
+# degrades to PENDING rather than building a path from an untrusted value.
+#
+# The three lines below are the WRITE-SITE half of a two-site guard, exactly like
+# the FLOW_PLUGIN_ROOT pair above. Keep them equivalent to `is_safe_id` in
+# hooks/flowy-inject.sh (empty / >128 / outside [A-Za-z0-9_-] all rejected): the
+# hook refuses to READ a state file whose id fails that check, so a value we
+# accept but it rejects would produce a file nothing ever reads — an activation
+# that silently never fires, which is the failure class this whole change closes.
+SESSION_ID="${CLAUDE_CODE_SESSION_ID:-}"
+case "$SESSION_ID" in *[!A-Za-z0-9_-]* ) SESSION_ID="" ;; esac
+[ "${#SESSION_ID}" -le 128 ] 2>/dev/null || SESSION_ID=""
+if [ -n "$SESSION_ID" ]; then
+  STATE_NAME="state-$SESSION_ID.json"
+  STATE_SESSION="$SESSION_ID"
+else
+  STATE_NAME="state-PENDING.json"
+  STATE_SESSION="PENDING"
+fi
+
+# A fresh activation supersedes our own previous write at the SAME path (and, in
+# the PENDING fallback, any unclaimed PENDING). Other sessions' claimed
+# state-<id>.json files are left to the GC + TTL — not our job.
+rm -f "$STATE_DIR/$STATE_NAME" 2>/dev/null || true
 
 EPOCH="$(date +%s 2>/dev/null)"
 case "$EPOCH" in '' | *[!0-9]*) printf 'flowy-activate: no epoch\n' >&2; exit 7 ;; esac
@@ -111,18 +142,18 @@ case "$EPOCH" in '' | *[!0-9]*) printf 'flowy-activate: no epoch\n' >&2; exit 7 
 # F4: unique per-writer tmp ($$ = pid) so two concurrent same-project activations don't race
 # on ONE shared tmp path (the loser would otherwise hit the mv-failed branch with a misleading
 # "cannot write state" error). The failure cleanup below uses $TMP, so it stays consistent.
-TMP="$STATE_DIR/state-PENDING.json.$$.tmp"
+TMP="$STATE_DIR/$STATE_NAME.$$.tmp"
 cat > "$TMP" <<EOF
 {
   "schema": "flowy-state-v2",
-  "sessionId": "PENDING",
+  "sessionId": "$STATE_SESSION",
   "createdAtEpoch": $EPOCH,
   "activeFlows": [
     { "name": "$FLOW_NAME", "flowRef": "$FLOW_REF", "location": "$LOCATION", "pluginRoot": "$FLOW_PLUGIN_ROOT" }
   ]
 }
 EOF
-mv "$TMP" "$STATE_DIR/state-PENDING.json" 2>/dev/null || {
+mv "$TMP" "$STATE_DIR/$STATE_NAME" 2>/dev/null || {
   rm -f "$TMP" 2>/dev/null || true
   printf 'flowy-activate: cannot write state file in %s\n' "$STATE_DIR" >&2
   exit 8

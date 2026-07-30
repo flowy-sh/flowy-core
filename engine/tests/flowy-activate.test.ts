@@ -38,6 +38,9 @@ const HERE = fileURLToPath(new URL(".", import.meta.url));
 const SCRIPT_WIN = join(HERE, "..", "hooks", "flowy-activate.sh");
 const HELPER_WIN = join(HERE, "..", "hooks", "flowy-paths.sh");
 const RESOLVE_WIN = join(HERE, "..", "hooks", "flowy-resolve.sh");
+// The SEAM tests below drive the real hook too: the leak this file guards lives
+// BETWEEN the two scripts, so asserting only on what activate writes would miss it.
+const INJECT_WIN = join(HERE, "..", "hooks", "flowy-inject.sh");
 
 function toPosix(p: string): string {
   return p.replace(/^([A-Za-z]):/, (_m, d) => `/${d.toLowerCase()}`).replace(/\\/g, "/");
@@ -98,12 +101,19 @@ function runActivate(opts: {
   location?: string;
   flowPluginRoot?: string; // 5th CLI arg — the overlay's own plugin-root
   projectDirEnv?: string | null; // null/undefined => env var unset
+  sessionId?: string | null; // null/undefined => CLAUDE_CODE_SESSION_ID unset
   cwd?: string; // Windows path, for the pwd fallback
 }) {
   if (!GIT_BASH) throw new Error("Git Bash not found");
   const env: Record<string, string> = { ...process.env } as Record<string, string>;
   if (opts.projectDirEnv == null) delete env.CLAUDE_PROJECT_DIR;
   else env.CLAUDE_PROJECT_DIR = opts.projectDirEnv;
+  // EXPLICIT, never inherited. These tests run INSIDE Claude Code, whose shell
+  // exports a real CLAUDE_CODE_SESSION_ID; inheriting it would make every
+  // unrelated case write an addressed state file instead of PENDING — green on
+  // CI, red on a developer machine, for reasons invisible in the test body.
+  if (opts.sessionId == null) delete env.CLAUDE_CODE_SESSION_ID;
+  else env.CLAUDE_CODE_SESSION_ID = opts.sessionId;
   const args = [toPosix(SCRIPT_WIN), opts.pluginRoot];
   if (opts.flowName !== undefined) args.push(opts.flowName);
   if (opts.flowRef !== undefined) args.push(opts.flowRef);
@@ -116,6 +126,26 @@ function runActivate(opts: {
 function pending(dirs: Dirs): string {
   return readFileSync(join(dirs.stateDirWin, "state-PENDING.json"), "utf8");
 }
+
+/**
+ * Run the real UserPromptSubmit hook as a given session. flowy-inject.sh sources
+ * its siblings from `dirname $0`, so pointing CLAUDE_PLUGIN_ROOT at the test dirs
+ * is enough; the helpers come from this repo.
+ */
+function runInject(opts: { dirs: Dirs; sessionId: string }): string {
+  if (!GIT_BASH) throw new Error("Git Bash not found");
+  const env: Record<string, string> = { ...process.env } as Record<string, string>;
+  env.CLAUDE_PROJECT_DIR = opts.dirs.projectDirEnv;
+  env.CLAUDE_PLUGIN_ROOT = opts.dirs.pluginRootEnv;
+  const res = spawnSync(GIT_BASH, [toPosix(INJECT_WIN)], {
+    encoding: "utf8",
+    env,
+    input: JSON.stringify({ session_id: opts.sessionId, prompt: "do the thing" }),
+  });
+  return res.stdout ?? "";
+}
+
+const BANNER = "⚑ Flowy routing ACTIVE";
 
 /**
  * Build a per-flow OVERLAY plugin dir with flows/<name>/FLOW.md present. By default
@@ -390,4 +420,90 @@ d("flowy-activate.sh (location: overlay)", () => {
     // No smuggled entry anywhere (belt-and-braces: nothing is written at all).
     expect(existsSync(dirs.stateDirWin)).toBe(false);
   });
+});
+
+// =============================================================================
+// SESSION ADDRESSING — the cross-session leak.
+//
+// state-PENDING.json carries no addressee, so the claim in flowy-inject.sh goes
+// to whichever session in the project prompts FIRST. The mkdir lock serialises
+// two sessions racing to claim; it cannot stop the WRONG one claiming.
+//
+// REPRODUCED LIVE 2026-07-30: two Claude Code sessions shared the project key
+// `E__Projects_VS_skills_marketplace` (the second running in a worktree). The
+// founder activated ultra-powers in session 914841d3; session 617c4564 prompted
+// first and claimed it. 914841d3 then had NO state file, so the hook took its
+// no-op path and the ⚑ banner never appeared — for days, with no error.
+//
+// These tests drive activate AND inject because the defect is in the seam: what
+// activate writes is, on its own, indistinguishable between correct and leaking.
+// =============================================================================
+describe("session-addressed activation", () => {
+  test.skipIf(!HAVE_GIT_BASH)(
+    "an activation belongs to the session that requested it, even when another session prompts first",
+    () => {
+      const dirs = makeDirs();
+      const overlay = makeOverlay(dirs);
+      const r = runActivate({
+        pluginRoot: dirs.pluginRootEnv,
+        flowName: overlay.flowName,
+        flowRef: `flows/${overlay.flowName}/FLOW.md`,
+        location: "overlay",
+        flowPluginRoot: overlay.overlayRootEnv,
+        projectDirEnv: dirs.projectDirEnv,
+        sessionId: "sess-aaa",
+      });
+      expect(r.code).toBe(0);
+
+      // The BYSTANDER prompts first. It never asked for this Flow, so it must
+      // not be routed by it — and, critically, must not consume the activation.
+      expect(runInject({ dirs, sessionId: "sess-bbb" })).not.toContain(BANNER);
+
+      // The REQUESTER prompts second and still gets its Flow. This is the half
+      // the live bug broke: the founder's own session was left with nothing.
+      expect(runInject({ dirs, sessionId: "sess-aaa" })).toContain(BANNER);
+    },
+  );
+
+  test.skipIf(!HAVE_GIT_BASH)(
+    "falls back to an unaddressed PENDING when the host exposes no session id",
+    () => {
+      const dirs = makeDirs();
+      const overlay = makeOverlay(dirs);
+      const r = runActivate({
+        pluginRoot: dirs.pluginRootEnv,
+        flowName: overlay.flowName,
+        flowRef: `flows/${overlay.flowName}/FLOW.md`,
+        location: "overlay",
+        flowPluginRoot: overlay.overlayRootEnv,
+        projectDirEnv: dirs.projectDirEnv,
+        sessionId: null, // host does not export one
+      });
+      expect(r.code).toBe(0);
+      // Unchanged legacy behaviour: claim-on-next-prompt still works, so a host
+      // without the env var keeps working exactly as it does today.
+      expect(pending(dirs)).toContain(`"name": "${overlay.flowName}"`);
+      expect(runInject({ dirs, sessionId: "sess-anything" })).toContain(BANNER);
+    },
+  );
+
+  test.skipIf(!HAVE_GIT_BASH)(
+    "refuses a session id that could escape the state path, falling back to PENDING",
+    () => {
+      const dirs = makeDirs();
+      const overlay = makeOverlay(dirs);
+      const r = runActivate({
+        pluginRoot: dirs.pluginRootEnv,
+        flowName: overlay.flowName,
+        flowRef: `flows/${overlay.flowName}/FLOW.md`,
+        location: "overlay",
+        flowPluginRoot: overlay.overlayRootEnv,
+        projectDirEnv: dirs.projectDirEnv,
+        sessionId: "../../../evil",
+      });
+      expect(r.code).toBe(0);
+      // The traversal never becomes a path segment; we degrade to the safe default.
+      expect(existsSync(join(dirs.stateDirWin, "state-PENDING.json"))).toBe(true);
+    },
+  );
 });
