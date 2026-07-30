@@ -110,6 +110,13 @@ mkdir -p "$STATE_DIR" 2>/dev/null || {
 # unaddressed envelope to claim and no race to lose. Charset is the hook's own
 # session_id allowlist; anything else (traversal, metacharacters, over-length)
 # degrades to PENDING rather than building a path from an untrusted value.
+#
+# The three lines below are the WRITE-SITE half of a two-site guard, exactly like
+# the FLOW_PLUGIN_ROOT pair above. Keep them equivalent to `is_safe_id` in
+# hooks/flowy-inject.sh (empty / >128 / outside [A-Za-z0-9_-] all rejected): the
+# hook refuses to READ a state file whose id fails that check, so a value we
+# accept but it rejects would produce a file nothing ever reads — an activation
+# that silently never fires, which is the failure class this whole change closes.
 SESSION_ID="${CLAUDE_CODE_SESSION_ID:-}"
 case "$SESSION_ID" in *[!A-Za-z0-9_-]* ) SESSION_ID="" ;; esac
 [ "${#SESSION_ID}" -le 128 ] 2>/dev/null || SESSION_ID=""
