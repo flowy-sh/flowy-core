@@ -1,6 +1,6 @@
 {
   "name": "flowy-core",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "flowy-core engine — bun test harness for the hooks + activator",
   "scripts": {

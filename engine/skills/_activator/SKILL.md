@@ -17,7 +17,9 @@ On every user prompt, the hook reads a per-session state file and, if a Flow is 
 
 Your job as the activator is to **write the state file the hook reads**. The contract is precise — match it exactly or the hook silently no-ops.
 
-**Key constraint: you (a skill) do NOT see the Claude Code `session_id`.** Only the hook sees it (it arrives on the hook's stdin). So you write a **PENDING** state file, and the next hook invocation claims it by renaming `state-PENDING.json` → `state-<session_id>.json`. This is by design — do not try to discover or invent a session id.
+**Key constraint: you (a skill) do NOT see the Claude Code `session_id`** — never try to discover or invent one. The activation SCRIPT does see it: `flowy-activate.sh` reads `CLAUDE_CODE_SESSION_ID` from the shell environment and names the file `state-<session_id>.json` directly, so the activation belongs to THIS session and no other session sharing the project key can take it. On a host that exports no session id the script falls back to a **PENDING** file, which the next hook invocation claims by renaming `state-PENDING.json` → `state-<session_id>.json`. Either way you write nothing by hand — you run the script.
+
+Why the addressing exists: an unaddressed PENDING is claimed by whichever session in the project prompts FIRST, and that is not necessarily the one that asked. Two Claude Code sessions on the same repo (a worktree counts as the same project key) stole each other's activations for days — the victim got no banner and no error.
 
 ## Where state lives — OUT OF THE PROJECT REPO (read this carefully)
 
@@ -39,7 +41,7 @@ Throughout this skill, wherever a step names the state dir or `state-*.json`, it
 
 ## The state file contract — schema `flowy-state-v2`
 
-- **Location:** `<STATE_DIR>/state-PENDING.json` (you always write PENDING; the hook claims it). See the derivation above.
+- **Location:** `<STATE_DIR>/state-<session_id>.json` when the host exports `CLAUDE_CODE_SESSION_ID` (the normal case under Claude Code); `<STATE_DIR>/state-PENDING.json` only as the fallback when it does not, which the hook then claims. `flowy-activate.sh` picks between them — you do not. See the derivation above.
 - **Shape:**
 
 ```json
@@ -191,11 +193,11 @@ If you are stacking onto a Flow that was already active this session and its boo
 
 ### Stacking (rare: a Flow is ALREADY active this session)
 
-The script writes a fresh single-flow PENDING — correct for the common case (no Flow active yet). If the ⚑ banner THIS turn already lists active Flow(s) and you are ADDING another, the script alone will not take effect this turn: the hook will not re-claim PENDING while a claimed `state-<session_id>.json` exists. Handle stacking model-side instead:
+The script writes a fresh SINGLE-flow state addressed to this session, REPLACING whatever sits at that path — correct for the common case (no Flow active yet). If the ⚑ banner THIS turn already lists active Flow(s) and you are ADDING another, running the script alone would silently DROP the Flow that is already active. Handle stacking model-side instead, BEFORE you run the script:
 
 1. Get `<STATE_DIR>` from the `flowy-paths.sh` helper (see "Where state lives"). Read this session's claimed `state-<session_id>.json` for the existing `{name, flowRef, location, pluginRoot}` entries (they match the flow names the ⚑ banner lists after `Flowy routing ACTIVE:`).
 2. **Dedup:** if `<flow-name>` is already active, print `Flow already active: <flow-name>. Use /flowy deactivate <flow-name> first to reset.` and stop.
-3. Otherwise build the merged `activeFlows` (existing entries + your new `{ "name": "<flow-name>", "flowRef": "flows/<flow-name>/FLOW.md", "location": "<plugin|project|overlay>", "pluginRoot": "<overlay-plugin-root, or \"\" for plugin/project>" }`, your entry last) and write it into BOTH the claimed `state-<session_id>.json` (so it enforces THIS turn) AND a fresh `state-PENDING.json` (new `date +%s` `createdAtEpoch`). Never drop a previously-active Flow.
+3. Otherwise build the merged `activeFlows` (existing entries + your new `{ "name": "<flow-name>", "flowRef": "flows/<flow-name>/FLOW.md", "location": "<plugin|project|overlay>", "pluginRoot": "<overlay-plugin-root, or \"\" for plugin/project>" }`, your entry last) and write it into the claimed `state-<session_id>.json` (so it enforces THIS turn). Do NOT also write a `state-PENDING.json`: an unaddressed PENDING is claimable by a DIFFERENT session sharing this project key, which is the exact leak session addressing exists to close. Never drop a previously-active Flow.
 
 ### Step 6: Routing obligation (CRITICAL)
 
