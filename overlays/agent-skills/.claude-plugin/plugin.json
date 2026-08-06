@@ -1,0 +1,6 @@
+{
+  "name": "flowy-agent-skills",
+  "version": "1.2.0",
+  "description": "Auto-invoked overlay for addyosmani/agent-skills.",
+  "dependencies": [ { "name": "flowy-core", "version": "^1.0.0" } ]
+}

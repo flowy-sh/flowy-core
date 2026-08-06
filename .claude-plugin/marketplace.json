@@ -1,10 +1,34 @@
 {
   "name": "flowy-core",
-  "owner": { "name": "Flowy", "email": "maximo@flowy.sh" },
+  "owner": {
+    "name": "Flowy",
+    "email": "maximo@flowy.sh"
+  },
   "plugins": [
-    { "name": "flowy-core", "source": "./engine", "description": "The Flowy enforcement engine: the routing hook + activator that overlays depend on." },
-    { "name": "flowy-superpowers", "source": "./overlays/superpowers", "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate." },
-    { "name": "flowy-ultra-powers", "source": "./overlays/ultra-powers", "description": "Auto-invoked overlay: the everything-Flow (40 skills, 7 suites) with a disambiguating router, on the shared Flowy engine." },
-    { "name": "flowy-growth-marketing", "source": "./overlays/growth-marketing", "description": "Auto-invoked overlay: the growth-marketing funnel (research -> validate) routed to Corey Haines' marketing-skills, on the shared Flowy engine." }
+    {
+      "name": "flowy-core",
+      "source": "./engine",
+      "description": "The Flowy enforcement engine: the routing hook + activator that overlays depend on."
+    },
+    {
+      "name": "flowy-superpowers",
+      "source": "./overlays/superpowers",
+      "description": "Auto-invoked overlay for obra/superpowers. Routes the right superpowers skill at each gate."
+    },
+    {
+      "name": "flowy-ultra-powers",
+      "source": "./overlays/ultra-powers",
+      "description": "Auto-invoked overlay: the everything-Flow (40 skills, 7 suites) with a disambiguating router, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-growth-marketing",
+      "source": "./overlays/growth-marketing",
+      "description": "Auto-invoked overlay: the growth-marketing funnel (research -> validate) routed to Corey Haines' marketing-skills, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-agent-skills",
+      "source": "./overlays/agent-skills",
+      "description": "Auto-invoked overlay: the full SDLC routed to Addy Osmani's agent-skills, with the four rival -driven-development skills disambiguated, on the shared Flowy engine."
+    }
   ]
 }

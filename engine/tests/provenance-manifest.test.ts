@@ -136,7 +136,7 @@ describe("buildManifest", () => {
 
   test("covers every shipped Flow", () => {
     const ids = manifest.flows.map((f) => f.id).sort();
-    expect(ids).toEqual(["growth-marketing", "superpowers", "ultra-powers"]);
+    expect(ids).toEqual(["agent-skills", "growth-marketing", "superpowers", "ultra-powers"]);
   });
 
   test("every Flow carries a hash and a non-empty route sequence", () => {
