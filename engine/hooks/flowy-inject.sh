@@ -594,9 +594,20 @@ if [ -n "$LIVE_NAMES" ]; then
     # at resolve time), so BOTH are trusted. The old $PLUGIN_ROOT-only check silently
     # disabled the periodic refresh for every overlay (an overlay path never starts with
     # $PLUGIN_ROOT). $FIRST_REF is a resolver output (forward-slash), so normalize the base.
+    # FIX E, THIRD SITE. Same comparison, same drive-form defect as
+    # flowy-resolve.sh's S1 and its realpath re-check: $COMPACT is derived from a
+    # RESOLVER OUTPUT, which keeps the `/c/…` spelling the activator wrote, while
+    # $PLUGIN_ROOT arrives from Claude Code as `C:/…`. Unfixed, the periodic
+    # refresh is silently dropped for every overlay on Windows — and fixing the
+    # resolver is what makes this line reachable at all, since before that an
+    # overlay never resolved and COMPACT was never computed for one.
+    # Both sides through the SAME transform, so the restrict stays exactly as
+    # strict: a path outside the /plugins/ tree still fails in either spelling.
     _pluginsbase="$(flowy_plugins_base "$PLUGIN_ROOT")"
     if [ -n "$_pluginsbase" ]; then
-      case "$COMPACT" in "$_pluginsbase"* ) : ;; * ) COMPACT="" ;; esac
+      _cmpc="$(flowy_path_cmpform "$COMPACT")"
+      _cmpb="$(flowy_path_cmpform "$_pluginsbase")"
+      case "$_cmpc" in "$_cmpb"* ) : ;; * ) COMPACT="" ;; esac
     else
       COMPACT=""
     fi

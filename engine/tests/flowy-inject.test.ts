@@ -1867,6 +1867,64 @@ d("flowy-inject.sh", () => {
     expect(r.stdout).not.toContain("unreadable");
   });
 
+  // -------------------------------------------------------------------------
+  // FIX E, THE THIRD SITE. The reinject restrict (flowy-inject.sh) prefix-checks
+  // the resolved COMPACT path against flowy_plugins_base(PLUGIN_ROOT) — the same
+  // comparison, with the same drive-form defect as flowy-resolve.sh's S1 and its
+  // realpath re-check.
+  //
+  // In production CLAUDE_PLUGIN_ROOT arrives as `C:/…` while the overlay's
+  // resolved FLOW.md keeps the `/c/…` spelling the activator wrote, so the
+  // periodic routing refresh is silently dropped for EVERY overlay on Windows.
+  //
+  // This became REACHABLE only once the resolver was fixed: before that, an
+  // overlay never resolved at all, so COMPACT was never computed for one. The
+  // resolver fix moves the failure one step later unless this moves with it.
+  //
+  // ⚠ Unrepresentable in this harness until now for the third time:
+  // `pluginRootEnv` is `toPosix(pluginRootWin)`, so every other test hands the
+  // hook a POSIX root and the two spellings can never disagree.
+  // -------------------------------------------------------------------------
+  test("FIX E: an overlay's periodic routing refresh survives a C:/ CLAUDE_PLUGIN_ROOT", () => {
+    const dirs = makeDirs();
+    const cache = join(dirs.pluginRootWin, "..", "..", "..");
+    const overlayWin = join(cache, "flowy-refresh", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# overlay routes\n");
+    writeFileSync(
+      join(overlayWin, "flows", "superpowers", "FLOW-compact.md"),
+      "# compact\n- brainstorming: new idea\n",
+    );
+    writeState(dirs, "rfx", {
+      schema: "flowy-state-v2",
+      sessionId: "rfx",
+      createdAtEpoch: Math.floor(Date.now() / 1000),
+      activeFlows: [
+        {
+          name: "superpowers",
+          flowRef: "flows/superpowers/FLOW.md",
+          location: "overlay",
+          pluginRoot: toPosix(overlayWin),   // as flowy-activate.sh writes it
+        },
+      ],
+    });
+    // The engine root EXACTLY as Claude Code exports it: drive letter + colon.
+    const pluginRootDrive = dirs.pluginRootWin.replace(/\\/g, "/");
+    expect(pluginRootDrive).toMatch(/^[A-Za-z]:\//);
+    const opts = {
+      projectDir: dirs.projectDirEnv,
+      pluginRoot: pluginRootDrive,
+      stdin: stdinFor("rfx"),
+      env: { FLOWY_REINJECT_EVERY_N: "2" },
+    };
+    const r1 = runHook(opts);
+    const r2 = runHook(opts); // 2 % 2 == 0 → the refresh must fire
+    expect(r1.code).toBe(0);
+    expect(r2.code).toBe(0);
+    expect(r2.stdout).toContain("routing refresh");
+    expect(r2.stdout.toLowerCase()).toContain("brainstorming: new idea");
+  });
+
   // =========================================================================
   // POSITIONAL-PARITY WRONG-FIRE GUARD (FIX C) — NAMES/REFS/LOCATIONS/
   // PLUGINROOTS are zipped by RAW LINE INDEX (see section 6 above). If SOME
