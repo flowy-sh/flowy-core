@@ -59,6 +59,36 @@ flowy_plugins_base() {
   esac
 }
 
+# flowy_path_cmpform PATH -> PATH in ONE comparison form, so two spellings of the
+# same location compare equal. A Windows drive-letter prefix (`C:/…`) is rewritten
+# to the MSYS form (`/c/…`) with the letter lowercased; anything else is returned
+# unchanged after separator normalization.
+#
+# FIX E, observed in production 2026-08-11. Claude Code exports
+# CLAUDE_PLUGIN_ROOT as `C:/Users/…` while flowy-activate.sh runs under Git Bash
+# and writes `pluginRoot` as `/c/Users/…`. Both sides were already normalized
+# with `tr '\' '/'`, which does nothing to a drive prefix, so S1's prefix match
+# never fired and EVERY overlay activation on Windows Git Bash silently no-opped
+# — no error, no banner, no routing. The write site's own output could not
+# satisfy the reader's check.
+#
+# FOR COMPARISON ONLY. The caller keeps the ORIGINAL spelling for filesystem
+# access, because the resolved path is echoed back to the hook and must stay in
+# the form the rest of the pipeline was handed.
+#
+# NO-OP OFF WINDOWS: a POSIX path cannot have `:` as its second character, so the
+# case never matches on Linux/macOS. The MSYS form is the target rather than the
+# drive form precisely so nothing outside Windows is ever rewritten.
+flowy_path_cmpform() {
+  _fpc="$(printf '%s' "$1" | tr '\\' '/')"
+  case "$_fpc" in
+    [A-Za-z]:/* )
+      printf '/%s%s' "$(printf '%s' "${_fpc%%:*}" | tr 'A-Z' 'a-z')" "${_fpc#?:}"
+      ;;
+    * ) printf '%s' "$_fpc" ;;
+  esac
+}
+
 # flowy_extract_field CONTENT KEY -> echoes the VALUE of every `"KEY": "value"` line, one
 # per line (line-oriented; the state is deliberately flat, no jq). Both readers parse the
 # state through this ONE helper so the grep/sed pattern cannot drift between them.
@@ -131,7 +161,17 @@ flowy_resolve_flowmd() {
   if [ -n "$_flowpr" ]; then
     _plugbase="$(flowy_plugins_base "$_pr")"
     if [ -n "$_plugbase" ]; then
-      case "$_flowpr" in "$_plugbase"* ) : ;; * ) _flowpr="" ;; esac
+      # FIX E: compare in ONE drive form. Both sides go through the SAME
+      # transform, so the check is exactly as strict as before — an outside-the-
+      # tree root fails in either spelling — while `C:/…` and `/c/…` naming the
+      # same tree stop disagreeing. $_flowpr itself is left in its original
+      # spelling: this normalizes the COMPARISON, not the path that gets used.
+      # Assigned to variables first, NEVER inlined as `case "$(f x)" in "$(f y)"*`:
+      # a command substitution in a case PATTERN is not portably expanded before
+      # matching, and the first attempt at this fix silently refused everything.
+      _fpcmp="$(flowy_path_cmpform "$_flowpr")"
+      _pbcmp="$(flowy_path_cmpform "$_plugbase")"
+      case "$_fpcmp" in "$_pbcmp"* ) : ;; * ) _flowpr="" ;; esac
     else
       _flowpr=""   # engine root has no /plugins/ segment -> no containment base -> refuse
     fi
@@ -188,6 +228,14 @@ flowy_resolve_flowmd() {
       _rp="$(realpath "$_resolved" 2>/dev/null || true)"
       _pb="$(realpath "${_plugbase:-}" 2>/dev/null || true)"
       if [ -n "$_rp" ] && [ -n "$_pb" ]; then
+        # FIX E applies HERE TOO, and this is the half of it that is easy to
+        # miss: `realpath` PRESERVES the spelling it was given, so a `C:/…`
+        # plugbase and a `/c/…` resolved path canonicalize to two forms that
+        # still do not prefix-match. Fixing S1 alone left this check refusing
+        # every overlay, with S1 looking correct — the sibling defect this
+        # file's own docblocks warn about, twenty lines apart.
+        _rp="$(flowy_path_cmpform "$_rp")"
+        _pb="$(flowy_path_cmpform "$_pb")"
         case "$_rp" in "$_pb"/* | "$_pb" ) : ;; * ) _resolved="" ;; esac
       else
         _resolved=""

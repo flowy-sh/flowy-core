@@ -170,6 +170,88 @@ describe("flowy_resolve_flowmd (location: overlay)", () => {
   });
 
   // ---------------------------------------------------------------------------
+  // FIX E — OBSERVED IN PRODUCTION, 2026-08-11, on the founder's own machine.
+  //
+  // The two roots reach the resolver in DIFFERENT DRIVE FORMS. Claude Code hands
+  // the hook a Windows-style `CLAUDE_PLUGIN_ROOT` (`C:/Users/...`), while
+  // flowy-activate.sh runs under Git Bash and writes `pluginRoot` in MSYS form
+  // (`/c/Users/...`). Both sides are normalized with `tr '\' '/'`, which does
+  // nothing to `/c/` vs `C:/` — so S1's prefix match never fires, containment
+  // empties the overlay root, and the entry falls back to a path under the
+  // ENGINE that cannot exist.
+  //
+  // Result: EVERY overlay activation on Windows Git Bash silently no-ops. No
+  // error, no banner, no routing — the enforcement engine simply does not run,
+  // which is the product's entire mechanism.
+  //
+  // ⚠ WHY THE SUITE NEVER CAUGHT IT: `toPosix()` above is applied to BOTH roots
+  // in every existing case, so the two spellings are collapsed before the
+  // resolver is ever called and the mismatch is unrepresentable. The test
+  // helper's convenience WAS the blind spot. This case deliberately passes the
+  // engine root in the form production actually delivers.
+  // ---------------------------------------------------------------------------
+  test("FIX E: a C:/ engine root and a /c/ overlay root are the SAME tree and must resolve", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "ove "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+
+    // The engine root EXACTLY as Claude Code exports it: drive letter + colon,
+    // forward slashes. The overlay root exactly as flowy-activate.sh writes it.
+    const ENGINE_DRIVE = engineWin.replace(/\\/g, "/");
+    const OVERLAY_MSYS = toPosix(overlayWin);
+    const PFD = toPosix(join(base, "pfd"));
+    expect(ENGINE_DRIVE).toMatch(/^[A-Za-z]:\//); // the fixture is the real shape
+    expect(OVERLAY_MSYS).toMatch(/^\/[a-z]\//);
+
+    expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, ENGINE_DRIVE, OVERLAY_MSYS))
+      .toBe(`${OVERLAY_MSYS}/flows/superpowers/FLOW.md`);
+  });
+
+  test("FIX E: the reverse pairing resolves too (/c/ engine root, C:/ overlay root)", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "ovr "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    const overlayWin = join(cache, "flowy-superpowers", "0.1.0");
+    mkdirSync(join(overlayWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(overlayWin, "flows", "superpowers", "FLOW.md"), "# routes");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const PFD = toPosix(join(base, "pfd"));
+
+    // Normalizing only ONE direction would leave this pairing broken, so both
+    // are asserted; a one-way fix passes the case above and fails here.
+    const resolved = resolve(
+      "superpowers", "flows/superpowers/FLOW.md", "overlay",
+      PFD, toPosix(engineWin), overlayWin.replace(/\\/g, "/"),
+    );
+    expect(resolved).not.toBe("");
+    expect(resolved.endsWith("/flows/superpowers/FLOW.md")).toBe(true);
+  });
+
+  test("FIX E does NOT weaken S1: an outside-the-tree root is still refused in either form", () => {
+    if (!GIT_BASH) return;
+    const base = mkdtempSync(join(root, "ovs "));
+    const cache = join(base, ".claude", "plugins", "cache");
+    const engineWin = join(cache, "flowy-core", "engine", "0.1.0");
+    mkdirSync(join(engineWin, "flows"), { recursive: true });
+    const evilWin = join(base, "evil");
+    mkdirSync(join(evilWin, "flows", "superpowers"), { recursive: true });
+    writeFileSync(join(evilWin, "flows", "superpowers", "FLOW.md"), "# attacker routing");
+    const PFD = toPosix(join(base, "pfd"));
+
+    // Same real FLOW.md, outside the engine's /plugins/ tree. Both spellings.
+    for (const evil of [toPosix(evilWin), evilWin.replace(/\\/g, "/")]) {
+      expect(resolve("superpowers", "flows/superpowers/FLOW.md", "overlay", PFD, toPosix(engineWin), evil))
+        .toBe("");
+    }
+  });
+
+  // ---------------------------------------------------------------------------
   // FIX B — S1 containment is a STRING-PREFIX check on the uncanonicalized
   // path. A directory JUNCTION in an INTERMEDIATE component of the overlay root
   // (e.g. its "flows" dir) can physically escape the /plugins/ tree while the
