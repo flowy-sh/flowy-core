@@ -64,6 +64,26 @@
       "name": "flowy-portaljs",
       "source": "./overlays/portaljs",
       "description": "Auto-invoked overlay: the datopian/portaljs data-portal build, catalog and deploy skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-cloudflare",
+      "source": "./overlays/cloudflare",
+      "description": "Auto-invoked overlay: the Cloudflare Workers, Durable Objects, Sandbox and Zero Trust skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-langchain-skills",
+      "source": "./overlays/langchain-skills",
+      "description": "Auto-invoked overlay: the LangChain, LangGraph and Deep Agents skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-pup",
+      "source": "./overlays/pup",
+      "description": "Auto-invoked overlay: the Datadog APM, logs, monitors and live-debugger skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-aws-agent-skills",
+      "source": "./overlays/aws-agent-skills",
+      "description": "Auto-invoked overlay: eighteen AWS service skills, from Lambda and DynamoDB to IAM and Step Functions, routed by phase, on the shared Flowy engine."
     }
   ]
 }

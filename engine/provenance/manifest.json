@@ -70,6 +70,32 @@
       "canaries": []
     },
     {
+      "id": "aws-agent-skills",
+      "path": "overlays/aws-agent-skills/flows/aws-agent-skills/FLOW.md",
+      "hash": "e95e1b8daa98604bc852e4c975abe20d0d391d1b2bb20bd819241193c03ca97d",
+      "routes": [
+        "aws-agent-skills:api-gateway",
+        "aws-agent-skills:bedrock",
+        "aws-agent-skills:cloudformation",
+        "aws-agent-skills:cloudwatch",
+        "aws-agent-skills:cognito",
+        "aws-agent-skills:dynamodb",
+        "aws-agent-skills:ec2",
+        "aws-agent-skills:ecs",
+        "aws-agent-skills:eks",
+        "aws-agent-skills:eventbridge",
+        "aws-agent-skills:iam",
+        "aws-agent-skills:lambda",
+        "aws-agent-skills:rds",
+        "aws-agent-skills:s3",
+        "aws-agent-skills:secrets-manager",
+        "aws-agent-skills:sns",
+        "aws-agent-skills:sqs",
+        "aws-agent-skills:step-functions"
+      ],
+      "canaries": []
+    },
+    {
       "id": "claude-obsidian",
       "path": "overlays/claude-obsidian/flows/claude-obsidian/FLOW.md",
       "hash": "e045516bfd60cd721a4de7f093da25619628f423862fe07e094c4fcac247a07d",
@@ -89,6 +115,27 @@
         "claude-obsidian:wiki-query",
         "claude-obsidian:wiki-retrieve",
         "claude-obsidian:wiki"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "cloudflare",
+      "path": "overlays/cloudflare/flows/cloudflare/FLOW.md",
+      "hash": "fe645c443a3a74102c10adf94aac9b780c338b7a270ca86028d0f7d04d8c0a04",
+      "routes": [
+        "cloudflare:agents-sdk",
+        "cloudflare:cloudflare-email-service",
+        "cloudflare:cloudflare-one-migrations",
+        "cloudflare:cloudflare-one",
+        "cloudflare:cloudflare",
+        "cloudflare:durable-objects",
+        "cloudflare:sandbox-migrate-to-next",
+        "cloudflare:sandbox-next",
+        "cloudflare:sandbox-stable",
+        "cloudflare:turnstile-spin",
+        "cloudflare:web-perf",
+        "cloudflare:workers-best-practices",
+        "cloudflare:wrangler"
       ],
       "canaries": []
     },
@@ -152,6 +199,36 @@
         "They target different corpora and produce different artifacts.",
         "Then `ab-testing` costs nothing to run and settles it."
       ]
+    },
+    {
+      "id": "langchain-skills",
+      "path": "overlays/langchain-skills/flows/langchain-skills/FLOW.md",
+      "hash": "dd1312c8f5d8075ba658925c0ffcc22eb67f772b81fcb8c121822249370b81b1",
+      "routes": [
+        "langchain-skills:deep-agents-core",
+        "langchain-skills:deep-agents-memory",
+        "langchain-skills:deep-agents-orchestration",
+        "langchain-skills:deepagents-python-quickstart",
+        "langchain-skills:deepagents-typescript-quickstart",
+        "langchain-skills:ecosystem-primer",
+        "langchain-skills:eval-engineering",
+        "langchain-skills:langchain-dependencies",
+        "langchain-skills:langchain-fundamentals",
+        "langchain-skills:langchain-middleware",
+        "langchain-skills:langchain-python-quickstart",
+        "langchain-skills:langchain-rag",
+        "langchain-skills:langchain-typescript-quickstart",
+        "langchain-skills:langgraph-cli",
+        "langchain-skills:langgraph-fundamentals",
+        "langchain-skills:langgraph-human-in-the-loop",
+        "langchain-skills:langgraph-persistence",
+        "langchain-skills:langgraph-python-quickstart",
+        "langchain-skills:langgraph-typescript-quickstart",
+        "langchain-skills:langsmith-online-eval-engineering",
+        "langchain-skills:managed-deep-agents",
+        "langchain-skills:swarm"
+      ],
+      "canaries": []
     },
     {
       "id": "mem0",
@@ -268,6 +345,25 @@
         "portaljs:portaljs-deploy",
         "portaljs:portaljs-migrate",
         "portaljs:portaljs-new-portal"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "pup",
+      "path": "overlays/pup/flows/pup/FLOW.md",
+      "hash": "193831448839ee84f4b18a9d11c1b51a26568926e15c7fe838f713b2bb5a0a4c",
+      "routes": [
+        "pup:dd-apm",
+        "pup:dd-code-generation",
+        "pup:dd-debugger",
+        "pup:dd-docs",
+        "pup:dd-file-issue",
+        "pup:dd-logs",
+        "pup:dd-monitors",
+        "pup:dd-pup",
+        "pup:dd-symdb",
+        "pup:dd-triage-flaky-test",
+        "pup:dd-unblock-pr"
       ],
       "canaries": []
     },
