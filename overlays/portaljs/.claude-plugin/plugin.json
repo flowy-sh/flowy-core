@@ -1,0 +1,11 @@
+{
+  "name": "flowy-portaljs",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for datopian/portaljs.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

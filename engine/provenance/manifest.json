@@ -70,6 +70,29 @@
       "canaries": []
     },
     {
+      "id": "claude-obsidian",
+      "path": "overlays/claude-obsidian/flows/claude-obsidian/FLOW.md",
+      "hash": "e045516bfd60cd721a4de7f093da25619628f423862fe07e094c4fcac247a07d",
+      "routes": [
+        "claude-obsidian:autoresearch",
+        "claude-obsidian:canvas",
+        "claude-obsidian:defuddle",
+        "claude-obsidian:obsidian-bases",
+        "claude-obsidian:obsidian-markdown",
+        "claude-obsidian:save",
+        "claude-obsidian:think",
+        "claude-obsidian:wiki-cli",
+        "claude-obsidian:wiki-fold",
+        "claude-obsidian:wiki-ingest",
+        "claude-obsidian:wiki-lint",
+        "claude-obsidian:wiki-mode",
+        "claude-obsidian:wiki-query",
+        "claude-obsidian:wiki-retrieve",
+        "claude-obsidian:wiki"
+      ],
+      "canaries": []
+    },
+    {
       "id": "growth-marketing",
       "path": "overlays/growth-marketing/flows/growth-marketing/FLOW.md",
       "hash": "c3b1f174be300c4e095feeeb8403c96da1263ba41f76472d2bd7ddf69ccf1bd7",
@@ -162,6 +185,29 @@
       "canaries": []
     },
     {
+      "id": "n8n-mcp-skills",
+      "path": "overlays/n8n-mcp-skills/flows/n8n-mcp-skills/FLOW.md",
+      "hash": "46de48a25f6c7cd4517b1da8dc38942148c31d0c1d9b0f5a68403c20fc70646d",
+      "routes": [
+        "n8n-mcp-skills:n8n-agents",
+        "n8n-mcp-skills:n8n-binary-and-data",
+        "n8n-mcp-skills:n8n-code-javascript",
+        "n8n-mcp-skills:n8n-code-python",
+        "n8n-mcp-skills:n8n-code-tool",
+        "n8n-mcp-skills:n8n-error-handling",
+        "n8n-mcp-skills:n8n-expression-syntax",
+        "n8n-mcp-skills:n8n-mcp-tools-expert",
+        "n8n-mcp-skills:n8n-multi-instance",
+        "n8n-mcp-skills:n8n-node-configuration",
+        "n8n-mcp-skills:n8n-self-hosting",
+        "n8n-mcp-skills:n8n-subworkflows",
+        "n8n-mcp-skills:n8n-validation-expert",
+        "n8n-mcp-skills:n8n-workflow-patterns",
+        "n8n-mcp-skills:using-n8n-mcp-skills"
+      ],
+      "canaries": []
+    },
+    {
       "id": "nextjs",
       "path": "overlays/nextjs/flows/nextjs/FLOW.md",
       "hash": "f6e458a2cc41b416ee32d7d58f78286b50b2c75b28513a642ce3973fdcf13107",
@@ -200,6 +246,28 @@
         "ouroboros:unstuck",
         "ouroboros:update",
         "ouroboros:welcome"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "portaljs",
+      "path": "overlays/portaljs/flows/portaljs/FLOW.md",
+      "hash": "ffef6f7998bcc2366ed813b0a4ff685357519362744a0b4aac17f5c77a9ff5b2",
+      "routes": [
+        "portaljs:arcgis-to-portaljs",
+        "portaljs:portaljs-add-chart",
+        "portaljs:portaljs-add-dataset",
+        "portaljs:portaljs-add-dcat",
+        "portaljs:portaljs-add-geo",
+        "portaljs:portaljs-add-map",
+        "portaljs:portaljs-add-resource",
+        "portaljs:portaljs-architect",
+        "portaljs:portaljs-check-data-quality",
+        "portaljs:portaljs-connect-ckan",
+        "portaljs:portaljs-define-schema",
+        "portaljs:portaljs-deploy",
+        "portaljs:portaljs-migrate",
+        "portaljs:portaljs-new-portal"
       ],
       "canaries": []
     },

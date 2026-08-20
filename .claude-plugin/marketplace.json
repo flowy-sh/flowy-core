@@ -49,6 +49,21 @@
       "name": "flowy-agentmemory",
       "source": "./overlays/agentmemory",
       "description": "Auto-invoked overlay: the rohitg00/agentmemory recall, capture and session-handoff skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-claude-obsidian",
+      "source": "./overlays/claude-obsidian",
+      "description": "Auto-invoked overlay: the agricidaniel/claude-obsidian vault, wiki and research skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-n8n-mcp-skills",
+      "source": "./overlays/n8n-mcp-skills",
+      "description": "Auto-invoked overlay: the czlonkowski/n8n-skills workflow, node and expression skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-portaljs",
+      "source": "./overlays/portaljs",
+      "description": "Auto-invoked overlay: the datopian/portaljs data-portal build, catalog and deploy skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }

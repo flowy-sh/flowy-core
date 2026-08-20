@@ -1,0 +1,11 @@
+{
+  "name": "flowy-n8n-mcp-skills",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for czlonkowski/n8n-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

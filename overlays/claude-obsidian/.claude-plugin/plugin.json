@@ -1,0 +1,11 @@
+{
+  "name": "flowy-claude-obsidian",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for agricidaniel/claude-obsidian.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}
