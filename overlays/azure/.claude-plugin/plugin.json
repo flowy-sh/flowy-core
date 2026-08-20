@@ -1,0 +1,11 @@
+{
+  "name": "flowy-azure",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for microsoft/azure-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

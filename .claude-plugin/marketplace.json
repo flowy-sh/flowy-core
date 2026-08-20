@@ -84,6 +84,36 @@
       "name": "flowy-aws-agent-skills",
       "source": "./overlays/aws-agent-skills",
       "description": "Auto-invoked overlay: eighteen AWS service skills, from Lambda and DynamoDB to IAM and Step Functions, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-azure",
+      "source": "./overlays/azure",
+      "description": "Auto-invoked overlay: 37 Azure skills covering deployment, AKS, OpenAI model rollout, cost and diagnostics, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-openviking-memory",
+      "source": "./overlays/openviking-memory",
+      "description": "Auto-invoked overlay: the volcengine/openviking agent toolkit, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-compound-engineering",
+      "source": "./overlays/compound-engineering",
+      "description": "Auto-invoked overlay: the Every compound-engineering plan, review, ship and learn skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-chrome-devtools-mcp",
+      "source": "./overlays/chrome-devtools-mcp",
+      "description": "Auto-invoked overlay: the Chrome DevTools accessibility, performance, memory and network skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-vercel-plugin",
+      "source": "./overlays/vercel-plugin",
+      "description": "Auto-invoked overlay: 40 Vercel platform skills covering the AI SDK, workflows, caching, auth, storage and deployment, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-superset",
+      "source": "./overlays/superset",
+      "description": "Auto-invoked overlay: the superset parallel-agent, scheduling and workspace skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }

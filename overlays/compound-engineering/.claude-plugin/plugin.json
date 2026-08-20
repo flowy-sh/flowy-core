@@ -1,0 +1,11 @@
+{
+  "name": "flowy-compound-engineering",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for EveryInc/compound-engineering-plugin.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

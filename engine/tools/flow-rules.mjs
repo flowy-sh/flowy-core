@@ -52,12 +52,26 @@ function normalizeLines(text) {
 }
 
 /**
- * Namespaced skill reference. BOTH sides must start with a letter, which is
- * what keeps `http://localhost:3000` and a `09:30` standup out of the results:
- * a port and a time are not skills, and reporting them as orphans is how a
+ * Namespaced skill reference.
+ *
+ * The NAMESPACE must start with a letter and the SKILL must CONTAIN one. Both
+ * halves used to require a LEADING letter, aimed at keeping
+ * `http://localhost:3000` and a `09:30` standup out of the results, since a
+ * port and a time are not skills and reporting them as orphans is how a
  * checker gets switched off.
+ *
+ * That rule was right about the exclusions and wrong about the property. FOUND
+ * BY SHIPPING 2026-08-20: superset-sh/superset ships a skill named `10x`, so
+ * `superset:10x` matched nothing, checkClaimedCounts counted 7 routes where
+ * the file had 8, and a CORRECT Flow failed its own gate with "claims 8 skills
+ * but routes 7". A false negative in a shipping gate is the worst kind, because
+ * the remedy it suggests is to weaken a true claim.
+ *
+ * What separates `3000` and `30` from `10x` is not POSITION, it is that they
+ * contain NO LETTER AT ALL. Requiring at least one letter keeps every original
+ * exclusion (`09:` still fails on the namespace half) and admits the real name.
  */
-const SKILL_REF = /\b([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)\b/g;
+const SKILL_REF = /\b([a-z][a-z0-9-]*):([a-z0-9-]*[a-z][a-z0-9-]*)\b/g;
 const ARROW = /(?:→|->)/;
 
 /**

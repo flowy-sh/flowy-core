@@ -264,6 +264,29 @@ describe("checkNoOrphanSkills (R1)", () => {
     const text = "## Routing\n- x? → invoke ms:cro\n\nSee http://localhost:3000, standup 09:30.\n";
     expect(checkNoOrphanSkills(text)).toEqual([]);
   });
+
+  /* FOUND BY SHIPPING, 2026-08-20. `superset-sh/superset` ships a skill named
+     `10x`. SKILL_REF required BOTH halves to START with a letter, so
+     `superset:10x` matched nothing: the Flow routed 8 skills,
+     checkClaimedCounts counted 7, and a CORRECT Flow failed its own shipping
+     gate with "claims 8 skills but routes 7". A false negative in a gate is
+     the worst kind, because the remedy it suggests is to weaken a true claim.
+
+     The letter-FIRST rule was aimed at `localhost:3000` and `09:30`, and the
+     property that actually separates those from a skill is not POSITION: it is
+     that `3000` and `30` contain NO LETTER AT ALL. Requiring at least one
+     letter keeps both exclusions and admits the real name. */
+  test("a skill name starting with a digit is still counted as routed", () => {
+    const text =
+      "> Routes 1 skills\n\n## Routing\n\n```\n- x? → invoke superset:10x\n```\n";
+    expect(checkClaimedCounts(text)).toEqual([]);
+  });
+
+  test("a colon segment with no letter at all is still not a skill", () => {
+    const text =
+      "## Routing\n- x? → invoke ms:cro\n\nSee http://localhost:3000, standup 09:30, map 8080:3000." + "\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
 });
 
 describe("checkSectionOrder (R5)", () => {

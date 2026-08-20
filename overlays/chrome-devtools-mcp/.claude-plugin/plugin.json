@@ -1,0 +1,11 @@
+{
+  "name": "flowy-chrome-devtools-mcp",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for ChromeDevTools/chrome-devtools-mcp.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

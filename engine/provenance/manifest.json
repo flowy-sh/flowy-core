@@ -96,6 +96,65 @@
       "canaries": []
     },
     {
+      "id": "azure",
+      "path": "overlays/azure/flows/azure/FLOW.md",
+      "hash": "5f473f960058b4e26cb4fcce5d9062cd71644887b820a697a8d9c3b81fdacbb2",
+      "routes": [
+        "azure:airunway-aks-setup",
+        "azure:appinsights-instrumentation",
+        "azure:azure-ai",
+        "azure:azure-aigateway",
+        "azure:azure-app-onboard-prereq",
+        "azure:azure-app-onboard",
+        "azure:deploy",
+        "azure:prepare",
+        "azure:scaffold",
+        "azure:azure-cloud-migrate",
+        "azure:azure-compliance",
+        "azure:azure-compute",
+        "azure:azure-cost",
+        "azure:azure-deploy",
+        "azure:azure-diagnostics",
+        "azure:azure-enterprise-infra-planner",
+        "azure:azure-kubernetes",
+        "azure:azure-kubernetes-automatic-readiness",
+        "azure:azure-kusto",
+        "azure:azure-messaging",
+        "azure:azure-prepare",
+        "azure:azure-quotas",
+        "azure:azure-reliability",
+        "azure:azure-resource-lookup",
+        "azure:azure-resource-visualizer",
+        "azure:azure-storage",
+        "azure:azure-upgrade",
+        "azure:azure-validate",
+        "azure:entra-agent-id",
+        "azure:entra-app-registration",
+        "azure:microsoft-foundry",
+        "azure:finetuning",
+        "azure:deploy-model",
+        "azure:capacity",
+        "azure:customize",
+        "azure:preset",
+        "azure:python-appservice-deploy"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "chrome-devtools-mcp",
+      "path": "overlays/chrome-devtools-mcp/flows/chrome-devtools-mcp/FLOW.md",
+      "hash": "81fb57312c21cd89c9c9498685c99cab8b0f14c356f716718bbe368e1cdc2b40",
+      "routes": [
+        "chrome-devtools-mcp:a11y-debugging",
+        "chrome-devtools-mcp:chrome-devtools-cli",
+        "chrome-devtools-mcp:chrome-devtools",
+        "chrome-devtools-mcp:debug-optimize-lcp",
+        "chrome-devtools-mcp:memory-leak-debugging",
+        "chrome-devtools-mcp:troubleshooting"
+      ],
+      "canaries": []
+    },
+    {
       "id": "claude-obsidian",
       "path": "overlays/claude-obsidian/flows/claude-obsidian/FLOW.md",
       "hash": "e045516bfd60cd721a4de7f093da25619628f423862fe07e094c4fcac247a07d",
@@ -136,6 +195,46 @@
         "cloudflare:web-perf",
         "cloudflare:workers-best-practices",
         "cloudflare:wrangler"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "compound-engineering",
+      "path": "overlays/compound-engineering/flows/compound-engineering/FLOW.md",
+      "hash": "9792cf3dd1e0b9e02b6a52e4e9f65545ce020994001b19e5c6cc2ae1f5c66f9d",
+      "routes": [
+        "compound-engineering:ce-babysit-pr",
+        "compound-engineering:ce-brainstorm",
+        "compound-engineering:ce-code-review",
+        "compound-engineering:ce-commit-push-pr",
+        "compound-engineering:ce-commit",
+        "compound-engineering:ce-compound-refresh",
+        "compound-engineering:ce-compound",
+        "compound-engineering:ce-debug",
+        "compound-engineering:ce-doc-review",
+        "compound-engineering:ce-dogfood",
+        "compound-engineering:ce-explain",
+        "compound-engineering:ce-handoff",
+        "compound-engineering:ce-ideate",
+        "compound-engineering:ce-optimize",
+        "compound-engineering:ce-plan",
+        "compound-engineering:ce-polish",
+        "compound-engineering:ce-pov",
+        "compound-engineering:ce-product-pulse",
+        "compound-engineering:ce-promote",
+        "compound-engineering:ce-proof",
+        "compound-engineering:ce-resolve-pr-feedback",
+        "compound-engineering:ce-retune",
+        "compound-engineering:ce-riffrec-feedback-analysis",
+        "compound-engineering:ce-setup",
+        "compound-engineering:ce-simplify-code",
+        "compound-engineering:ce-strategy",
+        "compound-engineering:ce-sweep",
+        "compound-engineering:ce-test-browser",
+        "compound-engineering:ce-test-xcode",
+        "compound-engineering:ce-work",
+        "compound-engineering:ce-worktree",
+        "compound-engineering:lfg"
       ],
       "canaries": []
     },
@@ -297,6 +396,22 @@
       "canaries": []
     },
     {
+      "id": "openviking-memory",
+      "path": "overlays/openviking-memory/flows/openviking-memory/FLOW.md",
+      "hash": "347e807a24c1291124f590d174da2fba5acb2e3ac3575fdba5c3ff44b3dbf5d1",
+      "routes": [
+        "openviking-memory:cron",
+        "openviking-memory:github-proxy",
+        "openviking-memory:github",
+        "openviking-memory:opencode",
+        "openviking-memory:skill-creator",
+        "openviking-memory:summarize",
+        "openviking-memory:tmux",
+        "openviking-memory:weather"
+      ],
+      "canaries": []
+    },
+    {
       "id": "ouroboros",
       "path": "overlays/ouroboros/flows/ouroboros/FLOW.md",
       "hash": "9e4e7adec15040e40f4fb4275b817fdb7cabe0f1a8aec200b14648fff3017e31",
@@ -405,6 +520,22 @@
         "Debugging. Root cause in writing first.",
         "If you are about to write code to answer, TDD fires."
       ]
+    },
+    {
+      "id": "superset",
+      "path": "overlays/superset/flows/superset/FLOW.md",
+      "hash": "17fb4affd39235b42e33046c55611b269df6a818d102f73a1e295bbf3ac5feb0",
+      "routes": [
+        "superset:10x",
+        "superset:automate",
+        "superset:contribute",
+        "superset:doctor",
+        "superset:feedback",
+        "superset:orchestrate",
+        "superset:setup",
+        "superset:standup"
+      ],
+      "canaries": []
     },
     {
       "id": "ultra-powers",
@@ -544,6 +675,54 @@
         "ultra-powers:verification-before-completion. Run the command in THIS message.",
         "ultra-powers:git-commit-push-pr / ultra-powers:finishing-a-development-branch. The PR description and the integration choice matter."
       ]
+    },
+    {
+      "id": "vercel-plugin",
+      "path": "overlays/vercel-plugin/flows/vercel-plugin/FLOW.md",
+      "hash": "5930d4c1ed8e55149a984bc21cbf1a191fd70b0d4209a87f34f503433fbdd4e2",
+      "routes": [
+        "vercel-plugin:benchmark-agents",
+        "vercel-plugin:benchmark-e2e",
+        "vercel-plugin:benchmark-sandbox",
+        "vercel-plugin:benchmark-testing",
+        "vercel-plugin:plugin-audit",
+        "vercel-plugin:release",
+        "vercel-plugin:vercel-plugin-eval",
+        "vercel-plugin:access-protected-vercel-deployment",
+        "vercel-plugin:ai-gateway",
+        "vercel-plugin:ai-sdk",
+        "vercel-plugin:upstream",
+        "vercel-plugin:auth",
+        "vercel-plugin:bootstrap",
+        "vercel-plugin:cdn-caching",
+        "vercel-plugin:chat-sdk",
+        "vercel-plugin:deployments-cicd",
+        "vercel-plugin:env-vars",
+        "vercel-plugin:eve",
+        "vercel-plugin:knowledge-update",
+        "vercel-plugin:marketplace",
+        "vercel-plugin:microfrontends",
+        "vercel-plugin:next-cache-components",
+        "vercel-plugin:next-forge",
+        "vercel-plugin:next-upgrade",
+        "vercel-plugin:nextjs",
+        "vercel-plugin:react-best-practices",
+        "vercel-plugin:routing-middleware",
+        "vercel-plugin:runtime-cache",
+        "vercel-plugin:shadcn",
+        "vercel-plugin:turbopack",
+        "vercel-plugin:vercel-agent",
+        "vercel-plugin:vercel-cli",
+        "vercel-plugin:vercel-connect",
+        "vercel-plugin:vercel-firewall",
+        "vercel-plugin:vercel-functions",
+        "vercel-plugin:vercel-sandbox",
+        "vercel-plugin:vercel-services",
+        "vercel-plugin:vercel-storage",
+        "vercel-plugin:verification",
+        "vercel-plugin:workflow"
+      ],
+      "canaries": []
     }
   ]
 }
