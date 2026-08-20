@@ -1,0 +1,11 @@
+{
+  "name": "flowy-understand-anything",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for lum1104/understand-anything.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

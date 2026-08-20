@@ -114,6 +114,51 @@
       "name": "flowy-superset",
       "source": "./overlays/superset",
       "description": "Auto-invoked overlay: the superset parallel-agent, scheduling and workspace skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-baoyu-skills",
+      "source": "./overlays/baoyu-skills",
+      "description": "Auto-invoked overlay: the baoyu content, image and multi-platform publishing skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-rust-skills",
+      "source": "./overlays/rust-skills",
+      "description": "Auto-invoked overlay: 38 Rust skills covering ownership, traits, concurrency, unsafe and crate research, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-understand-anything",
+      "source": "./overlays/understand-anything",
+      "description": "Auto-invoked overlay: the codebase knowledge-graph, onboarding and diff-review skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-aso-skills",
+      "source": "./overlays/aso-skills",
+      "description": "Auto-invoked overlay: 40 app-store optimisation skills covering listings, creative, paid search and retention, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-claude-scholar",
+      "source": "./overlays/claude-scholar",
+      "description": "Auto-invoked overlay: 45 academic research skills covering manuscripts, literature, experiments and rebuttals, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-claude-blog",
+      "source": "./overlays/claude-blog",
+      "description": "Auto-invoked overlay: 32 blogging skills covering strategy, drafting, AI-citation readiness and multilingual publishing, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-ralph-orchestrator",
+      "source": "./overlays/ralph-orchestrator",
+      "description": "Auto-invoked overlay: the Ralph orchestrator task, TDD and terminal-automation skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-claude-ads",
+      "source": "./overlays/claude-ads",
+      "description": "Auto-invoked overlay: 33 paid-advertising skills across twelve ad platforms plus attribution, budget and creative, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-taste-skill",
+      "source": "./overlays/taste-skill",
+      "description": "Auto-invoked overlay: the taste design-quality skills for landing pages, mobile screens and identity systems, routed by phase, on the shared Flowy engine."
     }
   ]
 }
