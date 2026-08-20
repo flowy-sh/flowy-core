@@ -1,0 +1,11 @@
+{
+  "name": "flowy-kicad-happy",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for aklofas/kicad-happy.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

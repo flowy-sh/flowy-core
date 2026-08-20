@@ -166,7 +166,15 @@ describe("buildManifest", () => {
   test("the routes are real namespaced references, not prose fragments", () => {
     for (const flow of manifest.flows) {
       for (const route of flow.routes) {
-        expect(route).toMatch(/^[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*$/);
+        /* CAPITALS ALLOWED, 2026-08-20. This asserted lowercase and rejected
+         `ReVa:binary-triage`, which IS a real namespaced reference: the plugin
+         name comes from its own manifest and manifests carry capitals. The
+         property under test is "a reference, not a prose fragment", and case was
+         never what separated those -- `Gate: brief` is excluded by the space
+         after the colon. This was the FIFTH copy of the same lowercase
+         assumption found in one day, after SKILL_REF, ROUTE_RE, and the two
+         docblocks that each attributed the exclusion to the wrong property. */
+        expect(route).toMatch(/^[A-Za-z0-9][A-Za-z0-9-]*:[A-Za-z0-9][A-Za-z0-9-]*$/);
       }
     }
   });

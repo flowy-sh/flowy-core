@@ -1,0 +1,11 @@
+{
+  "name": "flowy-prd",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for anombyte93/prd-taskmaster.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

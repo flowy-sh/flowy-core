@@ -1,0 +1,11 @@
+{
+  "name": "flowy-ai-software-architect",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for codenamev/ai-software-architect.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

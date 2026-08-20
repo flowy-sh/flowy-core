@@ -1,0 +1,11 @@
+{
+  "name": "flowy-webnovel-writer",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for lingfengqaq/webnovel-writer.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowy-kimi",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for linxule/kimi-plugin-cc.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

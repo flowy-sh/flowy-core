@@ -1,0 +1,11 @@
+{
+  "name": "flowy-humanize",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for PolyArch/humanize.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

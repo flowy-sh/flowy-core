@@ -1,0 +1,11 @@
+{
+  "name": "flowy-linkedin-skills",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for sergebulaev/linkedin-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

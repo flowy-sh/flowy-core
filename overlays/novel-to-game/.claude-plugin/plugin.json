@@ -1,0 +1,11 @@
+{
+  "name": "flowy-novel-to-game",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for worldwonderer/novel-to-game.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

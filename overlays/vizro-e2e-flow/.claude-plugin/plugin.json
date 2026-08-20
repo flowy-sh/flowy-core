@@ -1,0 +1,11 @@
+{
+  "name": "flowy-vizro-e2e-flow",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for mckinsey/vizro.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

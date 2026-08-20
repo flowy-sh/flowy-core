@@ -70,8 +70,16 @@ function normalizeLines(text) {
  * What separates `3000` and `30` from `10x` is not POSITION, it is that they
  * contain NO LETTER AT ALL. Requiring at least one letter keeps every original
  * exclusion (`09:` still fails on the namespace half) and admits the real name.
+ *
+ * THE THIRD AXIS, 2026-08-20, also found by shipping: both halves were
+ * LOWERCASE-only, and `cyberkaida/reverse-engineering-assistant` publishes its
+ * plugin as `ReVa`. `ReVa:decompile` matched nothing, so a Flow routing 6
+ * skills was counted at 0 and failed its own gate. A plugin NAME is whatever
+ * its manifest says and manifests carry capitals. Case was never what
+ * separated a skill from a port: `3000` and `30` contain no letter in any
+ * case, and `09` starts with a digit in any case.
  */
-const SKILL_REF = /\b([a-z][a-z0-9-]*):([a-z0-9-]*[a-z][a-z0-9-]*)\b/g;
+const SKILL_REF = /\b([A-Za-z][A-Za-z0-9-]*):([A-Za-z0-9-]*[A-Za-z][A-Za-z0-9-]*)\b/g;
 const ARROW = /(?:→|->)/;
 
 /**

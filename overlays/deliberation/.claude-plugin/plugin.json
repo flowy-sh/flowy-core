@@ -1,0 +1,11 @@
+{
+  "name": "flowy-deliberation",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for antonbabenko/deliberation.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowy-alfred-dev",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for 686f6c61/alfred-dev.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

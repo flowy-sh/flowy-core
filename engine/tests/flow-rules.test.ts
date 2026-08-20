@@ -287,6 +287,30 @@ describe("checkNoOrphanSkills (R1)", () => {
       "## Routing\n- x? → invoke ms:cro\n\nSee http://localhost:3000, standup 09:30, map 8080:3000." + "\n";
     expect(checkNoOrphanSkills(text)).toEqual([]);
   });
+
+  /* THE THIRD AXIS OF THE SAME REGEX, FOUND BY SHIPPING, 2026-08-20.
+     This morning SKILL_REF was widened so the SKILL half may start with a
+     digit (`superset:10x`). The NAMESPACE half was left lowercase-only, and
+     `cyberkaida/reverse-engineering-assistant` publishes its plugin as `ReVa`.
+     So `ReVa:decompile` matched nothing: the Flow routed 6 skills, the checker
+     counted 0, and a correct Flow failed its own gate with "claims 6 skills
+     but routes 0".
+
+     A plugin NAME is whatever its manifest says, and manifests carry capitals.
+     Case has nothing to do with the exclusions this pattern exists for: a port
+     and a time are still excluded, because `3000` and `30` contain no letter
+     and `09` does not start with one. */
+  test("a namespace with capitals is still a skill reference", () => {
+    const text =
+      "> Routes 1 skills\n\n## Routing\n\n```\n- x? → invoke ReVa:decompile\n```\n";
+    expect(checkClaimedCounts(text)).toEqual([]);
+  });
+
+  test("a port and a time stay excluded whatever the case", () => {
+    const text =
+      "## Routing\n- x? → invoke ms:cro\n\nSee http://LocalHost:3000, standup 09:30." + "\n";
+    expect(checkNoOrphanSkills(text)).toEqual([]);
+  });
 });
 
 describe("checkSectionOrder (R5)", () => {

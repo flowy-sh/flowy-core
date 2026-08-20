@@ -44,9 +44,19 @@ import { normalizeText } from "./text-normalize.mjs";
  * Namespaced skill reference: `plugin-name:skill-name`.
  *
  * No whitespace either side of the colon, which is what keeps `Gate: brief`
- * and `https://flowy.sh` out of the results.
+ * and `https://flowy.sh` out of the results. BOTH are excluded by that rule
+ * alone: each fails on the character immediately after the colon, a space in
+ * one and a slash in the other.
+ *
+ * ⭐ CASE WAS NEVER PART OF IT, and the lowercase-only class said otherwise
+ * until 2026-08-20. `cyberkaida/reverse-engineering-assistant` publishes its
+ * plugin as `ReVa`, so a Flow routing 6 skills recorded ZERO routes in the
+ * manifest and tripped "every Flow carries a non-empty route sequence".
+ * `ROUTE_VARIANT_RE` twenty lines below already accepted capitals; this is
+ * the same pattern in the same file with a different blind spot, which is
+ * the fourth copy of it found in two repositories on one day.
  */
-const ROUTE_RE = /\b([a-z0-9][a-z0-9-]*):([a-z0-9][a-z0-9-]*)\b/g;
+const ROUTE_RE = /\b([A-Za-z0-9][A-Za-z0-9-]*):([A-Za-z0-9][A-Za-z0-9-]*)\b/g;
 
 /** High containment AND preserved order. Both, never either. */
 const DERIVATIVE_CONTAINMENT = 0.8;

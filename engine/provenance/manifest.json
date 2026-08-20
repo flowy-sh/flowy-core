@@ -2,6 +2,20 @@
   "schema": "flowy-provenance-v1",
   "flows": [
     {
+      "id": "ReVa",
+      "path": "overlays/ReVa/flows/ReVa/FLOW.md",
+      "hash": "208f9b6d2484e6238564d605376f3f3359b191ed4496cfaf5f1f5f427a355014",
+      "routes": [
+        "ReVa:binary-triage",
+        "ReVa:ctf-crypto",
+        "ReVa:ctf-pwn",
+        "ReVa:ctf-rev",
+        "ReVa:deep-analysis",
+        "ReVa:pyghidra-scripting"
+      ],
+      "canaries": []
+    },
+    {
       "id": "agent-skills",
       "path": "overlays/agent-skills/flows/agent-skills/FLOW.md",
       "hash": "f43abe7daac935f09ee19554ebfefb650542373477dc3e3bbb7167b59eff32d9",
@@ -66,6 +80,40 @@
         "agentmemory:remember",
         "agentmemory:session-history",
         "agentmemory:write-agentmemory-skill"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "ai-software-architect",
+      "path": "overlays/ai-software-architect/flows/ai-software-architect/FLOW.md",
+      "hash": "4e330329f6d0dee3898eaf065fceeb0a9f8229c50fd6123d912c8cb78377b9c9",
+      "routes": [
+        "ai-software-architect:architecture-review",
+        "ai-software-architect:architecture-status",
+        "ai-software-architect:create-adr",
+        "ai-software-architect:list-members",
+        "ai-software-architect:pragmatic-guard",
+        "ai-software-architect:setup-architect",
+        "ai-software-architect:specialist-review"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "alfred-dev",
+      "path": "overlays/alfred-dev/flows/alfred-dev/FLOW.md",
+      "hash": "2a21fcaec99793a8e45975f152ec940a41024cf801390f9885710af3cc25c144",
+      "routes": [
+        "alfred-dev:compliance-check",
+        "alfred-dev:evaluate-dependency",
+        "alfred-dev:incident-response",
+        "alfred-dev:memory",
+        "alfred-dev:pr-workflow",
+        "alfred-dev:sbom-generate",
+        "alfred-dev:sonarqube",
+        "alfred-dev:style-direction",
+        "alfred-dev:sync-project-docs",
+        "alfred-dev:threat-model",
+        "alfred-dev:write-adr"
       ],
       "canaries": []
     },
@@ -219,6 +267,23 @@
       "canaries": []
     },
     {
+      "id": "brooks-lint",
+      "path": "overlays/brooks-lint/flows/brooks-lint/FLOW.md",
+      "hash": "90df4e60a85dfe2a54cebca9ab04a7bf62b6ed40b9e7deae9035b2abfebe65bd",
+      "routes": [
+        "brooks-lint:brooks-harness",
+        "brooks-lint:new-skill",
+        "brooks-lint:release",
+        "brooks-lint:brooks-audit",
+        "brooks-lint:brooks-debt",
+        "brooks-lint:brooks-health",
+        "brooks-lint:brooks-review",
+        "brooks-lint:brooks-sweep",
+        "brooks-lint:brooks-test"
+      ],
+      "canaries": []
+    },
+    {
       "id": "chrome-devtools-mcp",
       "path": "overlays/chrome-devtools-mcp/flows/chrome-devtools-mcp/FLOW.md",
       "hash": "81fb57312c21cd89c9c9498685c99cab8b0f14c356f716718bbe368e1cdc2b40",
@@ -229,6 +294,23 @@
         "chrome-devtools-mcp:debug-optimize-lcp",
         "chrome-devtools-mcp:memory-leak-debugging",
         "chrome-devtools-mcp:troubleshooting"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "ck",
+      "path": "overlays/ck/flows/ck/FLOW.md",
+      "hash": "88043abb42c1561333d1eef90d9428a24153376527e69393424b428c703ac1aa",
+      "routes": [
+        "ck:backprop",
+        "ck:build",
+        "ck:caveman",
+        "ck:check",
+        "ck:deepen",
+        "ck:grill",
+        "ck:research",
+        "ck:review",
+        "ck:spec"
       ],
       "canaries": []
     },
@@ -411,6 +493,20 @@
       "canaries": []
     },
     {
+      "id": "codex-bridge",
+      "path": "overlays/codex-bridge/flows/codex-bridge/FLOW.md",
+      "hash": "4173c97e251c27aaa65814363cd283e7d292cc452410841877d36ffd1291a0d4",
+      "routes": [
+        "codex-bridge:ask-codex",
+        "codex-bridge:asset-set",
+        "codex-bridge:codex-delegate",
+        "codex-bridge:codex-review",
+        "codex-bridge:edit-image",
+        "codex-bridge:generate-image"
+      ],
+      "canaries": []
+    },
+    {
       "id": "compound-engineering",
       "path": "overlays/compound-engineering/flows/compound-engineering/FLOW.md",
       "hash": "9792cf3dd1e0b9e02b6a52e4e9f65545ce020994001b19e5c6cc2ae1f5c66f9d",
@@ -447,6 +543,75 @@
         "compound-engineering:ce-work",
         "compound-engineering:ce-worktree",
         "compound-engineering:lfg"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "craft",
+      "path": "overlays/craft/flows/craft/FLOW.md",
+      "hash": "239dcbd1498410877f8b0cf494d9c0e8364eb291764c8483db494f87a86e6aff",
+      "routes": [
+        "craft:adhoc",
+        "craft:approve",
+        "craft:browser",
+        "craft:content-spark",
+        "craft:creative-spark",
+        "craft:design-vibe",
+        "craft:lock-decision",
+        "craft:plan-chunks",
+        "craft:refine-chunk",
+        "craft:test-fix",
+        "craft:validate-chunk"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "deliberation",
+      "path": "overlays/deliberation/flows/deliberation/FLOW.md",
+      "hash": "3344c5d5ea7c2b72a2b8565bf5521c34022a8789b8a49cd5eaa89754fc2a3610",
+      "routes": [
+        "deliberation:architect",
+        "deliberation:code-reviewer",
+        "deliberation:debugger",
+        "deliberation:deliberation",
+        "deliberation:plan-reviewer",
+        "deliberation:researcher",
+        "deliberation:scope-analyst",
+        "deliberation:security-analyst"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "dotnet-artisan",
+      "path": "overlays/dotnet-artisan/flows/dotnet-artisan/FLOW.md",
+      "hash": "fbe9881fd72b7be9956c5169cb3ae4d915819f34520a02896fe96e65afca9c77",
+      "routes": [
+        "dotnet-artisan:dotnet-advisor",
+        "dotnet-artisan:dotnet-api",
+        "dotnet-artisan:dotnet-csharp",
+        "dotnet-artisan:dotnet-debugging",
+        "dotnet-artisan:dotnet-devops",
+        "dotnet-artisan:dotnet-testing",
+        "dotnet-artisan:dotnet-tooling",
+        "dotnet-artisan:dotnet-ui",
+        "dotnet-artisan:using-dotnet"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "dx",
+      "path": "overlays/dx/flows/dx/FLOW.md",
+      "hash": "72819f735685dd32206902bdda68b88da3c0f6dc902e437e97ff461be480d38e",
+      "routes": [
+        "dx:gha",
+        "dx:half-clone",
+        "dx:handoff",
+        "dx:hn-summarize",
+        "dx:private-github-search",
+        "dx:quarter-clone",
+        "dx:reddit-fetch",
+        "dx:review-claudemd",
+        "dx:version-check"
       ],
       "canaries": []
     },
@@ -659,6 +824,62 @@
       "canaries": []
     },
     {
+      "id": "edgeone-makers-tools",
+      "path": "overlays/edgeone-makers-tools/flows/edgeone-makers-tools/FLOW.md",
+      "hash": "3e8c534c46663371a144fb13081ad748a1a6de50c6541c6f1a323ff2d5da63b2",
+      "routes": [
+        "edgeone-makers-tools:makers-agents",
+        "edgeone-makers-tools:makers-cli",
+        "edgeone-makers-tools:makers-cloud-functions",
+        "edgeone-makers-tools:makers-deploy",
+        "edgeone-makers-tools:makers-edge-functions",
+        "edgeone-makers-tools:makers-env-adaption",
+        "edgeone-makers-tools:makers-middleware",
+        "edgeone-makers-tools:makers-migration",
+        "edgeone-makers-tools:makers-recipes",
+        "edgeone-makers-tools:makers-storage"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "firebase",
+      "path": "overlays/firebase/flows/firebase/FLOW.md",
+      "hash": "753e7aaec4801092314f265a791c19cec6d25617a587afb212ecf61b72a48319",
+      "routes": [
+        "firebase:extension-to-functions-codebase",
+        "firebase:firebase-ai-logic-basics",
+        "firebase:firebase-app-hosting-basics",
+        "firebase:firebase-auth-basics",
+        "firebase:firebase-basics",
+        "firebase:firebase-crashlytics",
+        "firebase:firebase-data-connect-basics",
+        "firebase:firebase-firestore",
+        "firebase:firebase-hosting-basics",
+        "firebase:firebase-remote-config-basics",
+        "firebase:firebase-security-rules-auditor",
+        "firebase:xcode-project-setup"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "forge",
+      "path": "overlays/forge/flows/forge/FLOW.md",
+      "hash": "820701c78ad522ffe83ba94c2215f40e0dc3987426c6253bf9fd6975e8bf0ba9",
+      "routes": [
+        "forge:backpropagation",
+        "forge:brainstorming",
+        "forge:caveman-internal",
+        "forge:collaborating",
+        "forge:design-system",
+        "forge:executing",
+        "forge:graphify-integration",
+        "forge:karpathy-guardrails",
+        "forge:planning",
+        "forge:reviewing"
+      ],
+      "canaries": []
+    },
+    {
       "id": "growth-marketing",
       "path": "overlays/growth-marketing/flows/growth-marketing/FLOW.md",
       "hash": "c3b1f174be300c4e095feeeb8403c96da1263ba41f76472d2bd7ddf69ccf1bd7",
@@ -720,6 +941,73 @@
       ]
     },
     {
+      "id": "humanize",
+      "path": "overlays/humanize/flows/humanize/FLOW.md",
+      "hash": "e807f2643f6ea296fce110867aaece7e187059d43706ed361d523a269fdc19df",
+      "routes": [
+        "humanize:ask-codex",
+        "humanize:ask-gemini",
+        "humanize:humanize-gen-plan",
+        "humanize:humanize-refine-plan",
+        "humanize:humanize-rlcr",
+        "humanize:humanize"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "kicad-happy",
+      "path": "overlays/kicad-happy/flows/kicad-happy/FLOW.md",
+      "hash": "cb8ebba083811e25ef3ecef542bb175b32b178a87d442d7440469cce14ad8100",
+      "routes": [
+        "kicad-happy:bom",
+        "kicad-happy:datasheets",
+        "kicad-happy:digikey",
+        "kicad-happy:element14",
+        "kicad-happy:emc",
+        "kicad-happy:jlcpcb",
+        "kicad-happy:kicad",
+        "kicad-happy:lcsc",
+        "kicad-happy:mouser",
+        "kicad-happy:pcbway",
+        "kicad-happy:spice"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "kimi",
+      "path": "overlays/kimi/flows/kimi/FLOW.md",
+      "hash": "f59c195f630d01385e8670d7113ee32f515cc8a31ab6b5a1f40af359b03b404c",
+      "routes": [
+        "kimi:kimi-ask",
+        "kimi:kimi-cancel",
+        "kimi:kimi-challenge",
+        "kimi:kimi-pursue",
+        "kimi:kimi-replay",
+        "kimi:kimi-rescue",
+        "kimi:kimi-result",
+        "kimi:kimi-review",
+        "kimi:kimi-setup",
+        "kimi:kimi-status",
+        "kimi:kimi-swarm-write",
+        "kimi:kimi-swarm"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "kotlin-agent-skills",
+      "path": "overlays/kotlin-agent-skills/flows/kotlin-agent-skills/FLOW.md",
+      "hash": "0a2ea1e2a9f417d5ae7907ca80a4e47e378ea7af747c05a9fe28a0b2bef805b3",
+      "routes": [
+        "kotlin-agent-skills:kotlin-backend-jpa-entity-mapping",
+        "kotlin-agent-skills:kotlin-tooling-agp9-migration",
+        "kotlin-agent-skills:kotlin-tooling-cocoapods-spm-migration",
+        "kotlin-agent-skills:kotlin-tooling-immutable-collections-0-5-x-migration",
+        "kotlin-agent-skills:kotlin-tooling-java-to-kotlin",
+        "kotlin-agent-skills:kotlin-tooling-native-build-performance"
+      ],
+      "canaries": []
+    },
+    {
       "id": "langchain-skills",
       "path": "overlays/langchain-skills/flows/langchain-skills/FLOW.md",
       "hash": "dd1312c8f5d8075ba658925c0ffcc22eb67f772b81fcb8c121822249370b81b1",
@@ -746,6 +1034,25 @@
         "langchain-skills:langsmith-online-eval-engineering",
         "langchain-skills:managed-deep-agents",
         "langchain-skills:swarm"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "linkedin-skills",
+      "path": "overlays/linkedin-skills/flows/linkedin-skills/FLOW.md",
+      "hash": "6ec73615177995c46fc2ce56aeee6323a24e2be15261dbb128123c2973c4646f",
+      "routes": [
+        "linkedin-skills:linkedin-comment-drafter",
+        "linkedin-skills:linkedin-content-planner",
+        "linkedin-skills:linkedin-employee-advocacy",
+        "linkedin-skills:linkedin-engager-analytics",
+        "linkedin-skills:linkedin-hook-extractor",
+        "linkedin-skills:linkedin-humanizer",
+        "linkedin-skills:linkedin-post-writer",
+        "linkedin-skills:linkedin-profile-optimizer",
+        "linkedin-skills:linkedin-reply-handler",
+        "linkedin-skills:linkedin-repurposer",
+        "linkedin-skills:linkedin-thread-monitor"
       ],
       "canaries": []
     },
@@ -812,6 +1119,38 @@
         "nextjs:next-cache-components-optimizer",
         "nextjs:next-dev-loop",
         "nextjs:next-partial-prefetching-adoption"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "novel-to-game",
+      "path": "overlays/novel-to-game/flows/novel-to-game/FLOW.md",
+      "hash": "b99cd1f3504853a0f96c2e39e17e8253d075df7a196a2dcf3f606303d1ab979e",
+      "routes": [
+        "novel-to-game:game-art-direction",
+        "novel-to-game:game-build",
+        "novel-to-game:game-concept",
+        "novel-to-game:game-qa",
+        "novel-to-game:game-world-design",
+        "novel-to-game:novel-game-analyze",
+        "novel-to-game:novel-to-game"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "onchainos-skills",
+      "path": "overlays/onchainos-skills/flows/onchainos-skills/FLOW.md",
+      "hash": "c9669cef4f0e057c4748488c0c5c8f472397e72269c74f35b3665a61578ff9c7",
+      "routes": [
+        "onchainos-skills:okx-activity",
+        "onchainos-skills:okx-agent-payments-protocol",
+        "onchainos-skills:okx-agentic-wallet",
+        "onchainos-skills:okx-ai",
+        "onchainos-skills:okx-dapp-discovery",
+        "onchainos-skills:okx-defi",
+        "onchainos-skills:okx-dex-market",
+        "onchainos-skills:okx-growth-competition",
+        "onchainos-skills:okx-guide"
       ],
       "canaries": []
     },
@@ -1033,6 +1372,22 @@
       "canaries": []
     },
     {
+      "id": "paperfit",
+      "path": "overlays/paperfit/flows/paperfit/FLOW.md",
+      "hash": "9da4012fc6aa4cab7a1b04db6a0a83d77cd71c73b963379d6cd08730fc045807",
+      "routes": [
+        "paperfit:consistency-polisher",
+        "paperfit:float-optimizer",
+        "paperfit:overflow-repair",
+        "paperfit:space-util-fixer",
+        "paperfit:taxonomy-vto",
+        "paperfit:template-migrator",
+        "paperfit:visual-inspector",
+        "paperfit:writing-polish"
+      ],
+      "canaries": []
+    },
+    {
       "id": "ponytail",
       "path": "overlays/ponytail/flows/ponytail/FLOW.md",
       "hash": "3564d834a94e607dfefe1110a58b7ce87b8868a243ea3219ed04172dfd5cfe7a",
@@ -1065,6 +1420,24 @@
         "portaljs:portaljs-deploy",
         "portaljs:portaljs-migrate",
         "portaljs:portaljs-new-portal"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "prd",
+      "path": "overlays/prd/flows/prd/FLOW.md",
+      "hash": "c0d0beb76205ab19af816afa6b038bdc1d135d1747eba652e4a64d64bdd57c61",
+      "routes": [
+        "prd:atlas",
+        "prd:customise-workflow",
+        "prd:discover",
+        "prd:execute-fleet",
+        "prd:execute-task",
+        "prd:expand-tasks",
+        "prd:generate",
+        "prd:go",
+        "prd:handoff",
+        "prd:setup"
       ],
       "canaries": []
     },
@@ -1113,6 +1486,23 @@
       "canaries": []
     },
     {
+      "id": "resume-builder",
+      "path": "overlays/resume-builder/flows/resume-builder/FLOW.md",
+      "hash": "56c482372d87cda64c4acf33e259739b465d85053a6cd9b163b51ad3ea826b4b",
+      "routes": [
+        "resume-builder:batch-resume",
+        "resume-builder:cover-letter",
+        "resume-builder:find-jobs",
+        "resume-builder:job-fit",
+        "resume-builder:resume-team",
+        "resume-builder:resume",
+        "resume-builder:setup",
+        "resume-builder:tailor-resume",
+        "resume-builder:writing-coach"
+      ],
+      "canaries": []
+    },
+    {
       "id": "rust-skills",
       "path": "overlays/rust-skills/flows/rust-skills/FLOW.md",
       "hash": "a2d4efa59a6a5f87cf1b8af5255ee8f89cbcf6b90afddb18ec89984945f5f0c3",
@@ -1155,6 +1545,73 @@
         "rust-skills:rust-symbol-analyzer",
         "rust-skills:rust-trait-explorer",
         "rust-skills:unsafe-checker"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "sanity",
+      "path": "overlays/sanity/flows/sanity/FLOW.md",
+      "hash": "3d5c9e025c364fa88ed149cd08a6bb8d635d8b7fb10e76bda01e9fbbff3f4c5f",
+      "routes": [
+        "sanity:content-experimentation-best-practices",
+        "sanity:content-modeling-best-practices",
+        "sanity:portable-text-conversion",
+        "sanity:portable-text-serialization",
+        "sanity:sanity-best-practices",
+        "sanity:sanity-migration",
+        "sanity:seo-aeo-best-practices"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "skills",
+      "path": "overlays/skills/flows/skills/FLOW.md",
+      "hash": "134fcd5a65474659a7df2ccbd42f665ce959c186ec300a04bc1a623ca5e17bb0",
+      "routes": [
+        "skills:agent-context-audit",
+        "skills:crabbox-setup",
+        "skills:dev-local-setup",
+        "skills:e2e-setup",
+        "skills:new-loop",
+        "skills:open-agent-teams",
+        "skills:seo-growth",
+        "skills:setup-codebase-harness",
+        "skills:verifier-setup",
+        "skills:visual-flow-gif"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "spec-superflow",
+      "path": "overlays/spec-superflow/flows/spec-superflow/FLOW.md",
+      "hash": "bd59a4290bfac343921dc548f66fa4459130cdad6bb391f719f2c188325f4600",
+      "routes": [
+        "spec-superflow:bug-investigator",
+        "spec-superflow:build-executor",
+        "spec-superflow:code-reviewer",
+        "spec-superflow:contract-builder",
+        "spec-superflow:need-explorer",
+        "spec-superflow:release-archivist",
+        "spec-superflow:spec-merger",
+        "spec-superflow:spec-writer",
+        "spec-superflow:workflow-start"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "superloopy",
+      "path": "overlays/superloopy/flows/superloopy/FLOW.md",
+      "hash": "9f4ef114fb8ce86f180909c6e52b6943de2c6578f62677f84c32c46469a1fac4",
+      "routes": [
+        "superloopy:humanize-korean",
+        "superloopy:i-have-adhd",
+        "superloopy:say-it-straight",
+        "superloopy:superloopy-clone",
+        "superloopy:superloopy-doctor",
+        "superloopy:superloopy-frontend",
+        "superloopy:superloopy-loop",
+        "superloopy:superloopy-research",
+        "superloopy:superloopy-slides"
       ],
       "canaries": []
     },
@@ -1231,6 +1688,23 @@
         "taste-skill:stitch-skill",
         "taste-skill:taste-skill-v1",
         "taste-skill:taste-skill"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "test-automation-skills-agents",
+      "path": "overlays/test-automation-skills-agents/flows/test-automation-skills-agents/FLOW.md",
+      "hash": "a4e88e8d6ce18ff39696fa412e5b56d55cee3d173506aad80fe148aa6222d7b8",
+      "routes": [
+        "test-automation-skills-agents:a11y-playwright-testing",
+        "test-automation-skills-agents:accessibility-selenium-testing",
+        "test-automation-skills-agents:api-testing",
+        "test-automation-skills-agents:grill-me-qa",
+        "test-automation-skills-agents:playwright-cli",
+        "test-automation-skills-agents:playwright-e2e-testing",
+        "test-automation-skills-agents:playwright-regression-testing",
+        "test-automation-skills-agents:qa-manual-istqb",
+        "test-automation-skills-agents:webapp-selenium-testing"
       ],
       "canaries": []
     },
@@ -1435,6 +1909,95 @@
         "vercel-plugin:vercel-storage",
         "vercel-plugin:verification",
         "vercel-plugin:workflow"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "video-recap-skills",
+      "path": "overlays/video-recap-skills/flows/video-recap-skills/FLOW.md",
+      "hash": "dfd72f9a680fc05226e7aa7c378b4014baf85513d7622d461ab232ea07e2e91f",
+      "routes": [
+        "video-recap-skills:video-assemble",
+        "video-recap-skills:video-cut",
+        "video-recap-skills:video-recap",
+        "video-recap-skills:video-script",
+        "video-recap-skills:video-understanding",
+        "video-recap-skills:video-voiceover"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "vizro-e2e-flow",
+      "path": "overlays/vizro-e2e-flow/flows/vizro-e2e-flow/FLOW.md",
+      "hash": "c544a604240561a4822fcc77220ac1fff4339c653c82ace53ad76713874c46cd",
+      "routes": [
+        "vizro-e2e-flow:dashboard-build",
+        "vizro-e2e-flow:dashboard-design",
+        "vizro-e2e-flow:designing-vizro-layouts",
+        "vizro-e2e-flow:selecting-vizro-charts",
+        "vizro-e2e-flow:wiring-vizro-actions",
+        "vizro-e2e-flow:writing-vizro-yaml"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "webnovel-writer",
+      "path": "overlays/webnovel-writer/flows/webnovel-writer/FLOW.md",
+      "hash": "364bbf8fe7ca8a368d16f0c006e6d7ae362ba1284f200316d81bf0d48be7b106",
+      "routes": [
+        "webnovel-writer:webnovel-dashboard",
+        "webnovel-writer:webnovel-doctor",
+        "webnovel-writer:webnovel-init",
+        "webnovel-writer:webnovel-learn",
+        "webnovel-writer:webnovel-plan",
+        "webnovel-writer:webnovel-query",
+        "webnovel-writer:webnovel-review",
+        "webnovel-writer:webnovel-write"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "winui",
+      "path": "overlays/winui/flows/winui/FLOW.md",
+      "hash": "c7dacf6d067ecb52e7dc105ea719681325801777d3bcf69e089d7974ff01341c",
+      "routes": [
+        "winui:winui-code-review",
+        "winui:winui-design",
+        "winui:winui-dev-workflow",
+        "winui:winui-packaging",
+        "winui:winui-session-report",
+        "winui:winui-setup",
+        "winui:winui-ui-testing",
+        "winui:winui-wpf-migration"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "xberg",
+      "path": "overlays/xberg/flows/xberg/FLOW.md",
+      "hash": "aab2b093c2fbb4cfe71c7cdd9e034af72c03f27214e08746703fd838f5663e59",
+      "routes": [
+        "xberg:batch-extraction",
+        "xberg:chunking",
+        "xberg:extracting-keywords",
+        "xberg:extracting-tables",
+        "xberg:extracting-with-ocr",
+        "xberg:picking-a-format",
+        "xberg:xberg"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "xcode-build-skills",
+      "path": "overlays/xcode-build-skills/flows/xcode-build-skills/FLOW.md",
+      "hash": "34bc90270d9d76f16c2a845606b71c67497d72ec3d7878e09e4e24b1f3b14c45",
+      "routes": [
+        "xcode-build-skills:spm-build-analysis",
+        "xcode-build-skills:xcode-build-benchmark",
+        "xcode-build-skills:xcode-build-fixer",
+        "xcode-build-skills:xcode-build-orchestrator",
+        "xcode-build-skills:xcode-compilation-analyzer",
+        "xcode-build-skills:xcode-project-analyzer"
       ],
       "canaries": []
     }

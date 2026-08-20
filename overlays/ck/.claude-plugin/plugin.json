@@ -1,0 +1,11 @@
+{
+  "name": "flowy-ck",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for JuliusBrussee/cavekit.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}
