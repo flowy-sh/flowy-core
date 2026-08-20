@@ -106,6 +106,37 @@
       ]
     },
     {
+      "id": "mem0",
+      "path": "overlays/mem0/flows/mem0/FLOW.md",
+      "hash": "de44f4639fc738ed4407c91968589ec6b28595f87a45d0e473e730fddf912f6e",
+      "routes": [
+        "mem0:context-loader",
+        "mem0:dream",
+        "mem0:export",
+        "mem0:forget",
+        "mem0:health",
+        "mem0:import",
+        "mem0:list-projects",
+        "mem0:mem0",
+        "mem0:memory-reviewer",
+        "mem0:onboard",
+        "mem0:peek",
+        "mem0:pin",
+        "mem0:remember",
+        "mem0:stats",
+        "mem0:switch-project",
+        "mem0:tour",
+        "mem0:memory-dream",
+        "mem0:memory-triage",
+        "mem0:mem0-cli",
+        "mem0:mem0-integrate",
+        "mem0:mem0-oss-to-platform",
+        "mem0:mem0-test-integration",
+        "mem0:mem0-vercel-ai-sdk"
+      ],
+      "canaries": []
+    },
+    {
       "id": "nextjs",
       "path": "overlays/nextjs/flows/nextjs/FLOW.md",
       "hash": "f6e458a2cc41b416ee32d7d58f78286b50b2c75b28513a642ce3973fdcf13107",

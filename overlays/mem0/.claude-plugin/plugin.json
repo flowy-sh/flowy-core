@@ -1,0 +1,11 @@
+{
+  "name": "flowy-mem0",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for mem0ai/mem0.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

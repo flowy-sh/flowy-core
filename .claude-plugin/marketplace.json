@@ -34,6 +34,11 @@
       "name": "flowy-agent-skills",
       "source": "./overlays/agent-skills",
       "description": "Auto-invoked overlay: the full SDLC routed to Addy Osmani's agent-skills, with the four rival -driven-development skills disambiguated, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-mem0",
+      "source": "./overlays/mem0",
+      "description": "Auto-invoked overlay: the mem0ai/mem0 memory skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }
