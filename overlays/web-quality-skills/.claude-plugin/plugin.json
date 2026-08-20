@@ -1,0 +1,11 @@
+{
+  "name": "flowy-web-quality-skills",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for addyosmani/web-quality-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

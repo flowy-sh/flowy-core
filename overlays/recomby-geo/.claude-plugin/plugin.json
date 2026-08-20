@@ -1,0 +1,11 @@
+{
+  "name": "flowy-recomby-geo",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for recomby-ai/recomby-geo.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

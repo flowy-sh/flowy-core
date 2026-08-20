@@ -1,0 +1,11 @@
+{
+  "name": "flowy-hi-vibe",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for jx-hxxx/hi-vibe.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

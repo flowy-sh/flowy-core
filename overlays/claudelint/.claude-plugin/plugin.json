@@ -1,0 +1,11 @@
+{
+  "name": "flowy-claudelint",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for pdugan20/claudelint.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowy-coder-eval",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for UiPath/coder_eval.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

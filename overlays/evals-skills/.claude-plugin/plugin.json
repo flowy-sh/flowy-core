@@ -1,0 +1,11 @@
+{
+  "name": "flowy-evals-skills",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for hamelsmu/evals-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

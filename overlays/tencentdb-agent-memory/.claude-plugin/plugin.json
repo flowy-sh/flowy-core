@@ -1,0 +1,11 @@
+{
+  "name": "flowy-tencentdb-agent-memory",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for baodq97/tencentdb-agent-memory.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

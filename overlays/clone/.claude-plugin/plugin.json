@@ -1,0 +1,11 @@
+{
+  "name": "flowy-clone",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for HarKro753/claude-copy.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

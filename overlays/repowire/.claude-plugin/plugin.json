@@ -1,0 +1,11 @@
+{
+  "name": "flowy-repowire",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for prassanna-ravishankar/repowire.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowy-pinecone",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for pinecone-io/pinecone-claude-code-plugin.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "flowy-tavily",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for tavily-ai/skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

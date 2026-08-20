@@ -16,6 +16,23 @@
       "canaries": []
     },
     {
+      "id": "academic-skills",
+      "path": "overlays/academic-skills/flows/academic-skills/FLOW.md",
+      "hash": "caba9f9551f20dc109c746c2485a2a5221fbaeb3e91b8d45d1708662651f9565",
+      "routes": [
+        "academic-skills:sci-download",
+        "academic-skills:sci-extract",
+        "academic-skills:sci-figure",
+        "academic-skills:sci-html",
+        "academic-skills:sci-polish",
+        "academic-skills:sci-ppt",
+        "academic-skills:sci-review",
+        "academic-skills:sci-search",
+        "academic-skills:sci-zotero"
+      ],
+      "canaries": []
+    },
+    {
       "id": "agent-skills",
       "path": "overlays/agent-skills/flows/agent-skills/FLOW.md",
       "hash": "f43abe7daac935f09ee19554ebfefb650542373477dc3e3bbb7167b59eff32d9",
@@ -472,6 +489,40 @@
       "canaries": []
     },
     {
+      "id": "claudelint",
+      "path": "overlays/claudelint/flows/claudelint/FLOW.md",
+      "hash": "969115fd04231412ee8b32cb29387e6df54da46bcb7cb1c429bfdb57a41395f3",
+      "routes": [
+        "claudelint:format-cc",
+        "claudelint:optimize-cc-md",
+        "claudelint:validate-all",
+        "claudelint:validate-cc-md",
+        "claudelint:validate-hooks",
+        "claudelint:validate-mcp",
+        "claudelint:validate-plugin",
+        "claudelint:validate-settings",
+        "claudelint:validate-skills"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "clone",
+      "path": "overlays/clone/flows/clone/FLOW.md",
+      "hash": "40571096c0b463aff8bd5851abc95de29f71e7e38054574cbfbca86ee10ef13d",
+      "routes": [
+        "clone:chrome-development",
+        "clone:html",
+        "clone:image",
+        "clone:react",
+        "clone:copywriting",
+        "clone:dense-ui-metrics",
+        "clone:plugin-creator",
+        "clone:shadcn",
+        "clone:skill-creator"
+      ],
+      "canaries": []
+    },
+    {
       "id": "cloudflare",
       "path": "overlays/cloudflare/flows/cloudflare/FLOW.md",
       "hash": "fe645c443a3a74102c10adf94aac9b780c338b7a270ca86028d0f7d04d8c0a04",
@@ -493,6 +544,20 @@
       "canaries": []
     },
     {
+      "id": "coder-eval",
+      "path": "overlays/coder-eval/flows/coder-eval/FLOW.md",
+      "hash": "0e6282f0a12e5d381c397a64a3e88e9564fe43e9554eec06885abe999e192480",
+      "routes": [
+        "coder-eval:analyze",
+        "coder-eval:check-skill",
+        "coder-eval:ci",
+        "coder-eval:init",
+        "coder-eval:lint-tasks",
+        "coder-eval:task"
+      ],
+      "canaries": []
+    },
+    {
       "id": "codex-bridge",
       "path": "overlays/codex-bridge/flows/codex-bridge/FLOW.md",
       "hash": "4173c97e251c27aaa65814363cd283e7d292cc452410841877d36ffd1291a0d4",
@@ -503,6 +568,23 @@
         "codex-bridge:codex-review",
         "codex-bridge:edit-image",
         "codex-bridge:generate-image"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "comfyui-custom-nodes",
+      "path": "overlays/comfyui-custom-nodes/flows/comfyui-custom-nodes/FLOW.md",
+      "hash": "0094db3f6b75c6a026625e5e57d9ccd1392351acabe71d22879d09446215c260",
+      "routes": [
+        "comfyui-custom-nodes:comfyui-node-advanced",
+        "comfyui-custom-nodes:comfyui-node-basics",
+        "comfyui-custom-nodes:comfyui-node-datatypes",
+        "comfyui-custom-nodes:comfyui-node-frontend",
+        "comfyui-custom-nodes:comfyui-node-inputs",
+        "comfyui-custom-nodes:comfyui-node-lifecycle",
+        "comfyui-custom-nodes:comfyui-node-migration",
+        "comfyui-custom-nodes:comfyui-node-outputs",
+        "comfyui-custom-nodes:comfyui-node-packaging"
       ],
       "canaries": []
     },
@@ -547,6 +629,20 @@
       "canaries": []
     },
     {
+      "id": "cortex",
+      "path": "overlays/cortex/flows/cortex/FLOW.md",
+      "hash": "92cdc49d87ac821a51366e573aa9f58aa513bbde75581083ac186779b12dfa7e",
+      "routes": [
+        "cortex:cortex-broadcast",
+        "cortex:cortex-distill",
+        "cortex:cortex-evolve",
+        "cortex:cortex-query",
+        "cortex:cortex-takeoff",
+        "cortex:using-cortex"
+      ],
+      "canaries": []
+    },
+    {
       "id": "craft",
       "path": "overlays/craft/flows/craft/FLOW.md",
       "hash": "239dcbd1498410877f8b0cf494d9c0e8364eb291764c8483db494f87a86e6aff",
@@ -562,6 +658,38 @@
         "craft:refine-chunk",
         "craft:test-fix",
         "craft:validate-chunk"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "crypto-trading-desk",
+      "path": "overlays/crypto-trading-desk/flows/crypto-trading-desk/FLOW.md",
+      "hash": "e222a23db5f17358c3d9cafa62853223464d5cfc63966ea07749bfaa32cb3a59",
+      "routes": [
+        "crypto-trading-desk:analyze",
+        "crypto-trading-desk:close-trade",
+        "crypto-trading-desk:create",
+        "crypto-trading-desk:monitor",
+        "crypto-trading-desk:portfolio",
+        "crypto-trading-desk:quick",
+        "crypto-trading-desk:setup",
+        "crypto-trading-desk:validate-predictions"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "deadeye",
+      "path": "overlays/deadeye/flows/deadeye/FLOW.md",
+      "hash": "776b4e5add624779700f692fab90dcf0f7cf617c619f39a25b23f464bb874ff5",
+      "routes": [
+        "deadeye:deadeye-coder",
+        "deadeye:deadeye-debt",
+        "deadeye:deadeye-gain",
+        "deadeye:deadeye-guard",
+        "deadeye:deadeye-help",
+        "deadeye:deadeye-review",
+        "deadeye:deadeye-sweep",
+        "deadeye:explore"
       ],
       "canaries": []
     },
@@ -842,6 +970,21 @@
       "canaries": []
     },
     {
+      "id": "evals-skills",
+      "path": "overlays/evals-skills/flows/evals-skills/FLOW.md",
+      "hash": "1e7f40c3064be54195f99f574e13ddbd6ccc681d4457d85a19df26d537b29baa",
+      "routes": [
+        "evals-skills:build-review-interface",
+        "evals-skills:error-analysis",
+        "evals-skills:eval-audit",
+        "evals-skills:evaluate-rag",
+        "evals-skills:generate-synthetic-data",
+        "evals-skills:validate-evaluator",
+        "evals-skills:write-judge-prompt"
+      ],
+      "canaries": []
+    },
+    {
       "id": "firebase",
       "path": "overlays/firebase/flows/firebase/FLOW.md",
       "hash": "753e7aaec4801092314f265a791c19cec6d25617a587afb212ecf61b72a48319",
@@ -862,6 +1005,24 @@
       "canaries": []
     },
     {
+      "id": "firecrawl",
+      "path": "overlays/firecrawl/flows/firecrawl/FLOW.md",
+      "hash": "bdefab9cfb9984486970ab6026b1a8cb7b4e833aba9b8ffa0f37ae7f2ae297b8",
+      "routes": [
+        "firecrawl:firecrawl-agent",
+        "firecrawl:firecrawl-crawl",
+        "firecrawl:firecrawl-download",
+        "firecrawl:firecrawl-interact",
+        "firecrawl:firecrawl-map",
+        "firecrawl:firecrawl-monitor",
+        "firecrawl:firecrawl-parse",
+        "firecrawl:firecrawl-scrape",
+        "firecrawl:firecrawl-search",
+        "firecrawl:firecrawl"
+      ],
+      "canaries": []
+    },
+    {
       "id": "forge",
       "path": "overlays/forge/flows/forge/FLOW.md",
       "hash": "820701c78ad522ffe83ba94c2215f40e0dc3987426c6253bf9fd6975e8bf0ba9",
@@ -876,6 +1037,20 @@
         "forge:karpathy-guardrails",
         "forge:planning",
         "forge:reviewing"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "forge-skills",
+      "path": "overlays/forge-skills/flows/forge-skills/FLOW.md",
+      "hash": "11027aaf51c56f439a4dbce536428e053d4dba7d97bc3f57aab110415a9b7715",
+      "routes": [
+        "forge-skills:forge-app-builder",
+        "forge-skills:forge-app-review",
+        "forge-skills:forge-connector",
+        "forge-skills:forge-cost-optimizer",
+        "forge-skills:forge-debugger",
+        "forge-skills:forge-security-review"
       ],
       "canaries": []
     },
@@ -939,6 +1114,20 @@
         "They target different corpora and produce different artifacts.",
         "Then `ab-testing` costs nothing to run and settles it."
       ]
+    },
+    {
+      "id": "hi-vibe",
+      "path": "overlays/hi-vibe/flows/hi-vibe/FLOW.md",
+      "hash": "8203dd08bd14fc46994bc04667ef050fdc9e2e431343b6ccd11e7397ae9588b2",
+      "routes": [
+        "hi-vibe:docs-keeper",
+        "hi-vibe:grounded-answers",
+        "hi-vibe:guards-setup",
+        "hi-vibe:repo-xray",
+        "hi-vibe:root-cause-first",
+        "hi-vibe:write-gate"
+      ],
+      "canaries": []
     },
     {
       "id": "humanize",
@@ -1053,6 +1242,20 @@
         "linkedin-skills:linkedin-reply-handler",
         "linkedin-skills:linkedin-repurposer",
         "linkedin-skills:linkedin-thread-monitor"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "llmwiki",
+      "path": "overlays/llmwiki/flows/llmwiki/FLOW.md",
+      "hash": "8b0b30ae72b4c769e56742ece71e153e71f526d34aeeed2b37ce15586814f453",
+      "routes": [
+        "llmwiki:llmwiki-ingest",
+        "llmwiki:llmwiki-query",
+        "llmwiki:llmwiki-sync",
+        "llmwiki:project-maintainer",
+        "llmwiki:self-learn",
+        "llmwiki:wiki-all"
       ],
       "canaries": []
     },
@@ -1342,6 +1545,25 @@
       "canaries": []
     },
     {
+      "id": "openzeppelin-skills",
+      "path": "overlays/openzeppelin-skills/flows/openzeppelin-skills/FLOW.md",
+      "hash": "3cd14559d9e00beefc7850f6e51ae516fd62be0b36d2310f110e01d5e88a3596",
+      "routes": [
+        "openzeppelin-skills:develop-secure-contracts",
+        "openzeppelin-skills:review-sui-contracts",
+        "openzeppelin-skills:setup-cairo-contracts",
+        "openzeppelin-skills:setup-solidity-contracts",
+        "openzeppelin-skills:setup-stellar-contracts",
+        "openzeppelin-skills:setup-stylus-contracts",
+        "openzeppelin-skills:setup-sui-contracts",
+        "openzeppelin-skills:upgrade-cairo-contracts",
+        "openzeppelin-skills:upgrade-solidity-contracts",
+        "openzeppelin-skills:upgrade-stellar-contracts",
+        "openzeppelin-skills:upgrade-stylus-contracts"
+      ],
+      "canaries": []
+    },
+    {
       "id": "ouroboros",
       "path": "overlays/ouroboros/flows/ouroboros/FLOW.md",
       "hash": "9e4e7adec15040e40f4fb4275b817fdb7cabe0f1a8aec200b14648fff3017e31",
@@ -1372,6 +1594,20 @@
       "canaries": []
     },
     {
+      "id": "pai-pro",
+      "path": "overlays/pai-pro/flows/pai-pro/FLOW.md",
+      "hash": "aff5bec854acbb170abd114ac601075ade26661b6e28e4996cf8ff4c610337cb",
+      "routes": [
+        "pai-pro:groups-compose",
+        "pai-pro:image-compose",
+        "pai-pro:script-compose",
+        "pai-pro:story-to-video-workflow",
+        "pai-pro:video-compose",
+        "pai-pro:voice-compose"
+      ],
+      "canaries": []
+    },
+    {
       "id": "paperfit",
       "path": "overlays/paperfit/flows/paperfit/FLOW.md",
       "hash": "9da4012fc6aa4cab7a1b04db6a0a83d77cd71c73b963379d6cd08730fc045807",
@@ -1384,6 +1620,41 @@
         "paperfit:template-migrator",
         "paperfit:visual-inspector",
         "paperfit:writing-polish"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "pg",
+      "path": "overlays/pg/flows/pg/FLOW.md",
+      "hash": "a61e0d207e958d192c05c6da15ac53129b63c0f4e6410d671faae8d90fb3bd97",
+      "routes": [
+        "pg:design-postgis-tables",
+        "pg:design-postgres-tables",
+        "pg:find-hypertable-candidates",
+        "pg:ghost-database",
+        "pg:migrate-postgres-tables-to-hypertables",
+        "pg:pgvector-semantic-search",
+        "pg:postgres-database-migration",
+        "pg:postgres-hybrid-text-search",
+        "pg:postgres",
+        "pg:setup-timescaledb-hypertables"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "pinecone",
+      "path": "overlays/pinecone/flows/pinecone/FLOW.md",
+      "hash": "da5e5b47174153e6959f1bf038d296a636a085d84df9a5d109f317178627a1b6",
+      "routes": [
+        "pinecone:assistant",
+        "pinecone:cli",
+        "pinecone:docs",
+        "pinecone:full-text-search",
+        "pinecone:help",
+        "pinecone:mcp",
+        "pinecone:n8n",
+        "pinecone:query",
+        "pinecone:quickstart"
       ],
       "canaries": []
     },
@@ -1486,6 +1757,56 @@
       "canaries": []
     },
     {
+      "id": "readwise",
+      "path": "overlays/readwise/flows/readwise/FLOW.md",
+      "hash": "5c94d4c160cbb2e12fae8e09fd8aa88821cfd43b21d0eaf3768982a598a86970",
+      "routes": [
+        "readwise:book-review",
+        "readwise:build-persona",
+        "readwise:feed-catchup",
+        "readwise:highlight-graph",
+        "readwise:now-reading-page",
+        "readwise:quiz",
+        "readwise:reader-recap",
+        "readwise:readwise-cli",
+        "readwise:readwise-mcp",
+        "readwise:surprise-me",
+        "readwise:triage"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "recomby-geo",
+      "path": "overlays/recomby-geo/flows/recomby-geo/FLOW.md",
+      "hash": "544037da6f897d05e61b545f9c957fd4d7f190cc3e560e08faa247650f2124ab",
+      "routes": [
+        "recomby-geo:content-quality-auditor",
+        "recomby-geo:content-writer",
+        "recomby-geo:frontend-design",
+        "recomby-geo:geo-pipeline",
+        "recomby-geo:geo-review-html",
+        "recomby-geo:internal-linking-optimizer",
+        "recomby-geo:keyword-research",
+        "recomby-geo:meta-tags-optimizer",
+        "recomby-geo:seo-geo-optimizer"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "repowire",
+      "path": "overlays/repowire/flows/repowire/FLOW.md",
+      "hash": "9bcc653dbd9428f613041b345b10bacb9ae3c6637517922104d9773f91188560",
+      "routes": [
+        "repowire:integration-test",
+        "repowire:cross-agent-plan",
+        "repowire:cross-agent-review",
+        "repowire:delegate",
+        "repowire:repowire-install",
+        "repowire:repowire-patterns"
+      ],
+      "canaries": []
+    },
+    {
       "id": "resume-builder",
       "path": "overlays/resume-builder/flows/resume-builder/FLOW.md",
       "hash": "56c482372d87cda64c4acf33e259739b465d85053a6cd9b163b51ad3ea826b4b",
@@ -1564,6 +1885,56 @@
       "canaries": []
     },
     {
+      "id": "self-media-suite",
+      "path": "overlays/self-media-suite/flows/self-media-suite/FLOW.md",
+      "hash": "60fd2df81f5d0b05dafe80472159c7f21d3ccaca8e77ab447cd44ee74e339c01",
+      "routes": [
+        "self-media-suite:self-media-content-analytics",
+        "self-media-suite:self-media-content-brief",
+        "self-media-suite:self-media-content-delivery",
+        "self-media-suite:self-media-content-strategy",
+        "self-media-suite:self-media-content-workflow",
+        "self-media-suite:self-media-platform-copywriting",
+        "self-media-suite:self-media-short-video",
+        "self-media-suite:self-media-trend-radar",
+        "self-media-suite:self-media-wechat-publisher"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "ship",
+      "path": "overlays/ship/flows/ship/FLOW.md",
+      "hash": "38db678745030958e3913e0e2b7bba3a4d6fd9b02391aecc55839b48691cc083",
+      "routes": [
+        "ship:arch-design",
+        "ship:auto",
+        "ship:design",
+        "ship:dev",
+        "ship:e2e",
+        "ship:handoff",
+        "ship:qa",
+        "ship:refactor",
+        "ship:review",
+        "ship:use-ship",
+        "ship:write-docs"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "signum",
+      "path": "overlays/signum/flows/signum/FLOW.md",
+      "hash": "aa1701fb8360b49e41b7db73ee17a5f350fc920ed89bc8c3cee14b03d46aaf34",
+      "routes": [
+        "signum:openspec-apply-change",
+        "signum:openspec-archive-change",
+        "signum:openspec-explore",
+        "signum:openspec-propose",
+        "signum:openspec-sync-specs",
+        "signum:openspec-update-change"
+      ],
+      "canaries": []
+    },
+    {
       "id": "skills",
       "path": "overlays/skills/flows/skills/FLOW.md",
       "hash": "134fcd5a65474659a7df2ccbd42f665ce959c186ec300a04bc1a623ca5e17bb0",
@@ -1595,6 +1966,36 @@
         "spec-superflow:spec-merger",
         "spec-superflow:spec-writer",
         "spec-superflow:workflow-start"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "stark",
+      "path": "overlays/stark/flows/stark/FLOW.md",
+      "hash": "141d4f79bf621b0c830ac523a5ead7998cde953dcb78b49b3519f9377c56deaa",
+      "routes": [
+        "stark:android-design",
+        "stark:apple-design",
+        "stark:cross-platform-design",
+        "stark:design-router",
+        "stark:design-tokens",
+        "stark:ux-design",
+        "stark:web-design",
+        "stark:windows-design"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "student-llm-wiki",
+      "path": "overlays/student-llm-wiki/flows/student-llm-wiki/FLOW.md",
+      "hash": "f08f0cafe8af77da7a1843df9c440951343afb52f98e2fdfabcc3612ca7b1ce8",
+      "routes": [
+        "student-llm-wiki:exam-prep",
+        "student-llm-wiki:wiki-core",
+        "student-llm-wiki:wiki-diagram",
+        "student-llm-wiki:wiki-ingest",
+        "student-llm-wiki:wiki-lint",
+        "student-llm-wiki:wiki-review"
       ],
       "canaries": []
     },
@@ -1688,6 +2089,38 @@
         "taste-skill:stitch-skill",
         "taste-skill:taste-skill-v1",
         "taste-skill:taste-skill"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "tavily",
+      "path": "overlays/tavily/flows/tavily/FLOW.md",
+      "hash": "cf77c6bb2d5915da70072296647efa9453644ba5f00a9da19ae348d4b18c4883",
+      "routes": [
+        "tavily:tavily-best-practices",
+        "tavily:tavily-cli",
+        "tavily:tavily-crawl",
+        "tavily:tavily-dynamic-search",
+        "tavily:tavily-extract",
+        "tavily:tavily-map",
+        "tavily:tavily-research",
+        "tavily:tavily-search"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "tencentdb-agent-memory",
+      "path": "overlays/tencentdb-agent-memory/flows/tencentdb-agent-memory/FLOW.md",
+      "hash": "505b582e054a2e673507ccac052be64552e6d74a7e3fb2667c283ada6da7fb26",
+      "routes": [
+        "tencentdb-agent-memory:contrib-consolidate",
+        "tencentdb-agent-memory:contrib-ingest",
+        "tencentdb-agent-memory:contrib-profile",
+        "tencentdb-agent-memory:contrib-synthesize",
+        "tencentdb-agent-memory:memory-consolidate",
+        "tencentdb-agent-memory:memory-seed",
+        "tencentdb-agent-memory:memory-view",
+        "tencentdb-agent-memory:tmem-cli"
       ],
       "canaries": []
     },
@@ -1941,6 +2374,20 @@
       "canaries": []
     },
     {
+      "id": "web-quality-skills",
+      "path": "overlays/web-quality-skills/flows/web-quality-skills/FLOW.md",
+      "hash": "6844c8f6397eed130781f6938eefd12bdb5cbbae782c425f8d532d67aec64a66",
+      "routes": [
+        "web-quality-skills:accessibility",
+        "web-quality-skills:best-practices",
+        "web-quality-skills:core-web-vitals",
+        "web-quality-skills:performance",
+        "web-quality-skills:seo",
+        "web-quality-skills:web-quality-audit"
+      ],
+      "canaries": []
+    },
+    {
       "id": "webnovel-writer",
       "path": "overlays/webnovel-writer/flows/webnovel-writer/FLOW.md",
       "hash": "364bbf8fe7ca8a368d16f0c006e6d7ae362ba1284f200316d81bf0d48be7b106",
@@ -1969,6 +2416,38 @@
         "winui:winui-setup",
         "winui:winui-ui-testing",
         "winui:winui-wpf-migration"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "woterclip",
+      "path": "overlays/woterclip/flows/woterclip/FLOW.md",
+      "hash": "ffe01755ed9f69a6e5be73306cb97135bdc96cf840e8f0bf6b0120772d93cadd",
+      "routes": [
+        "woterclip:heartbeat-log",
+        "woterclip:heartbeat",
+        "woterclip:init",
+        "woterclip:persona-create",
+        "woterclip:persona-import",
+        "woterclip:persona-list",
+        "woterclip:status"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "x-skills",
+      "path": "overlays/x-skills/flows/x-skills/FLOW.md",
+      "hash": "7068b9d72045b3355c2b8629d1cac047b24811e31403db7d5301906074517bb2",
+      "routes": [
+        "x-skills:x-audience-insights",
+        "x-skills:x-content-planner",
+        "x-skills:x-hook-extractor",
+        "x-skills:x-humanizer",
+        "x-skills:x-post-writer",
+        "x-skills:x-profile-optimizer",
+        "x-skills:x-reply-drafter",
+        "x-skills:x-repurposer",
+        "x-skills:x-thread-builder"
       ],
       "canaries": []
     },

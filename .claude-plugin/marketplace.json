@@ -344,6 +344,156 @@
       "name": "flowy-paperfit",
       "source": "./overlays/paperfit",
       "description": "Auto-invoked overlay: the OpenRaiser/PaperFit skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-web-quality-skills",
+      "source": "./overlays/web-quality-skills",
+      "description": "Auto-invoked overlay: the addyosmani/web-quality-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-forge-skills",
+      "source": "./overlays/forge-skills",
+      "description": "Auto-invoked overlay: the atlassian/forge-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-tencentdb-agent-memory",
+      "source": "./overlays/tencentdb-agent-memory",
+      "description": "Auto-invoked overlay: the baodq97/tencentdb-agent-memory skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-deadeye",
+      "source": "./overlays/deadeye",
+      "description": "Auto-invoked overlay: the deepaksinghcs14/deadeye-cc skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-stark",
+      "source": "./overlays/stark",
+      "description": "Auto-invoked overlay: the f0d010c/stark skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-firecrawl",
+      "source": "./overlays/firecrawl",
+      "description": "Auto-invoked overlay: the firecrawl/firecrawl-claude-plugin skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-evals-skills",
+      "source": "./overlays/evals-skills",
+      "description": "Auto-invoked overlay: the hamelsmu/evals-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-clone",
+      "source": "./overlays/clone",
+      "description": "Auto-invoked overlay: the HarKro753/claude-copy skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-ship",
+      "source": "./overlays/ship",
+      "description": "Auto-invoked overlay: the heliohq/ship skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-signum",
+      "source": "./overlays/signum",
+      "description": "Auto-invoked overlay: the heurema/signum skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-crypto-trading-desk",
+      "source": "./overlays/crypto-trading-desk",
+      "description": "Auto-invoked overlay: the hugoguerrap/crypto-claude-desk skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-student-llm-wiki",
+      "source": "./overlays/student-llm-wiki",
+      "description": "Auto-invoked overlay: the IssacW228/student-llm-wiki skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-comfyui-custom-nodes",
+      "source": "./overlays/comfyui-custom-nodes",
+      "description": "Auto-invoked overlay: the jtydhr88/comfyui-custom-node-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-hi-vibe",
+      "source": "./overlays/hi-vibe",
+      "description": "Auto-invoked overlay: the jx-hxxx/hi-vibe skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-openzeppelin-skills",
+      "source": "./overlays/openzeppelin-skills",
+      "description": "Auto-invoked overlay: the OpenZeppelin/openzeppelin-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-claudelint",
+      "source": "./overlays/claudelint",
+      "description": "Auto-invoked overlay: the pdugan20/claudelint skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-pinecone",
+      "source": "./overlays/pinecone",
+      "description": "Auto-invoked overlay: the pinecone-io/pinecone-claude-code-plugin skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-repowire",
+      "source": "./overlays/repowire",
+      "description": "Auto-invoked overlay: the prassanna-ravishankar/repowire skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-llmwiki",
+      "source": "./overlays/llmwiki",
+      "description": "Auto-invoked overlay: the Pratiyush/llm-wiki skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-readwise",
+      "source": "./overlays/readwise",
+      "description": "Auto-invoked overlay: the readwiseio/readwise-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-recomby-geo",
+      "source": "./overlays/recomby-geo",
+      "description": "Auto-invoked overlay: the recomby-ai/recomby-geo skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-x-skills",
+      "source": "./overlays/x-skills",
+      "description": "Auto-invoked overlay: the sergebulaev/x-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-academic-skills",
+      "source": "./overlays/academic-skills",
+      "description": "Auto-invoked overlay: the ShZhao27208/Aut_Sci_Write skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-tavily",
+      "source": "./overlays/tavily",
+      "description": "Auto-invoked overlay: the tavily-ai/skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-pg",
+      "source": "./overlays/pg",
+      "description": "Auto-invoked overlay: the timescale/pg-aiguide skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-coder-eval",
+      "source": "./overlays/coder-eval",
+      "description": "Auto-invoked overlay: the UiPath/coder_eval skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-pai-pro",
+      "source": "./overlays/pai-pro",
+      "description": "Auto-invoked overlay: the Utopai-Research/pai-pro skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-woterclip",
+      "source": "./overlays/woterclip",
+      "description": "Auto-invoked overlay: the wotai-dev/woterclip skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-cortex",
+      "source": "./overlays/cortex",
+      "description": "Auto-invoked overlay: the XBlueSky/cortexes skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-self-media-suite",
+      "source": "./overlays/self-media-suite",
+      "description": "Auto-invoked overlay: the yanhua1010/self-media-content-workflow skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }

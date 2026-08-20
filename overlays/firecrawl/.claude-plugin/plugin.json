@@ -1,0 +1,11 @@
+{
+  "name": "flowy-firecrawl",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for firecrawl/firecrawl-claude-plugin.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

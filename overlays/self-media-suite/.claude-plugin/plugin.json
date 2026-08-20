@@ -1,0 +1,11 @@
+{
+  "name": "flowy-self-media-suite",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for yanhua1010/self-media-content-workflow.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

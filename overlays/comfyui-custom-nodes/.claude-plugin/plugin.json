@@ -1,0 +1,11 @@
+{
+  "name": "flowy-comfyui-custom-nodes",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for jtydhr88/comfyui-custom-node-skills.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

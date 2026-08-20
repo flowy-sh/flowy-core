@@ -1,0 +1,11 @@
+{
+  "name": "flowy-student-llm-wiki",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for IssacW228/student-llm-wiki.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}
