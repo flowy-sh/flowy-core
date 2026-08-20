@@ -26,6 +26,11 @@
       "description": "Auto-invoked overlay: the growth-marketing funnel (research -> validate) routed to Corey Haines' marketing-skills, on the shared Flowy engine."
     },
     {
+      "name": "flowy-nextjs",
+      "source": "./overlays/nextjs",
+      "description": "Auto-invoked overlay: the Next.js Cache Components / Partial Prefetching / dev-loop skills from vercel/next.js, routed by phase, on the shared Flowy engine."
+    },
+    {
       "name": "flowy-agent-skills",
       "source": "./overlays/agent-skills",
       "description": "Auto-invoked overlay: the full SDLC routed to Addy Osmani's agent-skills, with the four rival -driven-development skills disambiguated, on the shared Flowy engine."

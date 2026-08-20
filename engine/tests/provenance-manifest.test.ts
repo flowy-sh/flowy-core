@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import {
@@ -134,9 +134,26 @@ describe("extractCanaries", () => {
 describe("buildManifest", () => {
   const manifest = buildManifest(ROOT);
 
+  // DERIVED, not frozen. This was a hardcoded four-name list, which is correct
+  // on the day it is written and silently stops covering whatever the repo
+  // grows: adding `overlays/nextjs/` broke it, and the only signal was a
+  // failure naming the four Flows that DID exist. Reading the directory is the
+  // stronger assertion, because a Flow that ships without reaching the manifest
+  // now fails forever rather than until someone remembers this array.
+  const shipped = readdirSync(join(ROOT, "overlays"), { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .sort();
+
+  test("the overlays directory was actually read", () => {
+    // An empty list would make the next test assert nothing at all.
+    expect(shipped.length).toBeGreaterThanOrEqual(4);
+    expect(shipped).toContain("superpowers");
+  });
+
   test("covers every shipped Flow", () => {
     const ids = manifest.flows.map((f) => f.id).sort();
-    expect(ids).toEqual(["agent-skills", "growth-marketing", "superpowers", "ultra-powers"]);
+    expect(ids).toEqual(shipped);
   });
 
   test("every Flow carries a hash and a non-empty route sequence", () => {

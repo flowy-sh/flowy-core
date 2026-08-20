@@ -106,6 +106,18 @@
       ]
     },
     {
+      "id": "nextjs",
+      "path": "overlays/nextjs/flows/nextjs/FLOW.md",
+      "hash": "f6e458a2cc41b416ee32d7d58f78286b50b2c75b28513a642ce3973fdcf13107",
+      "routes": [
+        "nextjs:next-cache-components-adoption",
+        "nextjs:next-cache-components-optimizer",
+        "nextjs:next-dev-loop",
+        "nextjs:next-partial-prefetching-adoption"
+      ],
+      "canaries": []
+    },
+    {
       "id": "superpowers",
       "path": "overlays/superpowers/flows/superpowers/FLOW.md",
       "hash": "b7408959852e765e465390ddc8504a05cb80e141fa5ae2ed8b89b05bc7e22791",
