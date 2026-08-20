@@ -44,6 +44,11 @@
       "name": "flowy-ouroboros",
       "source": "./overlays/ouroboros",
       "description": "Auto-invoked overlay: the Q00/ouroboros evolutionary-development skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-agentmemory",
+      "source": "./overlays/agentmemory",
+      "description": "Auto-invoked overlay: the rohitg00/agentmemory recall, capture and session-handoff skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }

@@ -45,6 +45,31 @@
       ]
     },
     {
+      "id": "agentmemory",
+      "path": "overlays/agentmemory/flows/agentmemory/FLOW.md",
+      "hash": "84044660623ca4f40f898ac240451c870b0b9d95884b32c931a1be2f1ae61a4c",
+      "routes": [
+        "agentmemory:agentmemory-agents",
+        "agentmemory:agentmemory-architecture",
+        "agentmemory:agentmemory-config",
+        "agentmemory:agentmemory-hooks",
+        "agentmemory:agentmemory-mcp-tools",
+        "agentmemory:agentmemory-rest-api",
+        "agentmemory:commit-context",
+        "agentmemory:commit-history",
+        "agentmemory:forget",
+        "agentmemory:handoff",
+        "agentmemory:lesson",
+        "agentmemory:memory-discipline",
+        "agentmemory:recall",
+        "agentmemory:recap",
+        "agentmemory:remember",
+        "agentmemory:session-history",
+        "agentmemory:write-agentmemory-skill"
+      ],
+      "canaries": []
+    },
+    {
       "id": "growth-marketing",
       "path": "overlays/growth-marketing/flows/growth-marketing/FLOW.md",
       "hash": "c3b1f174be300c4e095feeeb8403c96da1263ba41f76472d2bd7ddf69ccf1bd7",
