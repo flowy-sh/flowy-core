@@ -149,6 +149,36 @@
       "canaries": []
     },
     {
+      "id": "ouroboros",
+      "path": "overlays/ouroboros/flows/ouroboros/FLOW.md",
+      "hash": "9e4e7adec15040e40f4fb4275b817fdb7cabe0f1a8aec200b14648fff3017e31",
+      "routes": [
+        "ouroboros:auto",
+        "ouroboros:brownfield",
+        "ouroboros:cancel",
+        "ouroboros:config",
+        "ouroboros:evaluate",
+        "ouroboros:evolve",
+        "ouroboros:help",
+        "ouroboros:interview",
+        "ouroboros:ooo",
+        "ouroboros:pm",
+        "ouroboros:publish",
+        "ouroboros:qa",
+        "ouroboros:ralph",
+        "ouroboros:resume-session",
+        "ouroboros:run",
+        "ouroboros:seed",
+        "ouroboros:setup",
+        "ouroboros:status",
+        "ouroboros:tutorial",
+        "ouroboros:unstuck",
+        "ouroboros:update",
+        "ouroboros:welcome"
+      ],
+      "canaries": []
+    },
+    {
       "id": "superpowers",
       "path": "overlays/superpowers/flows/superpowers/FLOW.md",
       "hash": "b7408959852e765e465390ddc8504a05cb80e141fa5ae2ed8b89b05bc7e22791",
