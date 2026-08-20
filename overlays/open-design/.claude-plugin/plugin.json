@@ -1,0 +1,11 @@
+{
+  "name": "flowy-open-design",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for nexu-io/open-design.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}

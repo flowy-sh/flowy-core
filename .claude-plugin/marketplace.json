@@ -159,6 +159,21 @@
       "name": "flowy-taste-skill",
       "source": "./overlays/taste-skill",
       "description": "Auto-invoked overlay: the taste design-quality skills for landing pages, mobile screens and identity systems, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-ponytail",
+      "source": "./overlays/ponytail",
+      "description": "Auto-invoked overlay: the ponytail over-engineering review, audit and debt skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-ecc",
+      "source": "./overlays/ecc",
+      "description": "Auto-invoked overlay: 200 of the everything-claude-code skills spanning agents, languages, infrastructure and business, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-open-design",
+      "source": "./overlays/open-design",
+      "description": "Auto-invoked overlay: 163 design and media-generation skills covering Figma sync, decks, motion and image pipelines, routed by phase, on the shared Flowy engine."
     }
   ]
 }
