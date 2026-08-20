@@ -494,6 +494,31 @@
       "name": "flowy-self-media-suite",
       "source": "./overlays/self-media-suite",
       "description": "Auto-invoked overlay: the yanhua1010/self-media-content-workflow skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-ghost",
+      "source": "./overlays/ghost",
+      "description": "Auto-invoked overlay: the ghostsecurity/skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-gmgn-cli",
+      "source": "./overlays/gmgn-cli",
+      "description": "Auto-invoked overlay: the gmgnai/gmgn-skills skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-superml",
+      "source": "./overlays/superml",
+      "description": "Auto-invoked overlay: the Leeroo-AI/superml skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-agent-starter",
+      "source": "./overlays/agent-starter",
+      "description": "Auto-invoked overlay: the sneg55/agent-starter skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-wigtn-plugins",
+      "source": "./overlays/wigtn-plugins",
+      "description": "Auto-invoked overlay: the wigtn/wigtn-plugins skills, routed by phase, on the shared Flowy engine."
     }
   ]
 }

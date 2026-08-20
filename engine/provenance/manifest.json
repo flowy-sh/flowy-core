@@ -76,6 +76,22 @@
       ]
     },
     {
+      "id": "agent-starter",
+      "path": "overlays/agent-starter/flows/agent-starter/FLOW.md",
+      "hash": "a90eb263ae8b8924b0da38a8bde546e15f29ebde6ac09c3c9e8d21c9ce9ca843",
+      "routes": [
+        "agent-starter:adopt-project",
+        "agent-starter:commit-push-pr",
+        "agent-starter:commit",
+        "agent-starter:dream",
+        "agent-starter:new-project",
+        "agent-starter:reflect",
+        "agent-starter:remember",
+        "agent-starter:simplify"
+      ],
+      "canaries": []
+    },
+    {
       "id": "agentmemory",
       "path": "overlays/agentmemory/flows/agentmemory/FLOW.md",
       "hash": "84044660623ca4f40f898ac240451c870b0b9d95884b32c931a1be2f1ae61a4c",
@@ -1055,6 +1071,37 @@
       "canaries": []
     },
     {
+      "id": "ghost",
+      "path": "overlays/ghost/flows/ghost/FLOW.md",
+      "hash": "872ab66d421d70027a97e4a9677f88f8c5ae00b317c749400eae40f73a005d47",
+      "routes": [
+        "ghost:proxy",
+        "ghost:repo-context",
+        "ghost:report",
+        "ghost:scan-code",
+        "ghost:scan-deps",
+        "ghost:scan-secrets",
+        "ghost:validate"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "gmgn-cli",
+      "path": "overlays/gmgn-cli/flows/gmgn-cli/FLOW.md",
+      "hash": "0eaeb176e8501dbb0411c5169be5f5d61ab62e6ae8753abfe8e9e3bc406db590",
+      "routes": [
+        "gmgn-cli:gmgn-cooking",
+        "gmgn-cli:gmgn-holder-analysis",
+        "gmgn-cli:gmgn-market",
+        "gmgn-cli:gmgn-portfolio",
+        "gmgn-cli:gmgn-swap",
+        "gmgn-cli:gmgn-token",
+        "gmgn-cli:gmgn-track",
+        "gmgn-cli:gmgn-wallet-score"
+      ],
+      "canaries": []
+    },
+    {
       "id": "growth-marketing",
       "path": "overlays/growth-marketing/flows/growth-marketing/FLOW.md",
       "hash": "c3b1f174be300c4e095feeeb8403c96da1263ba41f76472d2bd7ddf69ccf1bd7",
@@ -2017,6 +2064,21 @@
       "canaries": []
     },
     {
+      "id": "superml",
+      "path": "overlays/superml/flows/superml/FLOW.md",
+      "hash": "78d3e851b5849296ae5fd0479c60b55f63a80a016692082f19926814d9264f1b",
+      "routes": [
+        "superml:ml-debug",
+        "superml:ml-experiment",
+        "superml:ml-iterate",
+        "superml:ml-plan",
+        "superml:ml-research",
+        "superml:ml-verify",
+        "superml:using-superml"
+      ],
+      "canaries": []
+    },
+    {
       "id": "superpowers",
       "path": "overlays/superpowers/flows/superpowers/FLOW.md",
       "hash": "b7408959852e765e465390ddc8504a05cb80e141fa5ae2ed8b89b05bc7e22791",
@@ -2400,6 +2462,21 @@
         "webnovel-writer:webnovel-query",
         "webnovel-writer:webnovel-review",
         "webnovel-writer:webnovel-write"
+      ],
+      "canaries": []
+    },
+    {
+      "id": "wigtn-plugins",
+      "path": "overlays/wigtn-plugins/flows/wigtn-plugins/FLOW.md",
+      "hash": "4467c51349517991b592071da11d6fd71b81524a0a4c5ad34bf962a72a53cc74",
+      "routes": [
+        "wigtn-plugins:code-review-levels",
+        "wigtn-plugins:design-system-reference",
+        "wigtn-plugins:handdrawn-diagram",
+        "wigtn-plugins:knowledge-wiki",
+        "wigtn-plugins:screen-spec",
+        "wigtn-plugins:team-memory-protocol",
+        "wigtn-plugins:wigtn-ppt"
       ],
       "canaries": []
     },

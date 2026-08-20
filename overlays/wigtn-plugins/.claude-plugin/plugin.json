@@ -1,0 +1,11 @@
+{
+  "name": "flowy-wigtn-plugins",
+  "version": "1.2.1",
+  "description": "Auto-invoked overlay for wigtn/wigtn-plugins.",
+  "dependencies": [
+    {
+      "name": "flowy-core",
+      "version": "^1.0.0"
+    }
+  ]
+}
