@@ -330,3 +330,79 @@ export function checkFlowRules(text) {
     ...checkClaimedCounts(text),
   ];
 }
+
+function refPairsIn(text) {
+  return [...text.matchAll(SKILL_REF)].map((m) => [m[0], m[1], m[2]]);
+}
+
+/**
+ * R8: a routed slug must exist in the target plugin.
+ *
+ * EVERY OTHER RULE IN THIS FILE CHECKS A FLOW.md AGAINST ITSELF. Section order,
+ * route verbs, orphan skills, claimed counts: all of them read one file and
+ * compare it to its own contents. None can see the plugin the routes point at,
+ * and a route to a slug that upstream renamed produces NO error at runtime. The
+ * skill simply never fires, which is indistinguishable from the model deciding
+ * not to route. That silence is why this has to be a build-time check.
+ *
+ * `checkClaimedCounts` is the sharpest illustration: mem0's FLOW.md claims "It
+ * ships 25" and passed, because the claim was compared against the file's own
+ * routed list (23 + 2). The plugin ships 17.
+ *
+ * Measured 2026-08-23 over the 7 overlays whose target was installed locally:
+ * compound-engineering 23 of 32 routes dead, mem0 7 of 23, the other five clean.
+ *
+ * ⛔ AN UNINSTALLED NAMESPACE IS AN ERROR, NOT A PASS. Returning `[]` for a
+ * plugin we cannot see is the same silent-zero that let 102 overlays drift
+ * unchecked, so it is reported in its own words. A caller that wants to tolerate
+ * unverifiable namespaces must say so explicitly by filtering; it cannot get
+ * that behaviour by accident.
+ *
+ * @param {string} text            the FLOW.md source
+ * @param {Record<string,string[]>} skillsByNs  namespace -> installed slugs
+ * @returns {string[]} errors
+ */
+export function checkRoutesResolve(text, skillsByNs) {
+  if (!skillsByNs || typeof skillsByNs !== "object") {
+    throw new TypeError(
+      "checkRoutesResolve needs a skill map ({ namespace: [slug, ...] }). " +
+        "An absent map must not return a clean pass: that silence is the defect this rule exists to catch.",
+    );
+  }
+  const installed = new Map();
+  for (const [ns, slugs] of Object.entries(skillsByNs)) installed.set(ns, new Set(slugs));
+
+  const errors = [];
+  const seen = new Set();
+  let inFence = false;
+  for (const [i, line] of normalizeLines(text).entries()) {
+    if (FENCE.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    // SCOPED TO THE FENCE, like checkRouteVerbs. Prose names skills to explain
+    // them, and demanding those resolve is how a checker earns its suppression.
+    if (!inFence) continue;
+    if (!isRouteLine(line)) continue;
+    const after = line.split(ARROW).slice(1).join(" ");
+    for (const [ref, ns, slug] of refPairsIn(after)) {
+      if (seen.has(ref)) continue;
+      seen.add(ref);
+      const set = installed.get(ns);
+      if (!set) {
+        errors.push(
+          `line ${i + 1}: cannot verify "${ref}" - plugin "${ns}" is not installed. ` +
+            "An unverified route is not a passing one.",
+        );
+        continue;
+      }
+      if (!set.has(slug)) {
+        errors.push(
+          `line ${i + 1}: route to "${ref}" is DEAD - "${ns}" installs no skill "${slug}". ` +
+            "A dead route fires nothing and reports nothing.",
+        );
+      }
+    }
+  }
+  return errors;
+}
