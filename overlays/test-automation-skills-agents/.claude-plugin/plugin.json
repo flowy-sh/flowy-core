@@ -1,6 +1,6 @@
 {
   "name": "flowy-test-automation-skills-agents",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Auto-invoked overlay for fugazi/test-automation-skills-agents.",
   "dependencies": [
     {

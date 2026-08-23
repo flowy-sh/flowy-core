@@ -1,6 +1,6 @@
 {
   "name": "flowy-kotlin-agent-skills",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Auto-invoked overlay for kotlin/kotlin-agent-skills.",
   "dependencies": [
     {

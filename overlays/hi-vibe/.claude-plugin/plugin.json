@@ -1,6 +1,6 @@
 {
   "name": "flowy-hi-vibe",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Auto-invoked overlay for jx-hxxx/hi-vibe.",
   "dependencies": [
     {
