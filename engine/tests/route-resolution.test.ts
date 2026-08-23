@@ -94,6 +94,20 @@ describe("checkRoutesResolve — R8, a route must resolve to an installed skill"
     expect(() => checkRoutesResolve(text)).toThrow(/skill map/i);
   });
 
+  /* ⚠ A NAMESPACE'S CASE IS THE PLUGIN AUTHOR'S CHOICE, NOT OURS. `ReVa` routes
+     `ReVa:binary-triage` while a cache directory or manifest may spell the same
+     plugin `reva`. Matching case-sensitively does not produce a WRONG answer -
+     it reports "cannot verify" - but it silently demotes a checkable overlay to
+     an unverifiable one, and an overlay nobody checks is how this whole class
+     of drift survived. */
+  test("resolves a namespace whose case differs from the installed spelling", () => {
+    const text = flowWithRoutes(["ReVa:binary-triage"]);
+
+    const errors = checkRoutesResolve(text, { reva: ["binary-triage"] });
+
+    expect(errors).toEqual([]);
+  });
+
   /* Scoped to the fence, exactly like checkRouteVerbs. Prose names skills for
      explanation ("`ai-seo` targets LLM citation") and demanding those resolve
      is how a checker earns its own suppression. */

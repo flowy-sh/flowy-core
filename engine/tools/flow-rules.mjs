@@ -369,8 +369,14 @@ export function checkRoutesResolve(text, skillsByNs) {
         "An absent map must not return a clean pass: that silence is the defect this rule exists to catch.",
     );
   }
+  /* Keyed LOWERCASE. A namespace's case belongs to the plugin author - `ReVa`
+     routes `ReVa:binary-triage` while a cache directory may spell it `reva` -
+     and matching case-sensitively does not give a wrong answer so much as a
+     useless one: it demotes a checkable overlay to "cannot verify", and an
+     overlay nobody checks is how this class of drift survived in the first
+     place. Slugs stay EXACT; only the namespace is folded. */
   const installed = new Map();
-  for (const [ns, slugs] of Object.entries(skillsByNs)) installed.set(ns, new Set(slugs));
+  for (const [ns, slugs] of Object.entries(skillsByNs)) installed.set(ns.toLowerCase(), new Set(slugs));
 
   const errors = [];
   const seen = new Set();
@@ -388,7 +394,7 @@ export function checkRoutesResolve(text, skillsByNs) {
     for (const [ref, ns, slug] of refPairsIn(after)) {
       if (seen.has(ref)) continue;
       seen.add(ref);
-      const set = installed.get(ns);
+      const set = installed.get(ns.toLowerCase());
       if (!set) {
         errors.push(
           `line ${i + 1}: cannot verify "${ref}" - plugin "${ns}" is not installed. ` +
