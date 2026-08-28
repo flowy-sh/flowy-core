@@ -1,6 +1,6 @@
 # FLOW.md: gmgnai/gmgn-skills
 
-> Routes all 8 skills from `gmgnai/gmgn-skills` so the right one fires at the right phase.
+> Routes all 9 skills from `gmgnai/gmgn-skills` so the right one fires at the right phase.
 
 ## Routing
 
@@ -10,6 +10,7 @@
 USER MESSAGE
   ├─ about to create and launch a brand new coin on a bonding curve venue, or asked how many launches a venue has produced?  → invoke gmgn-cli:gmgn-cooking   gate: the user confirms in writing before any launch is broadcast
   ├─ about to judge whether one coin supply is concentrated in whale, sniper, bundler or insider wallets?  → invoke gmgn-cli:gmgn-holder-analysis   gate: a chip distribution and entry cost breakdown with a structural rating is on screen
+  ├─ about to classify a token's candles into a named chart pattern and score it, rather than just pull the raw candle numbers?  → invoke gmgn-cli:gmgn-kline-pattern   gate: a named pattern with a 0-100 score and each point's stated reason is returned
   ├─ about to answer which coins are trending, newly launched or most searched, or to pull candlestick history for a chain?  → invoke gmgn-cli:gmgn-market   gate: a ranked board or an OHLCV series for the named chain is returned
   ├─ about to evaluate one address for holdings, realized and unrealized profit and loss, win rate or its launch history?  → invoke gmgn-cli:gmgn-portfolio   gate: per address performance stats for the given chain are printed
   ├─ about to place a buy, a sell, a limit order, a stop loss, a take profit or a batch order across several wallets?  → invoke gmgn-cli:gmgn-swap   gate: the user confirms in writing before any order is submitted

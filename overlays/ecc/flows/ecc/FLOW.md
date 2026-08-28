@@ -10,7 +10,6 @@
 
 ```
 USER MESSAGE
-  ├─ about to commit changes to a JavaScript project that uses conventional commit messages?  → invoke ecc:everything-claude-code   gate: the commit message follows the conventional commits format used by the project
   ├─ about to implement or audit a user interface so people using assistive technology can use it?  → invoke ecc:accessibility   gate: the component was checked against WCAG 2.2 Level AA success criteria
   ├─ about to diagnose why an agent or LLM application is misbehaving across its whole stack rather than one function?  → invoke ecc:agent-architecture-audit   gate: a severity-ranked findings report spanning the agent stack layers exists
   ├─ about to compare several coding agents against each other on the same custom task?  → invoke ecc:agent-eval   gate: a table of pass rate, cost, time, and consistency exists per agent
@@ -146,12 +145,9 @@ USER MESSAGE
   ├─ needing to draft a cold email, warm intro, or follow up message to a potential investor?  → invoke ecc:investor-outreach   gate: a personalized outreach message is drafted for a specific named contact
   ├─ needing app icon image files created for an iOS Xcode asset catalog?  → invoke ecc:ios-icon-gen   gate: image files are produced at every required icon size for the asset catalog
   ├─ a subagent keeps running out of useful context because a first pass retrieved too much or too little?  → invoke ecc:iterative-retrieval   gate: context is gathered in progressively refined passes rather than one large fetch
-  ├─ comparing a prediction market basket against your own existing notes, portfolio, or watchlist for gaps?  → invoke ecc:ito-basket-compare   gate: a read only comparison lists where the basket diverges from the existing position or thesis
+  ├─ working with a prediction market basket — researching it, comparing it against an existing position, or drafting the steps for a possible trade?  → invoke ecc:ito-baskets   gate: a source grounded basket worksheet exists, with no order submitted
   ├─ needing to find available GPU capacity or submit a compute rental request?  → invoke ecc:ito-compute   gate: an inventory query or rate request is executed through the real compute command line tool
-  ├─ designing the architecture of a research agent for market discovery rather than running basket research directly?  → invoke ecc:ito-data-atlas-agent   gate: an agent design exists with source grounded retrieval, not yet wired to live execution
   ├─ GPU compute has already been booked and now checking whether a model serving endpoint is available on it?  → invoke ecc:ito-inference   gate: a confirmed serving manifest is handed off only once the endpoint is verified live
-  ├─ researching market events, venues, or liquidity conditions rather than comparing to an existing portfolio?  → invoke ecc:ito-market-intelligence   gate: a source grounded briefing on the event or venue exists with citations
-  ├─ drafting the steps and constraints for a possible trade without placing an actual order?  → invoke ecc:ito-trade-planner   gate: a worksheet lists venues, prerequisites, and manual steps with no order submitted
   ├─ GPU compute has already been booked and the user now wants to run a training or fine tuning job on it?  → invoke ecc:ito-training   gate: a training job is launched against the existing booking record
   ├─ writing Java code for a Spring Boot or Quarkus service and unsure of the project naming or exception conventions?  → invoke ecc:java-coding-standards   gate: the code matches the framework specific naming and exception conventions automatically
   ├─ needing to read, update, or transition a Jira ticket as part of the current task?  → invoke ecc:jira-integration   gate: the ticket status or comment changes through the real API rather than being described only

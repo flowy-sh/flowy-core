@@ -1,6 +1,6 @@
 # FLOW.md: microsoft/azure-skills
 
-> Routes all 37 skills from `microsoft/azure-skills` so the right one fires at the right phase.
+> Routes all 38 skills from `microsoft/azure-skills` so the right one fires at the right phase.
 
 ## Routing
 
@@ -25,6 +25,7 @@ USER MESSAGE
   ├─ an Azure production service is failing or degraded and needs triage?  → invoke azure:azure-diagnostics   gate: a resource health or AppLens diagnostic finding names the root cause
   ├─ designing a multi-resource enterprise Azure topology across networking, identity, and security?  → invoke azure:azure-enterprise-infra-planner   gate: Bicep or Terraform is generated to match the WAF-aligned design
   ├─ planning or standing up a production AKS cluster from scratch?  → invoke azure:azure-kubernetes   gate: the Day-0 checklist is complete and the cluster SKU and networking are chosen
+  ├─ have a running AKS cluster already and need an existing web app or API containerized and deployed onto it?  → invoke azure:azure-kubernetes-app-deploy   gate: the app is deployed to the cluster and passes AKS Deployment Safeguards
   ├─ checking whether an existing AKS Standard workload can move to AKS Automatic?  → invoke azure:azure-kubernetes-automatic-readiness   gate: a readiness report lists incompatibilities and generated fixes
   ├─ digging through large volumes of logs or telemetry to find a pattern or anomaly?  → invoke azure:azure-kusto   gate: a KQL query ran against the ADX cluster and returned results
   ├─ a message queue or event hub client is throwing connection or auth errors and needs SDK level debugging?  → invoke azure:azure-messaging   gate: the SDK connection or auth error is identified and resolved

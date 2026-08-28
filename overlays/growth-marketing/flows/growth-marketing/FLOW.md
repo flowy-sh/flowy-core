@@ -18,7 +18,7 @@ plan, or the post first and invoke afterwards. **Producing the artifact when a t
 and you did not invoke is a VIOLATION, not a shortcut.** Naming the skill in your reply is not
 invoking it: invoking means an actual Skill tool call you can point at.
 
-All **47** installed skills are routed below. Every one carries a state-based trigger, because a
+All **49** installed skills are routed below. Every one carries a state-based trigger, because a
 skill worth naming is worth a condition, and a name without a condition is an index entry with
 nothing to match against.
 
@@ -55,6 +55,7 @@ USER MESSAGE
   │    ├─ about to submit to directories or listing sites?     → invoke marketing-skills:directory-submissions gate: the per-site description variants
   │    ├─ about to partner for a shared audience?              → invoke marketing-skills:co-marketing          gate: what each side gives and gets
   │    ├─ about to post into a community you did not build?    → invoke marketing-skills:community-marketing   gate: the 90/10 contribution record
+  │    ├─ about to run a creator, influencer, or ambassador partnership?  → invoke marketing-skills:influencer-marketing   gate: the partner brief, deal structure, and disclosure compliance are set before content goes live
   │    ├─ about to ask existing users to bring others?         → invoke marketing-skills:referrals             gate: the two-sided incentive
   │    └─ about to write or fix an app-store listing?          → invoke marketing-skills:aso                   gate: title, subtitle, keyword set
   │
@@ -90,6 +91,7 @@ USER MESSAGE
   │
   ├─ MEASURE AND KEEP.
   │    ├─ about to define, read, or trust a growth number?     → invoke marketing-skills:analytics             gate: the metric defined, with its source
+  │    ├─ dashboards disagree about which channel drove a conversion, or an attribution model needs choosing?  → invoke marketing-skills:attribution   gate: the model is named and the conflicting numbers are reconciled
   │    ├─ about to change the funnel model or lead lifecycle?  → invoke marketing-skills:revops                gate: the stage definitions
   │    └─ about to address churn, cancels, or failed payments? → invoke marketing-skills:churn-prevention      gate: the churn reason, evidenced
   │

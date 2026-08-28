@@ -133,7 +133,12 @@ Validate (ultra-powers:office-hours / ultra-powers:ce-ideate) → Design (ultra-
 
 ## Attribution
 
-Composed skills (each retains its upstream LICENSE + attribution; nothing here is claimed as original — the routing is the original work):
+All 40 skills are vendored and published as one installable plugin at
+https://github.com/MaximoCorrea1/ultra-powers (MIT) — the repository this routing resolves
+against. Composed skills (each retains its upstream LICENSE + attribution; nothing here is
+claimed as original — the routing is the original work). Each skill's ORIGINAL upstream
+source, credited below, is where its content was authored before being vendored into that
+repo:
 - **superpowers** — Jesse Vincent (obra), MIT — `brainstorming`, `writing-plans`, `test-driven-development`, `systematic-debugging`, `verification-before-completion`, `requesting-code-review`, `receiving-code-review`, `using-git-worktrees`, `finishing-a-development-branch`, `dispatching-parallel-agents`
 - **compound-engineering** — EveryInc, MIT — `ce-ideate`, `ce-brainstorm`, `ce-plan`, `ce-work`, `ce-debug`, `ce-review`, `ce-demo-reel`, `git-commit-push-pr`, `ce-compound`
 - **gstack** — Garry Tan, MIT — `office-hours`, `plan-ceo-review`, `plan-eng-review`, `plan-devex-review`, `autoplan`, `review`, `cso`, `document-generate`, `retro` (pure-markdown skills only; gstack's daemon-bound skills are excluded)
