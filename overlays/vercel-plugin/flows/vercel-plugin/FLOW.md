@@ -1,6 +1,6 @@
 # FLOW.md: vercel-labs/vercel-plugin
 
-> Routes all 40 skills from `vercel-labs/vercel-plugin` so the right one fires at the right phase.
+> Routes all 42 skills from `vercel-labs/vercel-plugin` so the right one fires at the right phase.
 
 ## Routing
 
@@ -21,8 +21,10 @@ USER MESSAGE
   ├─ about to build a new resumable process that must survive restarts, pause for external events, or retry on failure?  → invoke vercel-plugin:upstream   gate: the process resumes correctly after a simulated restart
   ├─ about to implement user sign in and sign up for a web application?  → invoke vercel-plugin:auth   gate: sign in and sign up flows work through the configured identity provider
   ├─ setting up or repairing a repository that depends on linked databases, identity providers, or other managed integrations?  → invoke vercel-plugin:bootstrap   gate: linking, environment pulls, and first run dev commands complete without manual steps
+  ├─ asked generically to build, scaffold, or architect an AI agent with no framework named yet?  → invoke vercel-plugin:build-agents   gate: a specific agent framework or approach was chosen before any code was written
   ├─ debugging why a deployment serves stale content or shows an unexpected cache hit rate?  → invoke vercel-plugin:cdn-caching   gate: the per request cache reason and prerender state are identified
   ├─ about to build a bot that must work across slack, telegram, discord, or another chat platform from one codebase?  → invoke vercel-plugin:chat-sdk   gate: the bot is implemented with a shared adapter based chat library
+  ├─ planning a new API or backend and unsure whether it should be Functions, Services, containers, Workflow, or Queues?  → invoke vercel-plugin:create-a-backend   gate: a specific backend architecture is chosen and named before scaffolding starts
   ├─ about to deploy, promote, roll back, or inspect a build, or configure a continuous integration pipeline definition file?  → invoke vercel-plugin:deployments-cicd   gate: the deployment or ci pipeline completes in the expected state
   ├─ working with dotenv files, command line environment pulls, oidc tokens, or environment specific configuration values?  → invoke vercel-plugin:env-vars   gate: the configuration value is present in the correct deployment environment
   ├─ creating, editing, or debugging a durable ai agent that needs a filesystem first runtime with durable sessions?  → invoke vercel-plugin:eve   gate: the agent session persists across a restart using the durable runtime

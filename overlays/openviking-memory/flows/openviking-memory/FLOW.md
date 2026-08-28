@@ -1,6 +1,6 @@
 # FLOW.md: volcengine/openviking
 
-> Routes all 8 skills from `volcengine/openviking` so the right one fires at the right phase.
+> Routes all 9 skills from `volcengine/openviking` so the right one fires at the right phase.
 
 ## Routing
 
@@ -12,6 +12,7 @@ USER MESSAGE
   ├─ about to clone or download from a remote code host while the direct connection here is slow or unreliable?  → invoke openviking-memory:github-proxy   gate: a proxy mirror address is used instead of the direct host and the transfer completes
   ├─ about to inspect or act on an issue, pull request, or continuous integration run on a hosted code repository?  → invoke openviking-memory:github   gate: a command line call against the hosting platform returns or updates the issue, pull request, or run
   ├─ about to check on or manage the status of a background coding agent job through its helper scripts?  → invoke openviking-memory:opencode   gate: a helper script reports or updates the running job status
+  ├─ starting a substantive task where prior decisions or context could matter, or need to persist a durable fact, preference, or lesson for later?  → invoke openviking-memory:openviking-memory   gate: prior knowledge was recalled before work began, or a durable fact was persisted after it
   ├─ about to design, structure, or package a new or updated agent capability with its own scripts and references?  → invoke openviking-memory:skill-creator   gate: a capability definition file and its supporting scripts or references are created or edited
   ├─ about to condense or pull the key points out of a long url, recording, or transcript?  → invoke openviking-memory:summarize   gate: a short condensed version of the source material is produced
   ├─ about to remote control an interactive command line session running inside a persistent terminal multiplexer?  → invoke openviking-memory:tmux   gate: keystrokes are sent into the terminal pane and its output is read back
