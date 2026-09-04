@@ -227,7 +227,7 @@
     {
       "id": "azure",
       "path": "overlays/azure/flows/azure/FLOW.md",
-      "hash": "5f473f960058b4e26cb4fcce5d9062cd71644887b820a697a8d9c3b81fdacbb2",
+      "hash": "8ca44ea9593a020f2c1d06eb988d3d163bf7410a902ff7c2ef7626d5767beaa5",
       "routes": [
         "azure:airunway-aks-setup",
         "azure:appinsights-instrumentation",
@@ -246,6 +246,7 @@
         "azure:azure-diagnostics",
         "azure:azure-enterprise-infra-planner",
         "azure:azure-kubernetes",
+        "azure:azure-kubernetes-app-deploy",
         "azure:azure-kubernetes-automatic-readiness",
         "azure:azure-kusto",
         "azure:azure-messaging",
@@ -607,29 +608,31 @@
     {
       "id": "compound-engineering",
       "path": "overlays/compound-engineering/flows/compound-engineering/FLOW.md",
-      "hash": "a6a86011905ad5d32ff72b3b43f7e7a60830df8128b975fd7ec805a0960eaf86",
+      "hash": "8a9a1b9d72f70d5d1dd087bac35a5975ef3da8516b5dc6d6a5bca744e20e3143",
       "routes": [
         "compound-engineering:ce-brainstorm",
-        "compound-engineering:ce-review",
-        "compound-engineering:git-commit-push-pr",
-        "compound-engineering:git-commit",
+        "compound-engineering:ce-code-review",
+        "compound-engineering:ce-commit-push-pr",
+        "compound-engineering:ce-commit",
         "compound-engineering:ce-compound-refresh",
         "compound-engineering:ce-compound",
         "compound-engineering:ce-debug",
-        "compound-engineering:document-review",
+        "compound-engineering:ce-doc-review",
         "compound-engineering:ce-ideate",
         "compound-engineering:ce-plan",
-        "compound-engineering:proof",
-        "compound-engineering:resolve-pr-feedback",
+        "compound-engineering:ce-proof",
+        "compound-engineering:ce-resolve-pr-feedback",
         "compound-engineering:ce-setup",
-        "compound-engineering:test-browser",
-        "compound-engineering:test-xcode",
+        "compound-engineering:ce-test-browser",
+        "compound-engineering:ce-test-xcode",
         "compound-engineering:ce-work",
-        "compound-engineering:git-worktree",
+        "compound-engineering:ce-worktree",
         "compound-engineering:lfg",
-        "compound-engineering:ce-demo-reel",
-        "compound-engineering:ce-sessions",
-        "compound-engineering:ce-slack-research"
+        "compound-engineering:ce-babysit-pr",
+        "compound-engineering:ce-prototype",
+        "compound-engineering:ce-simplify-code",
+        "compound-engineering:ce-pov",
+        "compound-engineering:ce-handoff"
       ],
       "canaries": []
     },
@@ -751,9 +754,8 @@
     {
       "id": "ecc",
       "path": "overlays/ecc/flows/ecc/FLOW.md",
-      "hash": "87dc1c7c225f8ce6d42a236ad2341395edd4fbc530fe08f6e082854aba890e5a",
+      "hash": "44b9033fe98363bcc6dd6d1b3ca5dd0b8d7c79181b5c5875e22bcf71435a8f87",
       "routes": [
-        "ecc:everything-claude-code",
         "ecc:accessibility",
         "ecc:agent-architecture-audit",
         "ecc:agent-eval",
@@ -889,12 +891,9 @@
         "ecc:investor-outreach",
         "ecc:ios-icon-gen",
         "ecc:iterative-retrieval",
-        "ecc:ito-basket-compare",
+        "ecc:ito-baskets",
         "ecc:ito-compute",
-        "ecc:ito-data-atlas-agent",
         "ecc:ito-inference",
-        "ecc:ito-market-intelligence",
-        "ecc:ito-trade-planner",
         "ecc:ito-training",
         "ecc:java-coding-standards",
         "ecc:jira-integration",
@@ -1077,10 +1076,11 @@
     {
       "id": "gmgn-cli",
       "path": "overlays/gmgn-cli/flows/gmgn-cli/FLOW.md",
-      "hash": "0eaeb176e8501dbb0411c5169be5f5d61ab62e6ae8753abfe8e9e3bc406db590",
+      "hash": "b9abe7d6d8ed3985f396ee2ce7e391ffd47a72135bfdee587b7c1e2975c7efef",
       "routes": [
         "gmgn-cli:gmgn-cooking",
         "gmgn-cli:gmgn-holder-analysis",
+        "gmgn-cli:gmgn-kline-pattern",
         "gmgn-cli:gmgn-market",
         "gmgn-cli:gmgn-portfolio",
         "gmgn-cli:gmgn-swap",
@@ -1093,7 +1093,7 @@
     {
       "id": "growth-marketing",
       "path": "overlays/growth-marketing/flows/growth-marketing/FLOW.md",
-      "hash": "c3b1f174be300c4e095feeeb8403c96da1263ba41f76472d2bd7ddf69ccf1bd7",
+      "hash": "abd3327f9056c72949a7db26461a6c58e524cf59db179226a31634f216b735d4",
       "routes": [
         "marketing-skills:product-marketing",
         "marketing-skills:customer-research",
@@ -1114,6 +1114,7 @@
         "marketing-skills:directory-submissions",
         "marketing-skills:co-marketing",
         "marketing-skills:community-marketing",
+        "marketing-skills:influencer-marketing",
         "marketing-skills:referrals",
         "marketing-skills:aso",
         "marketing-skills:content-strategy",
@@ -1139,6 +1140,7 @@
         "marketing-skills:marketing-council",
         "marketing-skills:launch",
         "marketing-skills:analytics",
+        "marketing-skills:attribution",
         "marketing-skills:revops",
         "marketing-skills:churn-prevention",
         "marketing-skills:ab-testing"
@@ -1373,16 +1375,14 @@
     {
       "id": "onchainos-skills",
       "path": "overlays/onchainos-skills/flows/onchainos-skills/FLOW.md",
-      "hash": "c9669cef4f0e057c4748488c0c5c8f472397e72269c74f35b3665a61578ff9c7",
+      "hash": "2607e59c82f225e9021fcc14fad5258f102409661fed9b434c12857fc7a5d48d",
       "routes": [
-        "onchainos-skills:okx-activity",
         "onchainos-skills:okx-agent-payments-protocol",
         "onchainos-skills:okx-agentic-wallet",
         "onchainos-skills:okx-ai",
         "onchainos-skills:okx-dapp-discovery",
         "onchainos-skills:okx-defi",
         "onchainos-skills:okx-dex-market",
-        "onchainos-skills:okx-growth-competition",
         "onchainos-skills:okx-guide"
       ],
       "canaries": []
@@ -1561,12 +1561,13 @@
     {
       "id": "openviking-memory",
       "path": "overlays/openviking-memory/flows/openviking-memory/FLOW.md",
-      "hash": "347e807a24c1291124f590d174da2fba5acb2e3ac3575fdba5c3ff44b3dbf5d1",
+      "hash": "23121e335bec0ab20d724bc0c542d6c1536559f6855226a3773205e7f0ba4112",
       "routes": [
         "openviking-memory:cron",
         "openviking-memory:github-proxy",
         "openviking-memory:github",
         "openviking-memory:opencode",
+        "openviking-memory:openviking-memory",
         "openviking-memory:skill-creator",
         "openviking-memory:summarize",
         "openviking-memory:tmux",
@@ -2103,14 +2104,17 @@
     {
       "id": "superset",
       "path": "overlays/superset/flows/superset/FLOW.md",
-      "hash": "17fb4affd39235b42e33046c55611b269df6a818d102f73a1e295bbf3ac5feb0",
+      "hash": "088e01d9ef195d05a80ce0cf555e88e5da32b3f31f27c49b05b08341daf410aa",
       "routes": [
         "superset:10x",
         "superset:automate",
+        "superset:browser",
+        "superset:computer",
         "superset:contribute",
         "superset:doctor",
         "superset:feedback",
         "superset:orchestrate",
+        "superset:page",
         "superset:setup",
         "superset:standup"
       ],
@@ -2189,7 +2193,7 @@
     {
       "id": "ultra-powers",
       "path": "overlays/ultra-powers/flows/ultra-powers/FLOW.md",
-      "hash": "b3357b14a03c794e0ce1dc8e76be6e84e279cf2ccc7beb67fc458fa8cf28e4a8",
+      "hash": "90f4e848d09e8baeb361e9e47bcc84b4229a8fd835c246a755db1e9271d76108",
       "routes": [
         "ultra-powers:office-hours",
         "ultra-powers:ce-ideate",
@@ -2345,7 +2349,7 @@
     {
       "id": "vercel-plugin",
       "path": "overlays/vercel-plugin/flows/vercel-plugin/FLOW.md",
-      "hash": "5930d4c1ed8e55149a984bc21cbf1a191fd70b0d4209a87f34f503433fbdd4e2",
+      "hash": "93a30e7114be32763259248cbc7bc2e8dccd570c68a753e2349c7c5d1775d8f9",
       "routes": [
         "vercel-plugin:benchmark-agents",
         "vercel-plugin:benchmark-e2e",
@@ -2360,8 +2364,10 @@
         "vercel-plugin:upstream",
         "vercel-plugin:auth",
         "vercel-plugin:bootstrap",
+        "vercel-plugin:build-agents",
         "vercel-plugin:cdn-caching",
         "vercel-plugin:chat-sdk",
+        "vercel-plugin:create-a-backend",
         "vercel-plugin:deployments-cicd",
         "vercel-plugin:env-vars",
         "vercel-plugin:eve",
