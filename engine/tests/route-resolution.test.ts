@@ -124,16 +124,40 @@ describe("checkRoutesResolve — R8, a route must resolve to an installed skill"
 });
 
 /* ============================================================
-   REGRESSION PIN, 2026-08-23.
+   REGRESSION PIN, 2026-08-23 — ⛔ CORRECTED 2026-09-04.
 
-   The two overlays repaired that day. This asserts the specific
-   slugs that were dead can never come back, and it needs no
-   plugin installed to do it, so it holds on any machine and in
-   CI where check-routes.mjs can only report UNVERIFIABLE.
+   The DESIGN was right: a pin that needs no plugin installed
+   holds on any machine and in CI, where check-routes.mjs can
+   only report UNVERIFIABLE. The DATA was not.
 
-   Anti-vacuity: each file must still contain real routes. A
-   moved or emptied file would otherwise satisfy every
-   not-to-contain below while proving nothing.
+   ⛔ The frozen "dead" list came from a measurement against the
+   locally INSTALLED plugin cache. That cache predates upstream's
+   rename, so it reported CURRENT names as dead. Verified against
+   the live GitHub API on 2026-09-04:
+
+     everyinc/compound-engineering-plugin ships 33 skills, and
+     ALL 23 slugs this pin froze as dead are ALIVE among them.
+     23 routed + 10 unrouted = 33 reconciles exactly.
+
+   So this test was forbidding routes to skills that exist, and
+   it went red the moment the overlay was corrected to match
+   upstream. A test that encodes an expired fact as a requirement
+   does not protect the file; it holds it at the old reality.
+
+   ⭐ THE LESSON, AND WHY THE LIST IS GONE RATHER THAN UPDATED:
+   "which slugs are dead upstream" is a property UPSTREAM OWNS
+   and changes without telling us. It is not freezable. What this
+   repo owns, and what is asserted below, is that the file still
+   carries real routes. LIVENESS is resolved by check-drift.ts in
+   the marketplace repo, which reads the live crawled manifest —
+   not by a list, and not by check-routes.mjs, which reads the
+   same stale cache that produced this error.
+
+   ⚠ mem0's list is LEFT ALONE deliberately. Its upstream skills
+   are not under mem0ai/mem0's /skills directory (6 there against
+   17+ routed), so the probe that cleared compound-engineering
+   cannot clear mem0, and an unverified edit is how this bug got
+   here. It stays pinned until someone measures it properly.
    ============================================================ */
 describe("repaired overlays stay repaired", () => {
   const cases = [
@@ -151,14 +175,10 @@ describe("repaired overlays stay repaired", () => {
       overlay: "compound-engineering",
       file: "overlays/compound-engineering/flows/compound-engineering/FLOW.md",
       ns: "compound-engineering",
-      dead: [
-        "ce-babysit-pr", "ce-code-review", "ce-commit-push-pr", "ce-commit",
-        "ce-doc-review", "ce-dogfood", "ce-explain", "ce-handoff", "ce-optimize",
-        "ce-polish", "ce-pov", "ce-product-pulse", "ce-promote", "ce-proof",
-        "ce-resolve-pr-feedback", "ce-retune", "ce-riffrec-feedback-analysis",
-        "ce-simplify-code", "ce-strategy", "ce-sweep", "ce-test-browser",
-        "ce-test-xcode", "ce-worktree",
-      ],
+      /* EMPTY, and that is the correction. Every slug this list held is alive
+         upstream (verified 2026-09-04). The anti-vacuity floor below is the
+         real assertion and it still fires. */
+      dead: [],
       minRoutes: 21,
     },
   ];

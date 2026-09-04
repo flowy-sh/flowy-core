@@ -1,6 +1,6 @@
 # FLOW.md: affaan-m/ecc
 
-> Routes 200 skills from `affaan-m/ECC` so the right one fires at the right phase.
+> Routes 196 skills from `affaan-m/ECC` so the right one fires at the right phase.
 >
 > The stored index is at a cap, so this plugin ships more than are listed here.
 
