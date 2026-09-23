@@ -6,8 +6,10 @@
 #   * the hook + GC `. "$(dirname "$0")/flowy-paths.sh"` then call the functions.
 #   * tests source the helper path explicitly (the helper is $1):
 #       sh -c '. "$1"; flowy_state_dir "$2" "$3"' _ <helper-path> <projdir> <pluginroot>
-#   * the activator passes the plugin root and builds the helper path from it:
-#       sh -c '. "$1/hooks/flowy-paths.sh"; flowy_state_dir "${CLAUDE_PROJECT_DIR:-$2}" "$1"' _ <plugin-root> <projdir>
+#   * the activator passes the plugin root and builds the helper path from it,
+#     as NAMED env vars (a SKILL.md cannot carry the shell's positionals: the skill
+#     loader rewrites dollar-digit tokens with the skill's arguments first):
+#       FLOWY_PLUGIN_ROOT=<plugin-root> FLOWY_PROJECT_DIR=<projdir> sh -c '. "$FLOWY_PLUGIN_ROOT/hooks/flowy-paths.sh"; flowy_state_dir "${CLAUDE_PROJECT_DIR:-$FLOWY_PROJECT_DIR}" "$FLOWY_PLUGIN_ROOT"'
 #
 # WHY IT EXISTS (Bug E): three sites (hook, gc, activator) each derived the
 # state key inline from CLAUDE_PROJECT_DIR with NO path normalization, so the
