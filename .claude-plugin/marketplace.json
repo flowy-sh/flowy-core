@@ -519,6 +519,56 @@
       "name": "flowy-wigtn-plugins",
       "source": "./overlays/wigtn-plugins",
       "description": "Auto-invoked overlay: the wigtn/wigtn-plugins skills, routed by phase, on the shared Flowy engine."
+    },
+    {
+      "name": "flowy-mattpocock-skills",
+      "source": "./overlays/mattpocock-skills",
+      "description": "Auto-invoked overlay for mattpocock/skills. Routes the right Matt Pocock Skills skill at each gate."
+    },
+    {
+      "name": "flowy-ui-ux-pro-max",
+      "source": "./overlays/ui-ux-pro-max",
+      "description": "Auto-invoked overlay for nextlevelbuilder/ui-ux-pro-max-skill. Routes the right UI/UX Pro Max skill at each gate."
+    },
+    {
+      "name": "flowy-caveman",
+      "source": "./overlays/caveman",
+      "description": "Auto-invoked overlay for JuliusBrussee/caveman. Routes the right Caveman skill at each gate."
+    },
+    {
+      "name": "flowy-claude-mem",
+      "source": "./overlays/claude-mem",
+      "description": "Auto-invoked overlay for thedotmack/claude-mem. Routes the right Claude-Mem skill at each gate."
+    },
+    {
+      "name": "flowy-hyperframes",
+      "source": "./overlays/hyperframes",
+      "description": "Auto-invoked overlay for heygen-com/hyperframes. Routes the right HyperFrames skill at each gate."
+    },
+    {
+      "name": "flowy-oh-my-claudecode",
+      "source": "./overlays/oh-my-claudecode",
+      "description": "Auto-invoked overlay for Yeachan-Heo/oh-my-claudecode. Routes the right Oh My Claude Code skill at each gate."
+    },
+    {
+      "name": "flowy-obsidian",
+      "source": "./overlays/obsidian",
+      "description": "Auto-invoked overlay for kepano/obsidian-skills. Routes the right Obsidian Skills skill at each gate."
+    },
+    {
+      "name": "flowy-copilotkit",
+      "source": "./overlays/copilotkit",
+      "description": "Auto-invoked overlay for CopilotKit/CopilotKit. Routes the right CopilotKit skill at each gate."
+    },
+    {
+      "name": "flowy-text-to-cad",
+      "source": "./overlays/text-to-cad",
+      "description": "Auto-invoked overlay for earthtojake/text-to-cad. Routes the right Text to CAD skill at each gate."
+    },
+    {
+      "name": "flowy-gsap-skills",
+      "source": "./overlays/gsap-skills",
+      "description": "Auto-invoked overlay for greensock/gsap-skills. Routes the right GSAP Skills skill at each gate."
     }
   ]
 }

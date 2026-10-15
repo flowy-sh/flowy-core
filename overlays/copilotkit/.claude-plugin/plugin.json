@@ -1,0 +1,8 @@
+{
+  "name": "flowy-copilotkit",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for CopilotKit/CopilotKit.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

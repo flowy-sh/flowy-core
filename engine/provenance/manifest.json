@@ -318,6 +318,41 @@
       "canaries": []
     },
     {
+      "id": "caveman",
+      "path": "overlays/caveman/flows/caveman/FLOW.md",
+      "hash": "6e867a3df2d14b2136fbcaad57dc29be550199281276bbb17a2297079968ebe3",
+      "routes": [
+        "caveman:caveman",
+        "caveman:investigate-first",
+        "caveman:surgical-patch",
+        "caveman:lean-build",
+        "caveman:safe-refactor",
+        "caveman:migration",
+        "caveman:verify-and-stop",
+        "caveman:caveman-review",
+        "caveman:caveman-commit",
+        "caveman:caveman-explore",
+        "caveman:cavecrew",
+        "caveman:caveman-compress",
+        "caveman:caveman-stats",
+        "caveman:lean-build",
+        "caveman:investigate-first",
+        "caveman:investigate-first",
+        "caveman:surgical-patch",
+        "caveman:lean-build",
+        "caveman:safe-refactor",
+        "caveman:migration",
+        "caveman:verify-and-stop",
+        "caveman:caveman-review",
+        "caveman:caveman-commit"
+      ],
+      "canaries": [
+        "lean-build and surgical-patch hold the scope.",
+        "verify-and-stop. Run the command in THIS message.",
+        "Brevity changes the voice, not the routing."
+      ]
+    },
+    {
       "id": "chrome-devtools-mcp",
       "path": "overlays/chrome-devtools-mcp/flows/chrome-devtools-mcp/FLOW.md",
       "hash": "81fb57312c21cd89c9c9498685c99cab8b0f14c356f716718bbe368e1cdc2b40",
@@ -428,6 +463,42 @@
         "claude-blog:blog"
       ],
       "canaries": []
+    },
+    {
+      "id": "claude-mem",
+      "path": "overlays/claude-mem/flows/claude-mem/FLOW.md",
+      "hash": "f77009e9fcd96e35fd2803059dc0769e4532ed310bf0bc91c250e158aaefde67",
+      "routes": [
+        "claude-mem:mem-search",
+        "claude-mem:learn-codebase",
+        "claude-mem:smart-explore",
+        "claude-mem:make-plan",
+        "claude-mem:do",
+        "claude-mem:babysit",
+        "claude-mem:handoff",
+        "claude-mem:standup",
+        "claude-mem:pathfinder",
+        "claude-mem:design-is",
+        "claude-mem:what-the",
+        "claude-mem:oh-my-issues",
+        "claude-mem:version-bump",
+        "claude-mem:timeline-report",
+        "claude-mem:knowledge-agent",
+        "claude-mem:agent-cost-report",
+        "claude-mem:make-plan",
+        "claude-mem:learn-codebase",
+        "claude-mem:mem-search",
+        "claude-mem:learn-codebase",
+        "claude-mem:smart-explore",
+        "claude-mem:make-plan",
+        "claude-mem:do",
+        "claude-mem:handoff"
+      ],
+      "canaries": [
+        "mem-search. Memory in the context is not memory in the store.",
+        "learn-codebase or smart-explore. Orientation first.",
+        "make-plan. Written, phased, then do."
+      ]
     },
     {
       "id": "claude-obsidian",
@@ -635,6 +706,27 @@
         "compound-engineering:ce-handoff"
       ],
       "canaries": []
+    },
+    {
+      "id": "copilotkit",
+      "path": "overlays/copilotkit/flows/copilotkit/FLOW.md",
+      "hash": "2bd2e66e051d23437a8013c15a75b5c411becb74018234c7b4ea930580888022",
+      "routes": [
+        "copilotkit:copilotkit",
+        "copilotkit:copilotkit-cli",
+        "copilotkit:channels-setup",
+        "copilotkit:copilotkit-channels",
+        "copilotkit:setup-slack-channel",
+        "copilotkit:copilotkit",
+        "copilotkit:channels-setup",
+        "copilotkit:copilotkit",
+        "copilotkit:copilotkit-cli",
+        "copilotkit:setup-slack-channel",
+        "copilotkit:copilotkit-channels"
+      ],
+      "canaries": [
+        "It changes fast. Invoke copilotkit."
+      ]
     },
     {
       "id": "cortex",
@@ -1154,6 +1246,32 @@
       ]
     },
     {
+      "id": "gsap-skills",
+      "path": "overlays/gsap-skills/flows/gsap-skills/FLOW.md",
+      "hash": "5c04b5e49486f37f7fa2ce6f577f9bcf8ad83cb09e6a3b0193ce0d218aaaf44b",
+      "routes": [
+        "gsap-skills:gsap-core",
+        "gsap-skills:gsap-timeline",
+        "gsap-skills:gsap-scrolltrigger",
+        "gsap-skills:gsap-plugins",
+        "gsap-skills:gsap-utils",
+        "gsap-skills:gsap-react",
+        "gsap-skills:gsap-frameworks",
+        "gsap-skills:gsap-performance",
+        "gsap-skills:gsap-core",
+        "gsap-skills:gsap-timeline",
+        "gsap-skills:gsap-core",
+        "gsap-skills:gsap-timeline",
+        "gsap-skills:gsap-scrolltrigger",
+        "gsap-skills:gsap-react",
+        "gsap-skills:gsap-frameworks",
+        "gsap-skills:gsap-performance"
+      ],
+      "canaries": [
+        "It changes between majors. Invoke gsap-core."
+      ]
+    },
+    {
       "id": "hi-vibe",
       "path": "overlays/hi-vibe/flows/hi-vibe/FLOW.md",
       "hash": "8203dd08bd14fc46994bc04667ef050fdc9e2e431343b6ccd11e7397ae9588b2",
@@ -1180,6 +1298,46 @@
         "humanize:humanize"
       ],
       "canaries": []
+    },
+    {
+      "id": "hyperframes",
+      "path": "overlays/hyperframes/flows/hyperframes/FLOW.md",
+      "hash": "108f989e2f0068032514be3b413d94bfade01821e52845da8bd9db07296130cb",
+      "routes": [
+        "hyperframes:hyperframes",
+        "hyperframes:hyperframes-core",
+        "hyperframes:hyperframes-animation",
+        "hyperframes:hyperframes-creative",
+        "hyperframes:hyperframes-keyframes",
+        "hyperframes:hyperframes-registry",
+        "hyperframes:hyperframes-audio",
+        "hyperframes:hyperframes-cli",
+        "hyperframes:hyperframes-studio",
+        "hyperframes:media-use",
+        "hyperframes:product-launch-video",
+        "hyperframes:pr-to-video",
+        "hyperframes:faceless-explainer",
+        "hyperframes:music-to-video",
+        "hyperframes:talking-head-recut",
+        "hyperframes:embedded-captions",
+        "hyperframes:motion-graphics",
+        "hyperframes:slideshow",
+        "hyperframes:figma",
+        "hyperframes:general-video",
+        "hyperframes:hyperframes",
+        "hyperframes:hyperframes-creative",
+        "hyperframes:hyperframes",
+        "hyperframes:hyperframes-creative",
+        "hyperframes:hyperframes-core",
+        "hyperframes:hyperframes-animation",
+        "hyperframes:hyperframes-audio",
+        "hyperframes:hyperframes-cli"
+      ],
+      "canaries": [
+        "hyperframes first. Video requests have an entry point.",
+        "Check the specialised skills first.",
+        "Run the lint and check commands in THIS message."
+      ]
     },
     {
       "id": "kicad-happy",
@@ -1298,6 +1456,46 @@
       "canaries": []
     },
     {
+      "id": "mattpocock-skills",
+      "path": "overlays/mattpocock-skills/flows/mattpocock-skills/FLOW.md",
+      "hash": "4ea9b262b2333f0b6e1857087407b4784afb285ee40ea5d3e4885cc10c972c4a",
+      "routes": [
+        "mattpocock-skills:grill-with-docs",
+        "mattpocock-skills:grill-me",
+        "mattpocock-skills:to-spec",
+        "mattpocock-skills:to-tickets",
+        "mattpocock-skills:wayfinder",
+        "mattpocock-skills:implement-spec",
+        "mattpocock-skills:implement",
+        "mattpocock-skills:tdd",
+        "mattpocock-skills:diagnosing-bugs",
+        "mattpocock-skills:prototype",
+        "mattpocock-skills:codebase-design",
+        "mattpocock-skills:domain-modeling",
+        "mattpocock-skills:improve-codebase-architecture",
+        "mattpocock-skills:code-review",
+        "mattpocock-skills:pr",
+        "mattpocock-skills:research",
+        "mattpocock-skills:triage",
+        "mattpocock-skills:handoff",
+        "mattpocock-skills:grill-with-docs",
+        "mattpocock-skills:to-spec",
+        "mattpocock-skills:grill-with-docs",
+        "mattpocock-skills:to-spec",
+        "mattpocock-skills:to-tickets",
+        "mattpocock-skills:implement-spec",
+        "mattpocock-skills:tdd",
+        "mattpocock-skills:code-review",
+        "mattpocock-skills:pr",
+        "mattpocock-skills:handoff"
+      ],
+      "canaries": [
+        "Grill. Unspoken assumptions are the bugs.",
+        "tdd. Failing test first, always.",
+        "diagnosing-bugs. Build the loop, prove the cause."
+      ]
+    },
+    {
       "id": "mem0",
       "path": "overlays/mem0/flows/mem0/FLOW.md",
       "hash": "3d60ba7a04609681c65924f8f1e29e4e4b83a56de3a597b52928bca4b89865f8",
@@ -1371,6 +1569,77 @@
         "novel-to-game:novel-to-game"
       ],
       "canaries": []
+    },
+    {
+      "id": "obsidian",
+      "path": "overlays/obsidian/flows/obsidian/FLOW.md",
+      "hash": "3b9179667070ab54aa29374e4ab4e893f14d761874c53453f571b54d9a75eb07",
+      "routes": [
+        "obsidian:obsidian-markdown",
+        "obsidian:obsidian-bases",
+        "obsidian:json-canvas",
+        "obsidian:obsidian-cli",
+        "obsidian:knap",
+        "obsidian:defuddle",
+        "obsidian:obsidian-markdown",
+        "obsidian:obsidian-cli",
+        "obsidian:defuddle",
+        "obsidian:obsidian-markdown",
+        "obsidian:knap",
+        "obsidian:obsidian-bases",
+        "obsidian:json-canvas",
+        "obsidian:obsidian-cli"
+      ],
+      "canaries": [
+        "Obsidian Markdown has wikilinks, callouts and properties.",
+        "obsidian-bases. The format is strict.",
+        "defuddle. Strip the clutter first."
+      ]
+    },
+    {
+      "id": "oh-my-claudecode",
+      "path": "overlays/oh-my-claudecode/flows/oh-my-claudecode/FLOW.md",
+      "hash": "2f7645de6e54bc366721f1a63371b58fab58531c17c2964a783c28a6c4263baf",
+      "routes": [
+        "oh-my-claudecode:deep-interview",
+        "oh-my-claudecode:ralplan",
+        "oh-my-claudecode:omc-plan",
+        "oh-my-claudecode:autopilot",
+        "oh-my-claudecode:execute",
+        "oh-my-claudecode:ralph",
+        "oh-my-claudecode:team",
+        "oh-my-claudecode:ultragoal",
+        "oh-my-claudecode:tdd",
+        "oh-my-claudecode:trace",
+        "oh-my-claudecode:minimal-code-discipline",
+        "oh-my-claudecode:verify",
+        "oh-my-claudecode:omc-review",
+        "oh-my-claudecode:ai-slop-cleaner",
+        "oh-my-claudecode:pr",
+        "oh-my-claudecode:release",
+        "oh-my-claudecode:external-context",
+        "oh-my-claudecode:research",
+        "oh-my-claudecode:project-session-manager",
+        "oh-my-claudecode:cancel",
+        "oh-my-claudecode:deep-interview",
+        "oh-my-claudecode:omc-plan",
+        "oh-my-claudecode:deep-interview",
+        "oh-my-claudecode:ralplan",
+        "oh-my-claudecode:omc-plan",
+        "oh-my-claudecode:execute",
+        "oh-my-claudecode:ralph",
+        "oh-my-claudecode:team",
+        "oh-my-claudecode:tdd",
+        "oh-my-claudecode:verify",
+        "oh-my-claudecode:omc-review",
+        "oh-my-claudecode:pr"
+      ],
+      "canaries": [
+        "deep-interview. Ambiguity is the cheapest bug to remove now.",
+        "tdd. Failing test first, always.",
+        "verify. Run the command in THIS message.",
+        "trace. Hypotheses compete, evidence picks."
+      ]
     },
     {
       "id": "onchainos-skills",
@@ -2189,6 +2458,63 @@
         "test-automation-skills-agents:webapp-selenium-testing"
       ],
       "canaries": []
+    },
+    {
+      "id": "text-to-cad",
+      "path": "overlays/text-to-cad/flows/text-to-cad/FLOW.md",
+      "hash": "5376d42207ae3b14edfb3a5a6c8f4b9f8092b69fcc49d40a53a92b83b8ddc085",
+      "routes": [
+        "text-to-cad:cad",
+        "text-to-cad:dxf",
+        "text-to-cad:engineering-drawing",
+        "text-to-cad:dfm",
+        "text-to-cad:dfam-check",
+        "text-to-cad:gcode",
+        "text-to-cad:bambu-labs",
+        "text-to-cad:sendcutsend",
+        "text-to-cad:step-parts",
+        "text-to-cad:urdf",
+        "text-to-cad:srdf",
+        "text-to-cad:sdf",
+        "text-to-cad:cad",
+        "text-to-cad:dfm",
+        "text-to-cad:cad",
+        "text-to-cad:dfm",
+        "text-to-cad:dfam-check",
+        "text-to-cad:engineering-drawing",
+        "text-to-cad:dxf",
+        "text-to-cad:gcode",
+        "text-to-cad:bambu-labs",
+        "text-to-cad:sendcutsend"
+      ],
+      "canaries": [
+        "cad. Measure the exported geometry.",
+        "dfm and sendcutsend review the upload first."
+      ]
+    },
+    {
+      "id": "ui-ux-pro-max",
+      "path": "overlays/ui-ux-pro-max/flows/ui-ux-pro-max/FLOW.md",
+      "hash": "9758362e41733d1eff33a746eec65362243c3cbfe1b2e1f8ad9a15babda25f63",
+      "routes": [
+        "ui-ux-pro-max:ui-ux-pro-max",
+        "ui-ux-pro-max:design",
+        "ui-ux-pro-max:ui-styling",
+        "ui-ux-pro-max:design-system",
+        "ui-ux-pro-max:brand",
+        "ui-ux-pro-max:banner-design",
+        "ui-ux-pro-max:slides",
+        "ui-ux-pro-max:design",
+        "ui-ux-pro-max:design-system",
+        "ui-ux-pro-max:design",
+        "ui-ux-pro-max:design-system",
+        "ui-ux-pro-max:ui-styling",
+        "ui-ux-pro-max:ui-ux-pro-max"
+      ],
+      "canaries": [
+        "Invoke ui-ux-pro-max. Chosen, not guessed.",
+        "A small tweak is still interface work."
+      ]
     },
     {
       "id": "ultra-powers",

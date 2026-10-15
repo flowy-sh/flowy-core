@@ -1,0 +1,8 @@
+{
+  "name": "flowy-gsap-skills",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for greensock/gsap-skills.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

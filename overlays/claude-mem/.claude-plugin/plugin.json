@@ -1,0 +1,8 @@
+{
+  "name": "flowy-claude-mem",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for thedotmack/claude-mem.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

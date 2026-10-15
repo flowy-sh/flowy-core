@@ -1,0 +1,8 @@
+{
+  "name": "flowy-obsidian",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for kepano/obsidian-skills.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

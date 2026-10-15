@@ -1,0 +1,8 @@
+{
+  "name": "flowy-text-to-cad",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for earthtojake/text-to-cad.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

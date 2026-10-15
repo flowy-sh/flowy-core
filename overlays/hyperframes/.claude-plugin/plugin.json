@@ -1,0 +1,8 @@
+{
+  "name": "flowy-hyperframes",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for heygen-com/hyperframes.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}
