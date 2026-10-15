@@ -467,7 +467,7 @@
     {
       "id": "claude-mem",
       "path": "overlays/claude-mem/flows/claude-mem/FLOW.md",
-      "hash": "f77009e9fcd96e35fd2803059dc0769e4532ed310bf0bc91c250e158aaefde67",
+      "hash": "189ba775afe7d7b3e53bdda924549fa228e834704b063955261858e0944cfbed",
       "routes": [
         "claude-mem:mem-search",
         "claude-mem:learn-codebase",
@@ -484,7 +484,6 @@
         "claude-mem:version-bump",
         "claude-mem:timeline-report",
         "claude-mem:knowledge-agent",
-        "claude-mem:agent-cost-report",
         "claude-mem:make-plan",
         "claude-mem:learn-codebase",
         "claude-mem:mem-search",

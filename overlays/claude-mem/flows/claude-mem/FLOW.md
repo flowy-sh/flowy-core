@@ -1,6 +1,6 @@
 # FLOW.md: Claude-Mem Flow
 
-> Routes the 16 Claude-Mem skills (cross-session memory search, phased plans, handoffs and codebase orientation) so the right one fires at the right phase: the agent cannot skip them and improvise.
+> Routes the 15 Claude-Mem skills (cross-session memory search, phased plans, handoffs and codebase orientation) so the right one fires at the right phase: the agent cannot skip them and improvise.
 > Skills by Alex Newman (https://github.com/thedotmack/claude-mem, Apache-2.0). Routing by Flowy.
 
 <!-- The Flowy engine supplies the universal contract (announce ritual, invoke/READ,
@@ -27,7 +27,6 @@ USER MESSAGE
   ├─ release or version bump for a plugin?               → invoke claude-mem:version-bump
   ├─ project history report requested?                   → invoke claude-mem:timeline-report
   ├─ knowledge base from past observations wanted?       → invoke claude-mem:knowledge-agent
-  ├─ agent spend or cost report asked for?               → invoke claude-mem:agent-cost-report
   ├─ scope changed mid-task (brief or reqs changed)?  → re-enter the earliest invalidated phase (claude-mem:make-plan or claude-mem:learn-codebase)
   ├─ blocked / waiting on an external dependency?  → park: record the blocker and resume condition; do not fake progress
   └─ question, not work (advise / explain)?  → answer only; no files change
