@@ -2220,6 +2220,36 @@
       "canaries": []
     },
     {
+      "id": "short-form-video",
+      "path": "overlays/short-form-video/flows/short-form-video/FLOW.md",
+      "hash": "81de4ffb389388518bd8312f8f35734f3e70a69ba14aaf783d4e704285bc6ebb",
+      "routes": [
+        "marketing-skills:content-strategy",
+        "viral-video-master:viral-video-platform-algorithms",
+        "viral-video-master:viral-video-hooks-retention",
+        "marketing-skills:video",
+        "viral-video-master:viral-video-short-form",
+        "marketing-skills:marketing-psychology",
+        "marketing-skills:copywriting",
+        "superpowers:brainstorming",
+        "remotion:remotion-best-practices",
+        "remotion:remotion-markup",
+        "remotion:remotion-captions",
+        "remotion:remotion-render",
+        "marketing-skills:social",
+        "marketing-skills:analytics",
+        "marketing-skills:ab-testing",
+        "superpowers:writing-plans",
+        "superpowers:test-driven-development",
+        "superpowers:systematic-debugging",
+        "superpowers:requesting-code-review",
+        "superpowers:verification-before-completion"
+      ],
+      "canaries": [
+        "Render and look before anyone else does."
+      ]
+    },
+    {
       "id": "signum",
       "path": "overlays/signum/flows/signum/FLOW.md",
       "hash": "aa1701fb8360b49e41b7db73ee17a5f350fc920ed89bc8c3cee14b03d46aaf34",

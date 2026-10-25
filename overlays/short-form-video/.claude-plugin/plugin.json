@@ -1,0 +1,8 @@
+{
+  "name": "flowy-short-form-video",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for making vertical shorts about GitHub repos (marketing-skills, viral-video-master, remotion, superpowers).",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}

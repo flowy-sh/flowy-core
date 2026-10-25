@@ -569,6 +569,11 @@
       "name": "flowy-gsap-skills",
       "source": "./overlays/gsap-skills",
       "description": "Auto-invoked overlay for greensock/gsap-skills. Routes the right GSAP Skills skill at each gate."
+    },
+    {
+      "name": "flowy-short-form-video",
+      "source": "./overlays/short-form-video",
+      "description": "Auto-invoked overlay for making vertical shorts about GitHub repos (marketing-skills, viral-video-master, remotion, superpowers). Routes the right skill at each gate."
     }
   ]
 }
