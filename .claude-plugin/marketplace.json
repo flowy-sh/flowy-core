@@ -574,6 +574,11 @@
       "name": "flowy-short-form-video",
       "source": "./overlays/short-form-video",
       "description": "Auto-invoked overlay for making vertical shorts about GitHub repos (marketing-skills, viral-video-master, remotion, superpowers). Routes the right skill at each gate."
+    },
+    {
+      "name": "flowy-seo",
+      "source": "./overlays/seo",
+      "description": "Auto-invoked overlay for Flowy's SEO pipeline (claude-seo, openseo, marketing-skills, superpowers): measure, diagnose, research, build, AI search, ship, done-check. Routes the right skill at each gate."
     }
   ]
 }

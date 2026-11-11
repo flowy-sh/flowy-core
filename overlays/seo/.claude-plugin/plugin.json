@@ -1,0 +1,8 @@
+{
+  "name": "flowy-seo",
+  "version": "1.2.3",
+  "description": "Auto-invoked overlay for Flowy's SEO pipeline (claude-seo, openseo, marketing-skills, superpowers): measure, diagnose, research, build, AI search, ship, done-check.",
+  "dependencies": [
+    { "name": "flowy-core", "version": "^1.0.0" }
+  ]
+}
