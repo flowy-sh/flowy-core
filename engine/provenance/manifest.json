@@ -2203,7 +2203,7 @@
     {
       "id": "seo",
       "path": "overlays/seo/flows/seo/FLOW.md",
-      "hash": "4f527732fb438d7891858a3192fd92d7f6a92d4164a0e02286413cf8ce4dcc12",
+      "hash": "5fd0338f324b63e14f26a093e69af44aaaa5880aadcbebcc899e40432b1a1fa4",
       "routes": [
         "marketing-skills:analytics",
         "openseo:seo-project-setup",
@@ -2243,6 +2243,7 @@
         "superpowers:requesting-code-review",
         "superpowers:verification-before-completion",
         "openseo:seo-report",
+        "superpowers:verification-before-completion",
         "marketing-skills:ab-testing"
       ],
       "canaries": [
