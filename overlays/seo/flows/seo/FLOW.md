@@ -14,17 +14,17 @@ It routes 39 skills, one owner per SEO job. Where two plugins ship a skill for t
 ```
 USER MESSAGE
   ├─ NOT FLOWY. No SEO.md at the repository root.
-  │    └─ say once that this Flow is Flowy's only, and route nothing from it.
+  │    └─ say that this Flow is Flowy's only, and route nothing from it.
   │
   ├─ MEASURE. Numbers before opinions.
-  │    ├─ about to add, change or audit what is tracked (GA4 or PostHog events, UTMs, the Search Console property)? → invoke marketing-skills:analytics; gate: each metric defined with its source and what each event means
+  │    ├─ about to add, change or audit what is tracked (GA4 or PostHog events, UTMs)? → invoke marketing-skills:analytics; gate: each metric defined with its source and what each event means
   │    └─ openseo's project context missing or stale (goals, rivals, key pages)? → invoke openseo:seo-project-setup; gate: context saved, the Search Console property linked
   │
   ├─ DIAGNOSE. Something is wrong or unknown.
   │    ├─ impressions, clicks or indexed pages moved and the cause is unknown? → invoke superpowers:systematic-debugging; gate: the root cause written with its probe before any fix; the audits below are its instruments
   │    ├─ whole-site health unknown (the default audit, free)? → invoke claude-seo:seo-audit; gate: a scored report, each top fix tied to a page class
   │    ├─ the founder wants the changes most likely to grow organic traffic, from search data, and has approved the credits? → invoke openseo:seo-audit; gate: the credit estimate he approved; each change tied to a query or a page
-  │    ├─ one URL in question, any aspect? → invoke claude-seo:seo-page; gate: findings read from that URL's live HTML
+  │    ├─ one URL in question and its problem not yet named? → invoke claude-seo:seo-page; gate: findings read from that URL's live HTML
   │    ├─ crawl, index, robots, canonical, rendering or Core Web Vitals in question across a page class or the site? → invoke claude-seo:seo-technical; gate: each finding with its URL and the live response
   │    ├─ pages crawled but not indexed, thin, or sounding machine-written? → invoke claude-seo:seo-content; gate: a verdict per page class, unique value on every page or noindex
   │    ├─ a page ranks for the wrong intent, or the results show another page type? → invoke claude-seo:seo-sxo; gate: the result page types named and the mismatch stated
@@ -68,7 +68,7 @@ USER MESSAGE
   │    ├─ about to ship SEO-affecting code, or a deploy just landed? → invoke claude-seo:seo-drift; gate: a baseline before, a diff after, no unexplained title, canonical, robots or schema change
   │    ├─ an SEO change is complete? → invoke superpowers:requesting-code-review; gate: one fresh reviewer
   │    ├─ about to claim an SEO page or fix is indexed, shipped or live? → invoke superpowers:verification-before-completion; gate: the live body read, URL Inspection's word for indexed, what was NOT checked
-  │    └─ no search report dated in the last 7 days, or the founder asks how search is doing? → invoke openseo:seo-report; gate: the same series every week, the period named
+  │    └─ the founder asks how search is doing, or a search review is the task at hand? → invoke openseo:seo-report; gate: the same series every week, the period named
   │
   ├─ DONE-CHECK. Before any "it worked".
   │    ├─ about to claim an SEO change worked or won? → invoke superpowers:verification-before-completion; gate: the same series over equal windows before and after, past Google's lag, confounders named (a Google update, another deploy); at low volume say "directional, not significant"
@@ -86,9 +86,9 @@ USER MESSAGE
 
 ## Priority on collision
 
-1. Not Flowy, or blocked. 2. Scope changed. 3. Cause unknown: systematic-debugging first; the audits are its instruments, not rivals. 4. Verification before any claim: indexed, shipped, live or worked. 5. A failing test before SEO code. 6. Two audits: claude-seo's free audit is the default; openseo's runs only on the founder's word for its credits. One URL takes the page route; a page class or the site takes the technical route. 7. Lifecycle order: measure, diagnose, research, plan, build, AI search, authority, ship and watch. 8. Advisory answers without producing files.
+1. Not Flowy, or blocked. 2. Scope changed. 3. Cause unknown: systematic-debugging first; the audits are its instruments, not rivals. 4. Verification before any claim: indexed, shipped, live or worked. 5. A failing test before SEO code. 6. Two audits: claude-seo's free audit is the default; openseo's runs only on the founder's word for its credits. One URL whose problem is not yet named takes the page route; a named problem (intent, thin content, images, a technical fault) takes its own route, for one URL or many. 7. Lifecycle order: measure, diagnose, research, plan, build, AI search, authority, ship and watch. 8. Advisory answers without producing files.
 
-**With growth-marketing:** an SEO session activates superpowers and this Flow; growth-marketing is not needed. If it is active too, its SEARCH branch, and its sentence giving SEO execution to marketing-skills, yield to the routes above; its other branches stand. Where both Flows route the same skill there is no conflict.
+**With growth-marketing:** an SEO session activates the flowy-superpowers overlay and this Flow; growth-marketing is not needed. If it is active too, its SEARCH branch, and its sentence giving SEO execution to marketing-skills, yield to the routes above; its other branches stand. Where both Flows route the same skill there is no conflict.
 
 ## Hard rules (Flowy's)
 

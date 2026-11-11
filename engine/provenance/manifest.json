@@ -2203,7 +2203,7 @@
     {
       "id": "seo",
       "path": "overlays/seo/flows/seo/FLOW.md",
-      "hash": "5fd0338f324b63e14f26a093e69af44aaaa5880aadcbebcc899e40432b1a1fa4",
+      "hash": "48392e5346daa18274ad0248d2f73fe3c3421ff924b5101c41fbeb7423285898",
       "routes": [
         "marketing-skills:analytics",
         "openseo:seo-project-setup",
